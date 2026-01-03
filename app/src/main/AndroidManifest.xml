@@ -40,8 +40,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Habitate"
-        tools:targetApi="36"
-        tools:remove="android:debuggable">
+        tools:targetApi="36">
 
         <!-- Nothing Glyph API Key -->
         <meta-data android:name="NothingKey" android:value="test"/>
