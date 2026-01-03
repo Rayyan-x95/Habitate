@@ -250,9 +250,15 @@ class AuthViewModel @Inject constructor(
 
     fun checkEmailVerification() {
         viewModelScope.launch {
-            authRepository.reloadUser()
-            val isVerified = authRepository.isEmailVerified()
-            _uiState.update { it.copy(isEmailVerified = isVerified) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            runCatching {
+                authRepository.reloadUser()
+                authRepository.isEmailVerified()
+            }.onSuccess { isVerified ->
+                _uiState.update { it.copy(isLoading = false, isEmailVerified = isVerified) }
+            }.onFailure { e ->
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
         }
     }
 
@@ -272,7 +278,7 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
-            _uiState.update { it.copy(isLoggedIn = false) }
+            _uiState.update { it.copy(isLoggedIn = false, isEmailVerified = false) }
         }
     }
 

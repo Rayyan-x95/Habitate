@@ -1,11 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Letter H centered in adaptive icon safe zone -->
-    <path
-        android:fillColor="#F2EFEA"
-        android:pathData="M38,30v48h8v-20h16v20h8v-48h-8v20h-16v-20z"/>
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+  <path
+      android:pathData="M0,0h1024v1024h-1024z">
+    <aapt:attr name="android:fillColor">
+      <gradient
+          android:startX="1024"
+          android:startY="0"
+          android:endX="0"
+          android:endY="1024"
+          android:type="linear">
+        <item android:offset="0" android:color="#FF1F3D32"/>
+        <item android:offset="1" android:color="#FF0F1C18"/>
+      </gradient>
+    </aapt:attr>
+  </path>
 </vector>
