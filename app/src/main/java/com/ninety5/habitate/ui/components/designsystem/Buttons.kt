@@ -87,7 +87,7 @@ fun HabitatePrimaryButton(
             if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null,
+                    contentDescription = text,
                     modifier = Modifier.size(Size.iconMd)
                 )
                 Spacer(Modifier.width(Spacing.sm))

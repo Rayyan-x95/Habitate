@@ -71,7 +71,7 @@ fun HabitateEmptyState(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = title,
                 modifier = Modifier.size(Size.iconXxl),
                 tint = colors.primary
             )

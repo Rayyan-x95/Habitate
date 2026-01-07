@@ -34,7 +34,7 @@ fun ErrorState(
     ) {
         Icon(
             imageVector = Icons.Rounded.ErrorOutline,
-            contentDescription = null,
+            contentDescription = "Error",
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
         )

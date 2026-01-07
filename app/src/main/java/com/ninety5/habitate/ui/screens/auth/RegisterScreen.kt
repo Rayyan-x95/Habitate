@@ -123,7 +123,7 @@ fun RegisterScreen(
                     leadingIcon = {
                         Icon(
                             Icons.Default.Person,
-                            contentDescription = null,
+                            contentDescription = "Display name",
                             tint = colors.primary
                         )
                     },
@@ -152,7 +152,7 @@ fun RegisterScreen(
                     leadingIcon = {
                         Icon(
                             Icons.Default.AlternateEmail,
-                            contentDescription = null,
+                            contentDescription = "Username",
                             tint = colors.primary
                         )
                     },
@@ -182,7 +182,7 @@ fun RegisterScreen(
                     leadingIcon = {
                         Icon(
                             Icons.Default.Email,
-                            contentDescription = null,
+                            contentDescription = "Email address",
                             tint = colors.primary
                         )
                     },
@@ -222,7 +222,7 @@ fun RegisterScreen(
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = null,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
                                 tint = colors.textMuted
                             )
                         }

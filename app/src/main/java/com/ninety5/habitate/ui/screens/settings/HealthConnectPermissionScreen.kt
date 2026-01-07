@@ -53,7 +53,7 @@ fun HealthConnectPermissionScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.Favorite,
-                contentDescription = null,
+                contentDescription = \"Connect Health Data\",
                 modifier = Modifier.size(64.dp),
                 tint = SoftIndigo
             )
