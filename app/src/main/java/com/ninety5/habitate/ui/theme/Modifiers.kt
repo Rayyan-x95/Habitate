@@ -11,11 +11,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 fun Modifier.glassEffect() = composed {
-    val backgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-    val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    // Minimal style: Solid surface color, no blur or transparency
+    val backgroundColor = MaterialTheme.colorScheme.surface
     
     this
         .background(backgroundColor, RoundedCornerShape(16.dp))
-        .border(1.dp, borderColor, RoundedCornerShape(16.dp))
         .clip(RoundedCornerShape(16.dp))
 }

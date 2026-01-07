@@ -1,4 +1,4 @@
-package com.ninety5.habitate.ui.viewmodel
+package com.ninety5.habitate.ui.screens.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

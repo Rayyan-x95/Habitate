@@ -24,48 +24,50 @@ import androidx.compose.foundation.border
 import com.ninety5.habitate.data.local.relation.StoryWithUser
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.PostAdd
-import com.ninety5.habitate.core.utils.DebugLogger
-import com.ninety5.habitate.ui.components.HabitateLogo
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.ninety5.habitate.ui.common.LocalSnackbarHostState
+import com.ninety5.habitate.ui.components.shimmerEffect
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import com.ninety5.habitate.ui.components.ErrorState
 import com.ninety5.habitate.ui.components.PostItem
-import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
-import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
-import com.ninety5.habitate.ui.components.designsystem.HabitateSkeletonPost
 import com.ninety5.habitate.ui.theme.*
+import com.ninety5.habitate.ui.theme.ReferenceColors
 
 import androidx.compose.material.icons.rounded.Chat
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.IconButton
-import com.ninety5.habitate.ui.viewmodel.StoryViewModel
+import com.ninety5.habitate.ui.screens.story.StoryViewModel
 import com.ninety5.habitate.ui.viewmodel.FeatureFlagsViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import androidx.compose.ui.layout.ContentScale
+import com.ninety5.habitate.util.FeatureFlags
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,131 +76,111 @@ fun FeedScreen(
     onUserClick: (String) -> Unit,
     onCreatePostClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onCheckInClick: () -> Unit,
     onChatClick: () -> Unit,
     onStoryClick: (String) -> Unit,
     onAddStoryClick: () -> Unit = {},
+    hasNotifications: Boolean = false, // Added parameter
     viewModel: FeedViewModel = hiltViewModel(),
     storyViewModel: StoryViewModel = hiltViewModel(),
     featureFlagsViewModel: FeatureFlagsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val storyUiState by storyViewModel.uiState.collectAsState()
-    val groupedStories = storyUiState.groupedStories
+    val stories by storyViewModel.activeStories.collectAsState()
     val posts = viewModel.pagingDataFlow.collectAsLazyPagingItems()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
     val featureFlags = featureFlagsViewModel.featureFlags
-    // #region agent log
-    LaunchedEffect(Unit) {
-        DebugLogger.log(
-            "FeedScreen.kt:88",
-            "Feature flags accessed",
-            mapOf("isChatEnabled" to featureFlags.isChatEnabled, "isStoriesEnabled" to featureFlags.isStoriesEnabled, "storiesCount" to groupedStories.size),
-            "B"
-        )
-    }
-    // #endregion
-    val showStories = featureFlags.isStoriesEnabled && groupedStories.isNotEmpty()
-    val colors = HabitateTheme.colors
+    val showStories = featureFlags.isStoriesEnabled && stories.isNotEmpty()
 
     Scaffold(
-        containerColor = colors.background,
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            // Glass Header with brand styling
-            GlassNavBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Spacing.lg)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        HabitateLogo(
-                            size = 32.dp,
-                            tint = colors.textPrimary
-                        )
-                        Spacer(modifier = Modifier.width(Spacing.md))
-                        Text(
-                            text = "Habitate",
-                            style = SectionTitle,
-                            color = colors.textPrimary
-                        )
-                    }
-                    
-                    Row {
-                        IconButton(onClick = onCheckInClick) {
-                            Icon(
-                                imageVector = Icons.Rounded.CalendarMonth,
-                                contentDescription = "Daily Check-in",
-                                tint = colors.textPrimary
-                            )
-                        }
-                        if (featureFlags.isChatEnabled) {
-                            IconButton(onClick = onChatClick) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Chat,
-                                    contentDescription = "Chat",
-                                    tint = colors.textPrimary
-                                )
-                            }
-                        }
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Habitate",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
+                actions = {
+                    Box(modifier = Modifier.padding(end = RefSpacingMD.dp)) {
                         IconButton(onClick = onNotificationClick) {
                             Icon(
                                 imageVector = Icons.Rounded.Notifications,
                                 contentDescription = "Notifications",
-                                tint = colors.textPrimary
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        // Notification dot
+                        if (hasNotifications) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error)
+                                    .align(Alignment.TopEnd)
+                                    .padding(top = RefSpacingXS.dp, end = RefSpacingXS.dp)
                             )
                         }
                     }
-                }
-            }
-        },
-        floatingActionButton = {
-            Box(
-                modifier = Modifier
-                    .size(Size.fabMedium)
-                    .clip(CircleShape)
-                    .background(GradientBrand)
-                    .clickable(onClick = onCreatePostClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Rounded.Add, 
-                    contentDescription = "Create Post",
-                    tint = colors.onPrimary
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
-            }
+            )
         }
     ) { paddingValues ->
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(colors.background)
+            // Removed redundant background
             .padding(paddingValues)
         ) {
             
             if (posts.loadState.refresh is LoadState.Loading) {
                 FeedSkeletonLoader()
-            } else if (posts.itemCount == 0) {
+            } else if (posts.loadState.refresh is LoadState.NotLoading && posts.itemCount == 0) {
                 EmptyFeedState(onCreatePostClick = onCreatePostClick)
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp) // Space for FAB
                 ) {
-                    if (showStories) {
-                        item {
-                            StoriesBar(
-                                groupedStories = groupedStories,
-                                onStoryClick = onStoryClick,
-                                onAddStoryClick = onAddStoryClick
+                    item {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            Text(
+                                text = "Trending",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
+                            
+                            if (showStories) {
+                                StoriesBar(
+                                    stories = stories,
+                                    onStoryClick = onStoryClick,
+                                    onAddStoryClick = onAddStoryClick
+                                )
+                            } else {
+                                // Placeholder trending items if no stories
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    items(5) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(64.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.Gray.copy(alpha = 0.2f))
+                                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                     
@@ -225,17 +207,17 @@ fun FeedScreen(
                                 },
                                 onUserClick = { onUserClick(post.authorId) }
                             )
-                            HorizontalDivider(
-                                thickness = 0.5.dp, 
-                                color = colors.divider
-                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                 }
             }
             
-            if (uiState.error != null) {
-                // Show error snackbar or dialog instead of replacing content
+            val snackbarHostState = LocalSnackbarHostState.current
+            LaunchedEffect(uiState.error) {
+                uiState.error?.let { error ->
+                    snackbarHostState.showSnackbar(error)
+                }
             }
         }
     }
@@ -243,40 +225,125 @@ fun FeedScreen(
 
 @Composable
 fun EmptyFeedState(onCreatePostClick: () -> Unit) {
-    HabitateEmptyState(
-        icon = Icons.Rounded.PostAdd,
-        title = "Your Feed is Empty",
-        description = "Follow people or join habitats to see posts here. Or be the first to share something!",
-        actionText = "Create First Post",
-        onAction = onCreatePostClick
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(80.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Rounded.PostAdd,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Your Feed is Empty",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Follow people or join habitats to see posts here. Or be the first to share something!",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onCreatePostClick,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Create First Post")
+        }
+    }
 }
 
 @Composable
 fun FeedSkeletonLoader() {
-    Column(Modifier.padding(Spacing.lg)) {
+    Column(Modifier.padding(16.dp)) {
         repeat(4) {
-            HabitateSkeletonPost(
-                modifier = Modifier.padding(bottom = Spacing.lg)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                // Avatar skeleton
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .shimmerEffect()
+                )
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    // Name skeleton
+                    Box(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Time skeleton
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Content lines
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(16.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 fun StoriesBar(
-    groupedStories: Map<String, List<StoryWithUser>>,
+    stories: List<StoryWithUser>,
     onStoryClick: (String) -> Unit,
     onAddStoryClick: () -> Unit
 ) {
-    val colors = HabitateTheme.colors
-    
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.lg),
-        contentPadding = PaddingValues(horizontal = Spacing.lg),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
+            .padding(vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Column(
@@ -285,69 +352,52 @@ fun StoriesBar(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(Size.avatarLg)
+                        .size(64.dp)
                         .clip(CircleShape)
-                        .background(colors.surfaceElevated)
-                        .border(2.dp, colors.background, CircleShape),
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
-                        contentDescription = "Add Moment",
-                        tint = colors.primary
+                        contentDescription = "Add Story",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                Spacer(modifier = Modifier.height(Spacing.xs))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Your Moment",
-                    style = CaptionText,
-                    color = colors.textSecondary
+                    text = "Your Story",
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }
 
-        items(groupedStories.keys.toList()) { userId ->
-            val stories = groupedStories[userId] ?: return@items
-            if (stories.isEmpty()) return@items
-            val user = stories.firstOrNull()?.user ?: return@items
-            
+        items(stories) { story ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onStoryClick(userId) }
+                modifier = Modifier.clickable { onStoryClick(story.story.userId) }
             ) {
                 Box(
                     modifier = Modifier
-                        .size(Size.avatarLg)
+                        .size(64.dp)
                         .clip(CircleShape)
-                        .background(colors.surfaceElevated)
-                        .border(2.dp, colors.primary, CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary,
+                            CircleShape
+                        )
                 ) {
-                    user?.avatarUrl?.let { avatarUrl ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(avatarUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } ?: run {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = colors.textMuted,
-                            modifier = Modifier.padding(Spacing.lg)
-                        )
-                    }
+                    // Placeholder for user avatar
+                    // In real app, use AsyncImage
                 }
-                Spacer(modifier = Modifier.height(Spacing.xs))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = user?.username ?: "User",
-                    style = CaptionText,
-                    color = colors.textSecondary
+                    text = story.user?.username ?: "User",
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }
     }
 }
+

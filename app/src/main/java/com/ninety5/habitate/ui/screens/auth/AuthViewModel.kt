@@ -75,6 +75,19 @@ class AuthViewModel @Inject constructor(
         authRepository.retryPendingSyncIfNeeded()
     }
 
+    fun handleGoogleSignIn(idToken: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            authRepository.signInWithGoogle(idToken)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                }
+        }
+    }
+
     fun login(email: String, password: String) {
         // Input validation
         if (email.isBlank()) {

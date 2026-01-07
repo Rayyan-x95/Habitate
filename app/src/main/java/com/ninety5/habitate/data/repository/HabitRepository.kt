@@ -1,6 +1,5 @@
 package com.ninety5.habitate.data.repository
 
-import com.ninety5.habitate.core.glyph.HabitateGlyphManager
 import com.ninety5.habitate.data.local.SecurePreferences
 import com.ninety5.habitate.data.local.dao.HabitDao
 import com.ninety5.habitate.data.local.dao.HabitLogDao
@@ -17,6 +16,8 @@ import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
@@ -44,7 +45,7 @@ class HabitRepository @Inject constructor(
     private val apiService: ApiService,
     private val securePreferences: SecurePreferences,
     private val moshi: Moshi,
-    private val glyphManager: HabitateGlyphManager
+    private val glyphManager: com.ninety5.habitate.core.glyph.HabitateGlyphManager
 ) {
 
     // ======================
@@ -444,14 +445,18 @@ class HabitRepository @Inject constructor(
                                 val entity = habitDao.getHabitByIdOnce(op.entityId)
                                 if (entity != null) {
                                     val dto = HabitDto.fromEntity(entity)
-                                    apiService.createHabit(dto)
+                                    val json = moshi.adapter(HabitDto::class.java).toJson(dto)
+                                    val payload = json.toRequestBody()
+                                    apiService.create("habits", payload)
                                     habitDao.upsert(entity.copy(syncState = SyncState.SYNCED))
                                 }
                             } else if (op.entityType == "habit_log") {
                                 val entity = habitLogDao.getLogByIdOnce(op.entityId)
                                 if (entity != null) {
                                     val dto = HabitLogDto.fromEntity(entity)
-                                    apiService.createHabitLog(entity.habitId, dto)
+                                    val json = moshi.adapter(HabitLogDto::class.java).toJson(dto)
+                                    val payload = json.toRequestBody()
+                                    apiService.create("habit-logs", payload)
                                     habitLogDao.upsert(entity.copy(syncState = SyncState.SYNCED))
                                 }
                             }
@@ -462,7 +467,9 @@ class HabitRepository @Inject constructor(
                                 val entity = habitDao.getHabitByIdOnce(op.entityId)
                                 if (entity != null) {
                                     val dto = HabitDto.fromEntity(entity)
-                                    apiService.updateHabit(op.entityId, dto)
+                                    val json = moshi.adapter(HabitDto::class.java).toJson(dto)
+                                    val payload = json.toRequestBody()
+                                    apiService.update("habits", op.entityId, payload)
                                     habitDao.upsert(entity.copy(syncState = SyncState.SYNCED))
                                 }
                             }
@@ -470,7 +477,7 @@ class HabitRepository @Inject constructor(
                         }
                         "DELETE" -> {
                             if (op.entityType == "habit") {
-                                apiService.deleteHabit(op.entityId)
+                                apiService.delete("habits", op.entityId)
                             }
                             Timber.d("Synced DELETE: ${op.entityType} ${op.entityId}")
                         }

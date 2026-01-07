@@ -6,7 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.ninety5.habitate.data.local.SecurePreferences
-import com.ninety5.habitate.data.remote.api.HabitateApiService
+import com.ninety5.habitate.data.remote.ApiService
 import com.ninety5.habitate.data.remote.dto.RegisterRequest
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -27,7 +27,7 @@ import timber.log.Timber
 class UserSyncWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val apiService: HabitateApiService,
+    private val apiService: ApiService,
     private val securePreferences: SecurePreferences
 ) : CoroutineWorker(context, params) {
 

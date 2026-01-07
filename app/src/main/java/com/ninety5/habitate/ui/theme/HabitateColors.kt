@@ -5,6 +5,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
@@ -120,24 +121,16 @@ val SemanticInfoDark = Color(0xFF4B6BB5)
 // GRADIENTS (Logo-derived, subtle)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Main brand gradient - from logo background */
-val GradientBrand = Brush.linearGradient(
-    colors = listOf(Primary500, Primary700, Primary800)
-)
+/** Main brand gradient - flattened to solid for minimal look */
+val GradientBrand = SolidColor(Primary500)
 
-/** Subtle surface gradient for depth */
-val GradientSurface = Brush.verticalGradient(
-    colors = listOf(Neutral100, Neutral200)
-)
+/** Subtle surface gradient for depth - flattened */
+val GradientSurface = SolidColor(Neutral100)
 
-val GradientSurfaceDark = Brush.verticalGradient(
-    colors = listOf(NeutralDark200, NeutralDark100)
-)
+val GradientSurfaceDark = SolidColor(NeutralDark200)
 
-/** Accent gradient for highlights */
-val GradientAccent = Brush.linearGradient(
-    colors = listOf(Accent300, Accent500)
-)
+/** Accent gradient for highlights - flattened */
+val GradientAccent = SolidColor(Accent500)
 
 /** Glass highlight gradient */
 val GradientGlassHighlight = Brush.verticalGradient(

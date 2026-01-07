@@ -159,11 +159,7 @@ fun HabitateTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Use background color for status bar (more subtle)
-            window.statusBarColor = colorScheme.background.toArgb()
-            // Navigation bar
-            window.navigationBarColor = colorScheme.surface.toArgb()
-            // Light/dark icons
+            // Use WindowCompat to set status bar color
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !darkTheme
                 isAppearanceLightNavigationBars = !darkTheme

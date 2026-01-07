@@ -118,10 +118,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun toggleLike(postId: String) {
+    fun toggleLike(postId: String, reactionType: String? = null) {
         viewModelScope.launch {
             val userId = authRepository.getCurrentUserId() ?: return@launch
-            feedRepository.toggleLike(userId, postId)
+            feedRepository.toggleLike(userId, postId, reactionType)
         }
     }
 }

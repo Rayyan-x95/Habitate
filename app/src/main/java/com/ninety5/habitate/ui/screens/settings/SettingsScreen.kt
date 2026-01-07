@@ -53,6 +53,7 @@ fun SettingsScreen(
     onNavigateToNotifications: () -> Unit,
     onNavigateToArchive: () -> Unit,
     onNavigateToPrivacyDashboard: () -> Unit,
+    onNavigateToPublicApi: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -98,20 +99,14 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
-                )
+                }
             )
         }
     ) { paddingValues ->
@@ -125,7 +120,7 @@ fun SettingsScreen(
                 title = "Edit Profile",
                 onClick = onNavigateToEditProfile
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
             
             // Theme Settings
             Text(
@@ -152,14 +147,14 @@ fun SettingsScreen(
                 }
             )
             
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
 
             SettingsItem(
                 icon = Icons.Rounded.Favorite,
                 title = "Health Connect",
                 onClick = onNavigateToHealthConnect
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
             
             SettingsItem(
                 icon = Icons.Rounded.Notifications,
@@ -168,15 +163,11 @@ fun SettingsScreen(
                 trailingContent = {
                     Switch(
                         checked = uiState.notificationsEnabled,
-                        onCheckedChange = { viewModel.toggleNotifications(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                        )
+                        onCheckedChange = { viewModel.toggleNotifications(it) }
                     )
                 }
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
             
             SettingsItem(
                 icon = Icons.Rounded.Security,
@@ -185,15 +176,11 @@ fun SettingsScreen(
                 trailingContent = {
                     Switch(
                         checked = uiState.isPrivateAccount,
-                        onCheckedChange = { viewModel.togglePrivateAccount(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                        )
+                        onCheckedChange = { viewModel.togglePrivateAccount(it) }
                     )
                 }
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
 
             // Data & Storage
             Text(
@@ -208,14 +195,21 @@ fun SettingsScreen(
                 title = "Archived Items",
                 onClick = onNavigateToArchive
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
+
+            SettingsItem(
+                icon = Icons.Rounded.Description,
+                title = "Public APIs Integration",
+                onClick = onNavigateToPublicApi
+            )
+            HorizontalDivider()
 
             SettingsItem(
                 icon = Icons.Rounded.Security,
                 title = "Privacy Dashboard",
                 onClick = onNavigateToPrivacyDashboard
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
 
             // Legal & Compliance
             Text(
@@ -233,7 +227,7 @@ fun SettingsScreen(
                     context.startActivity(intent)
                 }
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
 
             SettingsItem(
                 icon = Icons.Rounded.Description,
@@ -243,7 +237,7 @@ fun SettingsScreen(
                     context.startActivity(intent)
                 }
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
             
             SettingsItem(
                 icon = Icons.AutoMirrored.Rounded.ExitToApp,
@@ -251,7 +245,7 @@ fun SettingsScreen(
                 onClick = { authViewModel.logout() },
                 textColor = MaterialTheme.colorScheme.error
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            HorizontalDivider()
             SettingsItem(
                 icon = Icons.Rounded.DeleteForever,
                 title = "Delete Account",
@@ -292,7 +286,7 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
-    textColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onBackground,
+    textColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
     ListItem(

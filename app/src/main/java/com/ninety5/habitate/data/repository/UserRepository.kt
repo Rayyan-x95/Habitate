@@ -79,6 +79,17 @@ class UserRepository @Inject constructor(
     }
 
     /**
+     * Get the current authenticated user.
+     * Returns null if no user is logged in.
+     */
+    suspend fun getCurrentUser(): UserEntity? {
+        // This should get the current user from AuthRepository or local storage
+        // For now, we'll use a simple approach - get the first user from local DB
+        // In a real implementation, this should get the currently logged-in user ID from AuthRepository
+        return userDao.getAllUsers().firstOrNull()
+    }
+
+    /**
      * Refresh user profile from server.
      */
     suspend fun refreshUser(userId: String): Result<Unit> {

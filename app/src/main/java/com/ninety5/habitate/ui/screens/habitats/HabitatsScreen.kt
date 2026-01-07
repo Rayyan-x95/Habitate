@@ -58,7 +58,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.data.local.entity.HabitatPrivacy
+import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
 import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.SageGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,27 +74,12 @@ fun HabitatsScreen(
     var selectedFilter by remember { mutableStateOf(HabitatFilter.ALL) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Habitats",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        },
+        containerColor = HabitateDarkGreenStart,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateHabitat,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = SageGreen,
+                contentColor = HabitateDarkGreenStart
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Create habitat")
             }
@@ -166,8 +154,10 @@ private fun FilterChipsRow(
                 onClick = { onFilterSelected(filter) },
                 label = { Text(filter.displayName) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                    selectedContainerColor = SageGreen,
+                    selectedLabelColor = HabitateDarkGreenStart,
+                    containerColor = HabitateOffWhite.copy(alpha = 0.1f),
+                    labelColor = HabitateOffWhite
                 )
             )
         }
@@ -187,18 +177,18 @@ private fun SectionHeader(title: String, count: Int) {
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = HabitateOffWhite
         )
         if (count > 0) {
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = SageGreen.copy(alpha = 0.2f),
                 shape = CircleShape
             ) {
                 Text(
                     text = "$count",
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = SageGreen
                 )
             }
         }
@@ -212,7 +202,7 @@ private fun EmptyHabitatsState(onCreateHabitat: () -> Unit) {
             .fillMaxWidth()
             .padding(16.dp)
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                HabitateOffWhite.copy(alpha = 0.05f),
                 RoundedCornerShape(16.dp)
             )
             .padding(24.dp),
@@ -222,24 +212,24 @@ private fun EmptyHabitatsState(onCreateHabitat: () -> Unit) {
             imageVector = Icons.Rounded.AddCircleOutline,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.primary
+            tint = SageGreen
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = "Join or Create a Habitat",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = HabitateOffWhite
         )
         Text(
             text = "Connect with others who share your interests.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = HabitateOffWhite.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
         )
         Button(
             onClick = onCreateHabitat,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(containerColor = SageGreen, contentColor = HabitateDarkGreenStart)
         ) {
             Text("Create New Habitat")
         }
@@ -259,9 +249,9 @@ fun HabitatCard(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+            containerColor = HabitateDarkGreenStart.copy(alpha = 0.5f)
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+        border = BorderStroke(1.dp, HabitateOffWhite.copy(alpha = 0.1f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -275,7 +265,7 @@ fun HabitatCard(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(16.dp)),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                color = SageGreen.copy(alpha = 0.1f)
             ) {
                 if (habitat.imageUrl != null) {
                     AsyncImage(
@@ -289,7 +279,7 @@ fun HabitatCard(
                             imageVector = Icons.Rounded.Group,
                             contentDescription = null,
                             modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = SageGreen
                         )
                     }
                 }
@@ -307,7 +297,7 @@ fun HabitatCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = HabitateOffWhite
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     if (habitat.privacy != HabitatPrivacy.PUBLIC) {
@@ -315,7 +305,7 @@ fun HabitatCard(
                             imageVector = Icons.Rounded.Lock,
                             contentDescription = "Private",
                             modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = HabitateOffWhite.copy(alpha = 0.5f)
                         )
                     }
                 }
@@ -323,7 +313,7 @@ fun HabitatCard(
                 Text(
                     text = habitat.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = HabitateOffWhite.copy(alpha = 0.7f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(vertical = 4.dp)
@@ -333,14 +323,14 @@ fun HabitatCard(
                     Text(
                         text = "${habitat.memberCount} members",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = SageGreen
                     )
                     
                     if (habitat.activeChallenge != null) {
                         Text(
                             text = " • ${habitat.activeChallenge}",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = SageGreen.copy(alpha = 0.8f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

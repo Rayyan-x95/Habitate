@@ -45,9 +45,18 @@ fun HabitListScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsState()
 
     var showSearchBar by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearError()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             if (showSearchBar) {
                 SearchBar(
@@ -81,18 +90,7 @@ fun HabitListScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Error message
-            if (uiState.error != null) {
-                SnackbarHost(
-                    hostState = remember { SnackbarHostState() }.apply {
-                        LaunchedEffect(uiState.error) {
-                            showSnackbar(uiState.error ?: "")
-                            viewModel.clearError()
-                        }
-                    }
-                )
-            }
-
+            
             when {
                 uiState.isLoading -> {
                     HabitateLoadingScreen()

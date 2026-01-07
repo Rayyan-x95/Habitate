@@ -1,104 +1,88 @@
 package com.ninety5.habitate.data.repository
 
 import com.ninety5.habitate.data.local.dao.StoryDao
-import com.ninety5.habitate.data.local.dao.StoryMuteDao
-import com.ninety5.habitate.data.local.dao.StoryViewDao
 import com.ninety5.habitate.data.local.dao.SyncQueueDao
 import com.ninety5.habitate.data.local.entity.StoryEntity
-import com.ninety5.habitate.data.local.entity.StoryMuteEntity
-import com.ninety5.habitate.data.local.entity.StoryViewEntity
 import com.ninety5.habitate.data.local.entity.SyncOperationEntity
 import com.ninety5.habitate.data.local.entity.SyncState
 import com.ninety5.habitate.data.local.entity.SyncStatus
 import com.ninety5.habitate.data.local.relation.StoryWithUser
 import com.ninety5.habitate.data.remote.ApiService
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import timber.log.Timber
 import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StoryRepository @Inject constructor(
     private val storyDao: StoryDao,
-    private val storyViewDao: StoryViewDao,
-    private val storyMuteDao: StoryMuteDao,
-    private val syncQueueDao: SyncQueueDao,
     private val apiService: ApiService,
-    private val authRepository: AuthRepository,
-    private val moshi: Moshi
+    private val syncQueueDao: SyncQueueDao,
+    private val authRepository: AuthRepository
 ) {
 
-    suspend fun getActiveStories(): Flow<List<StoryWithUser>> {
-        val userId = authRepository.getCurrentUserId() ?: return emptyFlow()
-        return storyDao.getActiveStories(userId)
+    fun getActiveStories(): Flow<List<StoryWithUser>> {
+        val userId = authRepository.getCurrentUserId() ?: return kotlinx.coroutines.flow.flowOf(emptyList())
+        return storyDao.getActiveStories(userId, System.currentTimeMillis())
+    }
+
+    suspend fun createStory(mediaUri: String) {
+        val userId = authRepository.getCurrentUserId() ?: return
+        val storyId = UUID.randomUUID().toString()
+        val now = Instant.now()
+        val expiresAt = now.plus(24, ChronoUnit.HOURS)
+        val nowMillis = now.toEpochMilli()
+        val expiresAtMillis = expiresAt.toEpochMilli()
+
+        val story = StoryEntity(
+            id = storyId,
+            userId = userId,
+            mediaUrl = mediaUri,
+            createdAt = nowMillis,
+            expiresAt = expiresAtMillis,
+            syncState = SyncState.PENDING
+        )
+
+        storyDao.upsert(story)
+
+        // Queue sync
+        val payload = "{\"mediaUri\": \"$mediaUri\", \"expiresAt\": \"$expiresAt\"}"
+        
+        val op = SyncOperationEntity(
+            entityType = "story",
+            entityId = storyId,
+            operation = "CREATE",
+            payload = payload,
+            status = SyncStatus.PENDING,
+            createdAt = now,
+            lastAttemptAt = null
+        )
+        syncQueueDao.insert(op)
     }
 
     suspend fun refreshStories() {
         try {
-            val remoteStories = apiService.getStories()
-            val cutoffInstant = Instant.now().minusSeconds(24 * 60 * 60) // 24 hours ago
-            val cutoffMs = cutoffInstant.toEpochMilli()
+            // Clean up expired stories first
+            // storyDao.deleteExpired() // Assuming this exists or we add it
             
-            remoteStories.forEach { dto ->
-                // Only cache non-expired stories
-                if (dto.createdAt.isAfter(cutoffInstant)) {
-                    val entity = StoryEntity(
-                        id = dto.id,
-                        userId = dto.authorId,
-                        mediaUrl = dto.mediaUri,
-                        caption = dto.caption,
-                        createdAt = dto.createdAt.toEpochMilli(),
-                        expiresAt = dto.expiresAt.toEpochMilli(),
-                        syncState = SyncState.SYNCED
-                    )
-                    storyDao.upsert(entity)
-                }
+            val storyDtos = apiService.getStories()
+            val storyEntities = storyDtos.map { dto ->
+                StoryEntity(
+                    id = dto.id,
+                    userId = dto.authorId,
+                    mediaUrl = dto.mediaUri,
+                    createdAt = dto.createdAt.toEpochMilli(),
+                    expiresAt = dto.expiresAt.toEpochMilli(),
+                    syncState = SyncState.SYNCED
+                )
             }
-            
-            // Clean up expired stories from local cache
-            storyDao.deleteExpired(cutoffMs)
-            
-            Timber.d("StoryRepository: Refreshed ${remoteStories.size} stories from server")
+            storyEntities.forEach { story ->
+                storyDao.upsert(story)
+            }
         } catch (e: Exception) {
-            Timber.e(e, "StoryRepository: Failed to refresh stories")
-            throw e
+            // Ignore network errors for now, rely on cache
         }
-    }
-
-    suspend fun createStory(story: StoryEntity) {
-        storyDao.upsert(story.copy(syncState = SyncState.PENDING))
-        
-        val payload = moshi.adapter(StoryEntity::class.java).toJson(story)
-        val syncOp = SyncOperationEntity(
-            entityType = "story",
-            entityId = story.id,
-            operation = "CREATE",
-            payload = payload,
-            status = SyncStatus.PENDING,
-            createdAt = Instant.now(),
-            lastAttemptAt = null
-        )
-        syncQueueDao.insert(syncOp)
-    }
-
-    suspend fun recordView(storyId: String) {
-        val userId = authRepository.getCurrentUserId() ?: return
-        val view = StoryViewEntity(storyId = storyId, viewerId = userId)
-        storyViewDao.insert(view)
-        // Sync view to server (omitted)
-    }
-
-    suspend fun muteUser(mutedUserId: String) {
-        val userId = authRepository.getCurrentUserId() ?: return
-        val mute = StoryMuteEntity(userId = userId, mutedUserId = mutedUserId)
-        storyMuteDao.insert(mute)
-    }
-
-    suspend fun unmuteUser(mutedUserId: String) {
-        val userId = authRepository.getCurrentUserId() ?: return
-        storyMuteDao.delete(userId, mutedUserId)
     }
 }

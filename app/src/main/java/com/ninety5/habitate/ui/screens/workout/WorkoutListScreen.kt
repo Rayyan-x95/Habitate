@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.data.local.entity.WorkoutEntity
 import com.ninety5.habitate.data.local.entity.WorkoutSource
+import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.theme.SageGreen
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -43,21 +46,21 @@ fun WorkoutListScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateDarkGreenStart,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Workouts", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text("Workouts", color = HabitateOffWhite) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateDarkGreenStart,
+                    titleContentColor = HabitateOffWhite
                 ),
                 actions = {
                     IconButton(onClick = { viewModel.importHealthConnectWorkouts() }) {
                         Icon(
                             imageVector = Icons.Rounded.MonitorHeart,
                             contentDescription = "Import from Health Connect",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = SageGreen
                         )
                     }
                 }
@@ -66,8 +69,8 @@ fun WorkoutListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateWorkoutClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = SageGreen,
+                contentColor = HabitateDarkGreenStart
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Log Workout")
             }
@@ -84,9 +87,12 @@ fun WorkoutListScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("No workouts logged yet", color = MaterialTheme.colorScheme.onBackground)
+                        Text("No workouts logged yet", color = HabitateOffWhite)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onNavigateToHealthConnect) {
+                        Button(
+                            onClick = onNavigateToHealthConnect,
+                            colors = ButtonDefaults.buttonColors(containerColor = SageGreen, contentColor = HabitateDarkGreenStart)
+                        ) {
                             Text("Connect Health Data")
                         }
                     }
@@ -125,7 +131,7 @@ fun WorkoutItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = HabitateDarkGreenStart.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -137,7 +143,7 @@ fun WorkoutItem(
             Icon(
                 imageVector = Icons.Rounded.FitnessCenter,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = SageGreen,
                 modifier = Modifier.size(40.dp)
             )
             
@@ -149,14 +155,14 @@ fun WorkoutItem(
                 Text(
                     text = workout.type,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = HabitateOffWhite
                 )
                 Text(
                     text = DateTimeFormatter.ofPattern("MMM dd, HH:mm")
                         .withZone(ZoneId.systemDefault())
                         .format(workout.startTs),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = HabitateOffWhite.copy(alpha = 0.7f)
                 )
                 
                 Row(modifier = Modifier.padding(top = 4.dp)) {
@@ -164,7 +170,7 @@ fun WorkoutItem(
                         Text(
                             text = String.format("%.2f km", workout.distanceMeters / 1000.0),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = SageGreen,
                             modifier = Modifier.padding(end = 8.dp)
                         )
                     }
@@ -172,7 +178,7 @@ fun WorkoutItem(
                         Text(
                             text = "${workout.calories.toInt()} kcal",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
+                            color = SageGreen
                         )
                     }
                 }
@@ -182,7 +188,7 @@ fun WorkoutItem(
                 Icon(
                     imageVector = Icons.Rounded.MonitorHeart,
                     contentDescription = "Health Connect",
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = SageGreen.copy(alpha = 0.7f),
                     modifier = Modifier.size(16.dp)
                 )
             }

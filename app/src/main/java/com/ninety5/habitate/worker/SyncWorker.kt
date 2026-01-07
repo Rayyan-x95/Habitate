@@ -11,31 +11,23 @@ import com.ninety5.habitate.data.local.dao.SyncQueueDao
 import com.ninety5.habitate.data.local.dao.PostDao
 import com.ninety5.habitate.data.local.dao.TaskDao
 import com.ninety5.habitate.data.local.dao.WorkoutDao
-import com.ninety5.habitate.data.local.dao.HabitDao
-import com.ninety5.habitate.data.local.dao.ChallengeDao
-import com.ninety5.habitate.data.local.dao.HabitatDao
-import com.ninety5.habitate.data.local.dao.StoryDao
-import com.ninety5.habitate.data.local.entity.StoryEntity
+import com.ninety5.habitate.data.local.entity.FollowEntity
 import com.ninety5.habitate.data.local.entity.LikeEntity
 import com.ninety5.habitate.data.local.entity.CommentEntity
 import com.ninety5.habitate.data.local.entity.SyncStatus
 import com.ninety5.habitate.data.local.entity.SyncState
-import com.ninety5.habitate.core.utils.DebugLogger
 import com.ninety5.habitate.data.remote.ApiService
+import com.ninety5.habitate.data.local.dao.MessageDao
+import com.ninety5.habitate.data.local.entity.MessageStatus
+import com.ninety5.habitate.data.remote.dto.MessageDto
+import com.squareup.moshi.Moshi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import timber.log.Timber
-import com.squareup.moshi.Moshi
-import com.ninety5.habitate.data.local.entity.PostEntity
-import android.net.Uri
-import okhttp3.MultipartBody
+import java.time.Instant
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
-import com.ninety5.habitate.data.remote.ProgressRequestBody
-import java.io.File
-import java.io.FileOutputStream
 import kotlin.math.pow
-import com.ninety5.habitate.data.local.entity.FollowEntity
 
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
@@ -48,12 +40,7 @@ class SyncWorker @AssistedInject constructor(
     private val postDao: PostDao,
     private val taskDao: TaskDao,
     private val workoutDao: WorkoutDao,
-    private val habitDao: HabitDao,
-    private val challengeDao: ChallengeDao,
-    private val habitatDao: HabitatDao,
-    private val storyDao: StoryDao,
-    private val chatDao: com.ninety5.habitate.data.local.dao.ChatDao,
-    private val messageDao: com.ninety5.habitate.data.local.dao.MessageDao,
+    private val messageDao: MessageDao,
     private val apiService: ApiService,
     private val moshi: Moshi
 ) : CoroutineWorker(context, params) {
@@ -77,12 +64,17 @@ class SyncWorker @AssistedInject constructor(
                 syncQueueDao.updateStatus(op.id, SyncStatus.IN_PROGRESS)
                 
                 when (op.entityType) {
-                    "message" -> {
+                    "chat_message" -> {
                         if (op.operation == "CREATE") {
-                            val dto = moshi.adapter(com.ninety5.habitate.data.remote.dto.MessageDto::class.java).fromJson(op.payload)
-                            if (dto != null) {
-                                apiService.sendMessage(dto.chatId, dto)
-                                messageDao.updateStatus(op.entityId, com.ninety5.habitate.data.local.entity.MessageStatus.SENT)
+                            val adapter = moshi.adapter(MessageDto::class.java)
+                            val messageDto = adapter.fromJson(op.payload)
+                            
+                            if (messageDto != null) {
+                                val path = "chats/${messageDto.chatId}/messages"
+                                val mediaType = "application/json; charset=utf-8".toMediaType()
+                                val body = op.payload.toRequestBody(mediaType)
+                                apiService.create(path, body)
+                                messageDao.updateStatus(op.entityId, MessageStatus.SENT)
                             }
                         }
                     }
@@ -98,68 +90,16 @@ class SyncWorker @AssistedInject constructor(
                             apiService.unlikePost(op.entityId.split("_")[1])  // postId
                         }
                     }
-                    "comment" -> {
-                        val mediaType = "application/json; charset=utf-8".toMediaType()
-                        val body = op.payload.toRequestBody(mediaType)
-                        when (op.operation) {
-                            "CREATE" -> apiService.createComment(body)
-                            "DELETE" -> apiService.deleteComment(op.entityId)
-                        }
-                    }
+                    // "comment" case removed; handled by generic else block (entityType "comment" -> path "comments")
                     "notification_read" -> {
                         apiService.markNotificationRead(op.entityId)
                     }
                     "notification_read_all" -> {
                         apiService.markAllNotificationsRead()
                     }
-                    "story" -> {
+                    "challenge_join" -> {
                         if (op.operation == "CREATE") {
-                            val adapter = moshi.adapter(StoryEntity::class.java)
-                            var story = adapter.fromJson(op.payload) 
-                                ?: throw Exception("Failed to parse story payload for operation ${op.id}")
-                            
-                            if (story.mediaUrl.startsWith("content://") || story.mediaUrl.startsWith("file://")) {
-                                val newUrl = uploadMedia(Uri.parse(story.mediaUrl))
-                                story = story.copy(mediaUrl = newUrl)
-                                val newPayload = adapter.toJson(story)
-                                val mediaType = "application/json; charset=utf-8".toMediaType()
-                                apiService.create("stories", newPayload.toRequestBody(mediaType))
-                            } else {
-                                val mediaType = "application/json; charset=utf-8".toMediaType()
-                                apiService.create("stories", op.payload.toRequestBody(mediaType))
-                            }
-                        } else if (op.operation == "DELETE") {
-                            apiService.delete("stories", op.entityId)
-                        }
-                    }
-                    "post" -> {
-                        if (op.operation == "CREATE") {
-                            // Parse payload
-                            val adapter = moshi.adapter(PostEntity::class.java)
-                            var post = adapter.fromJson(op.payload)
-                                ?: throw Exception("Failed to parse post payload for operation ${op.id}")
-                            
-                            // Check for local URIs and upload
-                            val newMediaUrls = post.mediaUrls.map { url ->
-                                if (url.startsWith("content://") || url.startsWith("file://")) {
-                                    uploadMedia(Uri.parse(url))
-                                } else {
-                                    url
-                                }
-                            }
-                            
-                            val mediaType = "application/json; charset=utf-8".toMediaType()
-                            
-                            // Update payload if changed
-                            if (newMediaUrls != post.mediaUrls) {
-                                post = post.copy(mediaUrls = newMediaUrls)
-                                val newPayload = adapter.toJson(post)
-                                apiService.create("feed", newPayload.toRequestBody(mediaType))
-                            } else {
-                                apiService.create("feed", op.payload.toRequestBody(mediaType))
-                            }
-                        } else if (op.operation == "DELETE") {
-                            apiService.delete("feed", op.entityId)
+                            apiService.joinChallenge(op.entityId)
                         }
                     }
                     else -> {
@@ -167,8 +107,7 @@ class SyncWorker @AssistedInject constructor(
                             "task" -> "tasks"
                             "workout" -> "workouts"
                             "habitat" -> "habitats"
-                            "habit" -> "habits"
-                            "challenge" -> "challenges"
+                            "post" -> "posts"
                             else -> op.entityType + "s"
                         }
                         
@@ -228,12 +167,6 @@ class SyncWorker @AssistedInject constructor(
     private suspend fun rollbackOptimisticUpdate(op: com.ninety5.habitate.data.local.entity.SyncOperationEntity) {
         try {
             when (op.entityType) {
-                "message" -> {
-                    if (op.operation == "CREATE") {
-                        messageDao.updateStatus(op.entityId, com.ninety5.habitate.data.local.entity.MessageStatus.FAILED)
-                        Timber.d("Marked message as failed: ${op.entityId}")
-                    }
-                }
                 "follow" -> {
                     val ids = op.entityId.split("_")
                     if (ids.size == 2) {
@@ -281,8 +214,8 @@ class SyncWorker @AssistedInject constructor(
                 }
                 "post" -> {
                     if (op.operation == "CREATE") {
-                        postDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked post as failed: ${op.entityId}")
+                        postDao.deleteById(op.entityId)
+                        Timber.d("Rolled back post: ${op.entityId}")
                     }
                 }
                 "task" -> {
@@ -297,56 +230,9 @@ class SyncWorker @AssistedInject constructor(
                         Timber.d("Marked workout as failed: ${op.entityId}")
                     }
                 }
-                "habit" -> {
-                    if (op.operation == "CREATE") {
-                        habitDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked habit as failed: ${op.entityId}")
-                    }
-                }
-                "challenge" -> {
-                    if (op.operation == "CREATE") {
-                        challengeDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked challenge as failed: ${op.entityId}")
-                    }
-                }
-                "habitat" -> {
-                    if (op.operation == "CREATE") {
-                        habitatDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked habitat as failed: ${op.entityId}")
-                    }
-                }
-                "story" -> {
-                    if (op.operation == "CREATE") {
-                        storyDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked story as failed: ${op.entityId}")
-                    }
-                }
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to rollback operation ${op.id}")
-        }
-    }
-
-    private suspend fun uploadMedia(uri: Uri): String {
-        val file = getFileFromUri(uri) ?: throw Exception("Failed to get file from URI: $uri")
-        
-        val requestBody = ProgressRequestBody(file, "image/*") { } // No progress callback needed for sync
-        val part = MultipartBody.Part.createFormData("file", file.name, requestBody)
-        
-        return apiService.uploadMedia(part)
-    }
-
-    private fun getFileFromUri(uri: Uri): File? {
-        return try {
-            val inputStream = applicationContext.contentResolver.openInputStream(uri) ?: return null
-            val file = File(applicationContext.cacheDir, "upload_${System.currentTimeMillis()}")
-            FileOutputStream(file).use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-            file
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to create file from URI")
-            null
         }
     }
 }

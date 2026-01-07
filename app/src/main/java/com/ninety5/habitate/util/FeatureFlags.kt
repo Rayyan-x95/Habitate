@@ -16,8 +16,8 @@ class FeatureFlagsImpl @Inject constructor() : FeatureFlags {
     // To connect to Firebase Remote Config in the future, inject FirebaseRemoteConfig here
     // and read values from Remote Config with local defaults.
     
-    override val isChatEnabled: Boolean = true
-    override val isStoriesEnabled: Boolean = true
+    override val isChatEnabled: Boolean = false
+    override val isStoriesEnabled: Boolean = false
     override val isFocusModeEnabled: Boolean = true
     override val isAiPlannerEnabled: Boolean = true
 }

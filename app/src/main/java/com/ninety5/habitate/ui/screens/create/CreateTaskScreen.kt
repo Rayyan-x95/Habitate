@@ -194,7 +194,7 @@ fun CreateTaskScreen(
                     FilterChip(
                         selected = selectedPriority == priority,
                         onClick = { selectedPriority = priority },
-                        label = { Text(priority.name.lowercase().capitalize(Locale.getDefault())) }
+                        label = { Text(priority.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }) }
                     )
                 }
             }
@@ -207,7 +207,7 @@ fun CreateTaskScreen(
                     FilterChip(
                         selected = selectedRecurrence == recurrence,
                         onClick = { selectedRecurrence = recurrence },
-                        label = { Text(recurrence?.lowercase()?.capitalize(Locale.getDefault()) ?: "None") }
+                        label = { Text(recurrence?.lowercase()?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() } ?: "None") }
                     )
                 }
             }

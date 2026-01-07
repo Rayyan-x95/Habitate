@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.theme.SageGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,22 +36,7 @@ fun CreateScreen(
     onPlannerClick: () -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { Text("Create New") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        }
+        containerColor = HabitateDarkGreenStart
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -60,7 +48,7 @@ fun CreateScreen(
                 text = "What would you like to create?",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = HabitateOffWhite,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -99,7 +87,7 @@ fun CreateOptionCard(option: CreateOption) {
         onClick = option.onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = HabitateOffWhite.copy(alpha = 0.05f)
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -112,20 +100,21 @@ fun CreateOptionCard(option: CreateOption) {
             Icon(
                 imageVector = option.icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = SageGreen,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = option.title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = HabitateOffWhite
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = option.description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = HabitateOffWhite.copy(alpha = 0.7f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }

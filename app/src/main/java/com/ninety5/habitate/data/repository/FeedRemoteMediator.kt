@@ -52,6 +52,7 @@ class FeedRemoteMediator @Inject constructor(
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     database.remoteKeysDao().clearRemoteKeys()
+                    database.postDao().deleteSyncedPosts()
                 }
                 
                 val prevKey = if (page == 1) null else page - 1

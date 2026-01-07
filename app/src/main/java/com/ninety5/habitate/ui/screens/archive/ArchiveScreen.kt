@@ -29,7 +29,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.ninety5.habitate.data.local.view.TimelineItem
 import com.ninety5.habitate.ui.screens.timeline.TimelineItemCard
-import com.ninety5.habitate.ui.viewmodel.ArchiveViewModel
+import com.ninety5.habitate.ui.screens.archive.ArchiveViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

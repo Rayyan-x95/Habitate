@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -126,37 +127,13 @@ fun Modifier.glassEffect(
     backgroundAlpha: Float = GlassTokens.backgroundAlpha,
     borderAlpha: Float = GlassTokens.borderAlpha,
     isDark: Boolean = false
-): Modifier {
-    // Base glass color - slightly different for light/dark
-    val glassBase = if (isDark) {
-        Color.White.copy(alpha = 0.06f)
-    } else {
-        Color.White.copy(alpha = 0.65f)
-    }
+): Modifier = composed {
+    // Minimal style: Solid surface color, no blur or transparency
+    val backgroundColor = MaterialTheme.colorScheme.surface
     
-    // Tint using brand primary
-    val glassTint = tintColor.copy(alpha = backgroundAlpha)
-    
-    // Subtle gradient border for highlight effect
-    val glassBorder = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = if (isDark) 0.12f else 0.25f),
-            tintColor.copy(alpha = borderAlpha)
-        )
-    )
-    
-    return this
-        .then(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Modifier.blur(blur)
-            } else {
-                Modifier
-            }
-        )
+    this
         .clip(shape)
-        .background(glassBase, shape)
-        .background(glassTint, shape)
-        .border(GlassTokens.borderWidth, glassBorder, shape)
+        .background(backgroundColor, shape)
 }
 
 /**

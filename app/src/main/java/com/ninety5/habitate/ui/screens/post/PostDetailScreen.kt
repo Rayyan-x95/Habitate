@@ -47,6 +47,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.ui.components.designsystem.HabitateErrorState
 import com.ninety5.habitate.ui.components.UserAvatar
+import com.ninety5.habitate.ui.components.PostItem
+import com.ninety5.habitate.ui.screens.feed.PostUiModel
+import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,19 +64,19 @@ fun PostDetailScreen(
     var commentText by remember { mutableStateOf("") }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateDarkGreenStart,
         topBar = {
             TopAppBar(
-                title = { Text("Post") },
+                title = { Text("Post", color = HabitateOffWhite) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = HabitateOffWhite)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateDarkGreenStart,
+                    titleContentColor = HabitateOffWhite,
+                    navigationIconContentColor = HabitateOffWhite
                 )
             )
         },
@@ -130,91 +134,44 @@ fun PostDetailScreen(
                 ) {
                     // Post content
                     item {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            // Author row
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable { 
-                                    uiState.author?.id?.let { onUserClick(it) }
-                                }
-                            ) {
-                                UserAvatar(
-                                    avatarUrl = uiState.author?.avatarUrl,
-                                    size = 40.dp
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = uiState.author?.displayName ?: "Unknown",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = "@${uiState.author?.username ?: "unknown"}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Post text
-                            uiState.post?.contentText?.let { text ->
-                                Text(
-                                    text = text,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-
-                            // Post image
-                            uiState.post?.mediaUrls?.firstOrNull()?.let { mediaUrl ->
-                                Spacer(modifier = Modifier.height(12.dp))
-                                AsyncImage(
-                                    model = mediaUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(MaterialTheme.shapes.medium),
-                                    contentScale = ContentScale.FillWidth
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Actions row
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(24.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.clickable { viewModel.toggleLike() }
-                                ) {
-                                    Icon(
-                                        imageVector = if (uiState.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                        contentDescription = "Like",
-                                        tint = if (uiState.isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("${uiState.likeCount}")
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.ModeComment,
-                                        contentDescription = "Comments",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("${uiState.commentCount}")
-                                }
-                            }
+                        val postUiModel = uiState.post?.let { post ->
+                            PostUiModel(
+                                id = post.id,
+                                authorId = uiState.author?.id ?: "",
+                                authorName = uiState.author?.displayName ?: "Unknown",
+                                authorAvatarUrl = uiState.author?.avatarUrl,
+                                contentText = post.contentText ?: "",
+                                mediaUrls = post.mediaUrls,
+                                likes = uiState.likeCount,
+                                comments = uiState.commentCount,
+                                shares = 0,
+                                isLiked = uiState.isLiked,
+                                reactionType = null,
+                                visibility = post.visibility,
+                                createdAt = post.createdAt.toString(),
+                                workoutSummary = null
+                            )
                         }
 
-                        HorizontalDivider()
+                        if (postUiModel != null) {
+                            PostItem(
+                                post = postUiModel,
+                                onLikeClick = { viewModel.toggleLike() },
+                                onReactionClick = { reaction -> viewModel.toggleLike(reaction) },
+                                onCommentClick = { /* Already on detail screen */ },
+                                onShareClick = { /* Share */ },
+                                onUserClick = { onUserClick(postUiModel.authorId) }
+                            )
+                        }
+
+                        HorizontalDivider(color = HabitateOffWhite.copy(alpha = 0.1f))
 
                         Text(
                             text = "Comments",
                             style = MaterialTheme.typography.titleMedium,
+                            color = HabitateOffWhite,
                             modifier = Modifier.padding(16.dp)
+
                         )
                     }
 

@@ -22,16 +22,35 @@ import com.ninety5.habitate.data.remote.dto.HabitLogDto
 
 import okhttp3.MultipartBody
 
+import com.ninety5.habitate.data.remote.dto.AuthResponse
+import com.ninety5.habitate.data.remote.dto.RefreshTokenRequest
+import com.ninety5.habitate.data.remote.dto.RegisterRequest
+import retrofit2.Response
+
 interface ApiService {
+    // Auth
+    @POST("auth/login")
+    @FormUrlEncoded
+    suspend fun login(
+        @Field("username") username: String,
+        @Field("password") password: String
+    ): Response<AuthResponse>
+
+    @POST("auth/register")
+    suspend fun register(@Body request: RegisterRequest): Response<UserDto>
+
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<AuthResponse>
+
+    @POST("auth/logout")
+    suspend fun logout(): Response<Unit>
+
     // Chat
     @GET("chats")
     suspend fun getChats(): List<ChatDto>
 
     @GET("chats/{chatId}/messages")
     suspend fun getMessages(@Path("chatId") chatId: String, @Query("since") since: Long?): List<MessageDto>
-
-    @POST("chats/{chatId}/messages")
-    suspend fun sendMessage(@Path("chatId") chatId: String, @Body message: MessageDto): MessageDto
 
     @POST("chats/{chatId}/read")
     suspend fun markChatRead(@Path("chatId") chatId: String)
@@ -57,9 +76,6 @@ interface ApiService {
     @GET("habitats")
     suspend fun getHabitats(): List<HabitatDto>
 
-    @POST("habitats")
-    suspend fun createHabitat(@Body habitat: HabitatDto): HabitatDto
-
     // Users
     @GET("users/me")
     suspend fun getCurrentUser(): UserDto
@@ -72,9 +88,6 @@ interface ApiService {
 
     @POST("users/{id}/unfollow")
     suspend fun unfollowUser(@Path("id") id: String)
-
-    @PUT("users/profile")
-    suspend fun updateProfile(@Body user: UserDto)
 
     @GET("users/{id}/followers")
     suspend fun getUserFollowers(
@@ -102,34 +115,13 @@ interface ApiService {
     @POST("tasks")
     suspend fun createTask(@Body task: TaskDto): TaskDto
 
-    @PUT("tasks/{id}")
-    suspend fun updateTask(@Path("id") id: String, @Body task: TaskDto): TaskDto
-
-    @DELETE("tasks/{id}")
-    suspend fun deleteTask(@Path("id") id: String)
-
     // Workouts
     @GET("workouts")
     suspend fun getWorkouts(): List<WorkoutDto>
 
-    @POST("workouts")
-    suspend fun createWorkout(@Body workout: WorkoutDto): WorkoutDto
-
     // Habits
     @GET("habits")
     suspend fun getHabits(): List<HabitDto>
-
-    @POST("habits")
-    suspend fun createHabit(@Body habit: HabitDto): HabitDto
-
-    @PUT("habits/{id}")
-    suspend fun updateHabit(@Path("id") id: String, @Body habit: HabitDto): HabitDto
-
-    @DELETE("habits/{id}")
-    suspend fun deleteHabit(@Path("id") id: String)
-
-    @POST("habits/{id}/logs")
-    suspend fun createHabitLog(@Path("id") habitId: String, @Body log: HabitLogDto): HabitLogDto
 
     @GET("habits/{id}/logs")
     suspend fun getHabitLogs(
@@ -141,12 +133,6 @@ interface ApiService {
     @GET("stories")
     suspend fun getStories(): List<StoryDto>
 
-    @POST("stories")
-    suspend fun createStory(@Body story: StoryDto): StoryDto
-
-    @DELETE("stories/{id}")
-    suspend fun deleteStory(@Path("id") id: String)
-
     // Challenges
     @GET("challenges")
     suspend fun getChallenges(
@@ -154,9 +140,6 @@ interface ApiService {
         @Query("skip") skip: Int = 0,
         @Query("limit") limit: Int = 50
     ): List<ChallengeDto>
-
-    @POST("challenges")
-    suspend fun createChallenge(@Body challenge: ChallengeCreateRequest): ChallengeDto
 
     @POST("challenges/{id}/join")
     suspend fun joinChallenge(@Path("id") id: String)
@@ -171,7 +154,7 @@ interface ApiService {
     suspend fun getChallengeLeaderboard(
         @Path("id") id: String,
         @Query("limit") limit: Int = 20
-    ): List<LeaderboardEntryDto>
+    ): Response<List<LeaderboardEntryDto>>
 
     // Journal
     @GET("journal")
@@ -180,20 +163,8 @@ interface ApiService {
         @Query("limit") limit: Int = 50
     ): List<JournalEntryDto>
 
-    @POST("journal")
-    suspend fun createJournalEntry(@Body entry: JournalEntryCreateRequest): JournalEntryDto
-
     @GET("journal/{id}")
     suspend fun getJournalEntry(@Path("id") id: String): JournalEntryDto
-
-    @PUT("journal/{id}")
-    suspend fun updateJournalEntry(
-        @Path("id") id: String,
-        @Body entry: JournalEntryCreateRequest
-    ): JournalEntryDto
-
-    @DELETE("journal/{id}")
-    suspend fun deleteJournalEntry(@Path("id") id: String)
 
     // Social Interactions
     @POST("feed/{id}/like")
@@ -208,15 +179,9 @@ interface ApiService {
     @GET("comments")
     suspend fun getCommentsForPost(@Query("postId") postId: String): List<com.ninety5.habitate.data.remote.dto.CommentDto>
 
-    @POST("comments")
-    suspend fun createComment(@Body body: okhttp3.RequestBody)
-
-    @DELETE("comments/{id}")
-    suspend fun deleteComment(@Path("id") id: String)
-
     // Account
     @DELETE("users/me")
-    suspend fun deleteAccount()
+    suspend fun deleteAccount(): Response<Unit>
 
     // Generic methods (for sync queue operations)
     @POST("{path}")

@@ -100,7 +100,7 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleLike() {
+    fun toggleLike(reactionType: String? = null) {
         val userId = authRepository.getCurrentUserId() ?: return
         viewModelScope.launch {
             try {
@@ -112,7 +112,7 @@ class PostDetailViewModel @Inject constructor(
                         likeCount = if (currentlyLiked) it.likeCount - 1 else it.likeCount + 1
                     )
                 }
-                feedRepository.toggleLike(userId, postId)
+                feedRepository.toggleLike(userId, postId, reactionType)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to toggle like")
                 // Rollback

@@ -1,4 +1,4 @@
-package com.ninety5.habitate.ui.viewmodel
+package com.ninety5.habitate.ui.screens.timeline
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel

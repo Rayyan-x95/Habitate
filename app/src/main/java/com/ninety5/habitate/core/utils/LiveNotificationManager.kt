@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ninety5.habitate.MainActivity
 import com.ninety5.habitate.R
-import com.ninety5.habitate.core.glyph.HabitateGlyphManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -29,7 +28,7 @@ import javax.inject.Singleton
 @Singleton
 class LiveNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val glyphManager: HabitateGlyphManager
+    private val glyphManager: com.ninety5.habitate.core.glyph.HabitateGlyphManager
 ) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

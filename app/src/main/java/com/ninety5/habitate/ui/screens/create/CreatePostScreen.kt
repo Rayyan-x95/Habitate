@@ -169,7 +169,7 @@ fun CreatePostScreen(
             // Image upload progress
             if (uiState.isUploadingImage) {
                 LinearProgressIndicator(
-                    progress = uiState.imageUploadProgress,
+                    progress = { uiState.imageUploadProgress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)

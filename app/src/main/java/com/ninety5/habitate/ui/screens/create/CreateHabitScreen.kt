@@ -153,7 +153,7 @@ fun CreateHabitScreen(
                     FilterChip(
                         selected = selectedCategory == category,
                         onClick = { selectedCategory = category },
-                        label = { Text(category.name.lowercase().capitalize(Locale.getDefault())) }
+                        label = { Text(category.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }) }
                     )
                 }
             }
@@ -169,7 +169,7 @@ fun CreateHabitScreen(
                     FilterChip(
                         selected = selectedFrequency == frequency,
                         onClick = { selectedFrequency = frequency },
-                        label = { Text(frequency.name.lowercase().capitalize(Locale.getDefault())) }
+                        label = { Text(frequency.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }) }
                     )
                 }
             }

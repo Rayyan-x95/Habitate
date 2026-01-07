@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -31,12 +34,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.ninety5.habitate.ui.components.PostCard
+import com.ninety5.habitate.ui.components.PostItem
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.theme.SageGreen
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.platform.LocalContext
 import android.content.Intent
@@ -60,16 +66,23 @@ fun HabitatDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(habitat?.name ?: "Habitat") },
+                title = { 
+                    Text(
+                        text = habitat?.name ?: "Habitat",
+                        color = MaterialTheme.colorScheme.onBackground
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -96,7 +109,8 @@ fun HabitatDetailScreen(
                                         contentDescription = "Cover Image",
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(200.dp),
+                                            .height(200.dp)
+                                            .clip(RoundedCornerShape(16.dp)),
                                         contentScale = ContentScale.Crop
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
@@ -118,8 +132,9 @@ fun HabitatDetailScreen(
                                 if (activeChallenge != null) {
                                     Card(
                                         onClick = { onNavigateToChallenge(activeChallenge.id) },
+                                        shape = RoundedCornerShape(24.dp),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                            containerColor = Color(0xFF1A2C24)
                                         ),
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
@@ -130,20 +145,20 @@ fun HabitatDetailScreen(
                                             Icon(
                                                 Icons.Rounded.EmojiEvents,
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                tint = SageGreen
                                             )
                                             Spacer(modifier = Modifier.width(16.dp))
                                             Column {
                                                 Text(
                                                     "Active Challenge",
                                                     style = MaterialTheme.typography.labelMedium,
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                                    color = HabitateOffWhite.copy(alpha = 0.7f)
                                                 )
                                                 Text(
                                                     activeChallenge.title,
                                                     style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = HabitateOffWhite
                                                 )
                                             }
                                         }
@@ -163,9 +178,10 @@ fun HabitatDetailScreen(
 
                     // Posts
                     items(uiState.posts) { post ->
-                        PostCard(
+                        PostItem(
                             post = post,
                             onLikeClick = { viewModel.toggleLike(post.id) },
+                            onReactionClick = { reaction -> viewModel.toggleLike(post.id, reaction) },
                             onCommentClick = { onNavigateToPost(post.id) },
                             onShareClick = {
                                 val sendIntent = Intent().apply {

@@ -10,6 +10,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -30,7 +31,6 @@ import com.ninety5.habitate.ui.navigation.Screen
 import com.ninety5.habitate.ui.navigation.bottomNavItems
 import com.ninety5.habitate.ui.screens.auth.AuthViewModel
 import com.ninety5.habitate.ui.theme.HabitateTheme
-import com.ninety5.habitate.ui.theme.SoftIndigo
 import dagger.hilt.android.AndroidEntryPoint
 
 import androidx.lifecycle.lifecycleScope
@@ -38,6 +38,11 @@ import kotlinx.coroutines.launch
 import com.ninety5.habitate.data.repository.ChatRepository
 import com.ninety5.habitate.ui.screens.settings.SettingsViewModel
 import com.ninety5.habitate.util.FeatureFlags
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import com.ninety5.habitate.ui.common.LocalSnackbarHostState
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -99,6 +104,7 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Screens that should show bottom navigation
     val bottomNavScreens = mutableListOf(
@@ -116,40 +122,43 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags) {
     val showBottomBar = currentDestination?.route in bottomNavScreens
 
     val startDestination = when {
+        !uiState.isOnboarded -> Screen.Welcome.route
         !uiState.isLoggedIn -> Screen.Login.route
-        !uiState.isOnboarded -> Screen.Onboarding.route
         else -> Screen.Feed.route
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            if (showBottomBar) {
-                HabitateBottomNavigation(
-                    currentRoute = currentDestination?.route,
-                    featureFlags = featureFlags,
-                    onNavigate = { screen ->
-                        navController.navigate(screen.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+    CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            bottomBar = {
+                if (showBottomBar) {
+                    HabitateBottomNavigation(
+                        currentRoute = currentDestination?.route,
+                        featureFlags = featureFlags,
+                        onNavigate = { screen ->
+                            navController.navigate(screen.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
                             }
-                            // Avoid multiple copies of the same destination
-                            launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
-                            restoreState = true
                         }
-                    }
-                )
+                    )
+                }
             }
+        ) { innerPadding ->
+            HabitateNavHost(
+                navController = navController,
+                modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
+                startDestination = startDestination
+            )
         }
-    ) { innerPadding ->
-        HabitateNavHost(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding),
-            startDestination = startDestination
-        )
     }
 }
 
@@ -183,9 +192,9 @@ fun HabitateBottomNavigation(
                 },
                 label = { Text(text = item.label) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = SoftIndigo,
-                    selectedTextColor = SoftIndigo,
-                    indicatorColor = SoftIndigo.copy(alpha = 0.1f)
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
             )
         }

@@ -10,7 +10,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.ninety5.habitate.core.FirebaseConfigChecker
 import com.ninety5.habitate.data.local.SecurePreferences
-import com.ninety5.habitate.data.remote.api.HabitateApiService
+import com.ninety5.habitate.data.remote.ApiService
 import com.ninety5.habitate.data.remote.dto.RefreshTokenRequest
 import com.ninety5.habitate.data.remote.dto.RegisterRequest
 import com.ninety5.habitate.worker.UserSyncWorker
@@ -18,6 +18,7 @@ import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.ninety5.habitate.data.local.HabitateDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Auth state data class
+ */
+data class AuthState(
+    val isLoggedIn: Boolean,
+    val isOnboarded: Boolean,
+    val isEmailVerified: Boolean
+)
+
+/**
  * Repository for authentication operations.
  * Handles login, registration, token refresh, and session management.
  * 
@@ -43,7 +53,7 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val apiService: HabitateApiService,
+    private val apiService: ApiService,
     private val securePreferences: SecurePreferences,
     private val firebaseAuth: FirebaseAuth,
     private val firebaseConfigChecker: FirebaseConfigChecker,
@@ -59,6 +69,39 @@ class AuthRepository @Inject constructor(
 
     fun getCurrentUserId(): String? {
         return _currentUserId.value
+    }
+
+    suspend fun signInWithGoogle(idToken: String): Result<Unit> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user ?: throw Exception("Google Sign-In failed: User is null")
+
+            // Sync with backend
+            val synced = syncWithBackend(
+                email = user.email ?: "",
+                password = "", // No password for Google Sign-In
+                displayName = user.displayName ?: "User",
+                username = user.email?.substringBefore("@") ?: "user_${System.currentTimeMillis()}"
+            )
+
+            if (!synced) {
+                queueBackendSync(
+                    email = user.email ?: "",
+                    password = "",
+                    displayName = user.displayName ?: "User",
+                    username = user.email?.substringBefore("@") ?: "user_${System.currentTimeMillis()}",
+                    userId = user.uid
+                )
+            }
+
+            _currentUserId.value = user.uid
+            _isAuthenticated.value = true
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Google Sign-In failed")
+            Result.failure(e)
+        }
     }
 
     /**
@@ -616,5 +659,16 @@ class AuthRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+    
+    /**
+     * Get current authentication state
+     */
+    fun getAuthState(): AuthState {
+        return AuthState(
+            isLoggedIn = _isAuthenticated.value,
+            isOnboarded = securePreferences.isOnboarded,
+            isEmailVerified = firebaseAuth.currentUser?.isEmailVerified ?: false
+        )
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Groups
@@ -27,10 +28,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
-import com.ninety5.habitate.ui.components.designsystem.HabitateTextButton
+import androidx.compose.ui.unit.sp
 import com.ninety5.habitate.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -39,39 +40,31 @@ import kotlinx.coroutines.launch
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit
 ) {
-    val colors = HabitateTheme.colors
-    
     // Using brand-derived colors for each page
     val pages = listOf(
         OnboardingPage(
-            icon = Icons.Rounded.CheckCircle,
-            title = "Build Better Habits",
-            description = "Track your daily habits with streaks, reminders, and smart insights. Small steps lead to big changes.",
-            accentColor = colors.primary
+            icon = Icons.Rounded.CheckCircle, // Placeholder for Rocket
+            title = "Reach your goals with no distractions",
+            description = "",
+            accentColor = MaterialTheme.colorScheme.onSurface
         ),
         OnboardingPage(
-            icon = Icons.Rounded.FitnessCenter,
-            title = "Track Your Fitness",
-            description = "Log workouts, sync with Health Connect, and watch your progress grow over time.",
-            accentColor = colors.success
+            icon = Icons.Rounded.Groups, // Placeholder for Community
+            title = "Welcome to the community!",
+            description = "",
+            accentColor = MaterialTheme.colorScheme.onSurface
         ),
         OnboardingPage(
-            icon = Icons.Rounded.Groups,
-            title = "Join Communities",
-            description = "Connect with friends in Habitats. Share achievements, compete in challenges, and stay motivated together.",
-            accentColor = colors.accent
+            icon = Icons.Rounded.Groups, // Placeholder for 3 people
+            title = "A place where wellbeing combines with social aspects",
+            description = "Together for a better us.",
+            accentColor = MaterialTheme.colorScheme.onSurface
         ),
         OnboardingPage(
-            icon = Icons.Rounded.Timeline,
-            title = "Your Life Timeline",
-            description = "Everything you do is saved to your private timeline. Reflect on your journey and celebrate milestones.",
-            accentColor = Primary400
-        ),
-        OnboardingPage(
-            icon = Icons.Rounded.Psychology,
-            title = "AI-Powered Insights",
-            description = "Get personalized recommendations based on your patterns. Understand yourself better with smart analytics.",
-            accentColor = colors.info
+            icon = Icons.Rounded.Psychology, // Placeholder for Handshake
+            title = "Inspire yourself to do better",
+            description = "",
+            accentColor = MaterialTheme.colorScheme.onSurface
         )
     )
 
@@ -81,23 +74,10 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Skip button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
-                horizontalArrangement = Arrangement.End
-            ) {
-                HabitateTextButton(
-                    text = "Skip",
-                    onClick = onOnboardingComplete
-                )
-            }
-
             // Pager
             HorizontalPager(
                 state = pagerState,
@@ -112,16 +92,15 @@ fun OnboardingScreen(
             }
 
             // Bottom section
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Spacing.screenHorizontal),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(32.dp)
             ) {
-                // Page indicators - using smooth spring animation
+                // Page indicators
                 Row(
-                    modifier = Modifier.padding(bottom = Spacing.xl),
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    horizontalArrangement = Arrangement.Start
                 ) {
                     repeat(pagerState.pageCount) { iteration ->
                         val isSelected = pagerState.currentPage == iteration
@@ -132,21 +111,20 @@ fun OnboardingScreen(
                         )
                         Box(
                             modifier = Modifier
-                                .padding(horizontal = Spacing.xs)
+                                .padding(end = 8.dp)
                                 .height(8.dp)
                                 .width(width)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) colors.primary
-                                    else colors.border
+                                    if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                 )
                         )
                     }
                 }
 
-                // Action button
-                HabitatePrimaryButton(
-                    text = if (pagerState.currentPage == pages.size - 1) "Get Started" else "Continue",
+                // Action button (Circular Arrow)
+                IconButton(
                     onClick = {
                         if (pagerState.currentPage < pages.size - 1) {
                             scope.launch {
@@ -156,16 +134,18 @@ fun OnboardingScreen(
                             onOnboardingComplete()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Page counter
-                Text(
-                    text = "${pagerState.currentPage + 1} of ${pages.size}",
-                    style = CaptionText,
-                    color = colors.textMuted,
-                    modifier = Modifier.padding(top = Spacing.lg, bottom = Spacing.lg)
-                )
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(64.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                        contentDescription = "Next",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
         }
     }
@@ -176,7 +156,6 @@ fun OnboardingPageContent(
     page: OnboardingPage,
     isActive: Boolean
 ) {
-    val colors = HabitateTheme.colors
     val scale by animateFloatAsState(
         targetValue = if (isActive) 1f else 0.85f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy),
@@ -186,52 +165,48 @@ fun OnboardingPageContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.xl)
+            .padding(horizontal = 32.dp)
             .scale(scale),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Subtle layered icon container
-        Box(
-            modifier = Modifier
-                .size(180.dp)
-                .clip(CircleShape)
-                .background(page.accentColor.copy(alpha = 0.08f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(page.accentColor.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = page.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = page.accentColor
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(Spacing.xxxl))
-
         Text(
             text = page.title,
-            style = ScreenTitle,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
-            color = colors.textPrimary
+            color = HabitateOffWhite,
+            lineHeight = 40.sp
         )
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(48.dp))
 
-        Text(
-            text = page.description,
-            style = BodyText,
-            textAlign = TextAlign.Center,
-            color = colors.textSecondary
-        )
+        // Placeholder for Illustration
+        // In a real app, use Image(painter = painterResource(id = page.imageRes), ...)
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .clip(CircleShape)
+                .background(Color.Transparent), // Transparent background for illustration
+            contentAlignment = Alignment.Center
+        ) {
+             Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                modifier = Modifier.size(120.dp),
+                tint = HabitateOffWhite
+            )
+        }
+
+        if (page.description.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = page.description,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                color = HabitateOffWhite
+            )
+        }
     }
 }
 

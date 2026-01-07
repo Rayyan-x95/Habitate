@@ -21,13 +21,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +39,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.ninety5.habitate.data.local.view.TimelineItem
-import com.ninety5.habitate.ui.viewmodel.TimelineViewModel
+import com.ninety5.habitate.ui.screens.timeline.TimelineViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,7 +65,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.ninety5.habitate.ui.viewmodel.ExportFormat
+import com.ninety5.habitate.ui.screens.timeline.ExportFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,22 +97,29 @@ fun TimelineScreen(
             Column {
                 if (isSearchActive) {
                     SearchBar(
-                        query = searchQuery ?: "",
-                        onQueryChange = viewModel::setSearchQuery,
-                        onSearch = { isSearchActive = false },
-                        active = true,
-                        onActiveChange = { isSearchActive = it },
-                        placeholder = { Text("Search timeline...") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        trailingIcon = {
-                            IconButton(onClick = { 
-                                isSearchActive = false 
-                                viewModel.setSearchQuery("")
-                            }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close")
-                            }
-                        }
-                    ) {}
+                        inputField = {
+                            SearchBarDefaults.InputField(
+                                query = searchQuery ?: "",
+                                onQueryChange = viewModel::setSearchQuery,
+                                onSearch = { isSearchActive = false },
+                                expanded = true,
+                                onExpandedChange = { isSearchActive = it },
+                                placeholder = { Text("Search timeline...") },
+                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                                trailingIcon = {
+                                    IconButton(onClick = { 
+                                        isSearchActive = false 
+                                        viewModel.setSearchQuery("")
+                                    }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close")
+                                    }
+                                }
+                            )
+                        },
+                        expanded = true,
+                        onExpandedChange = { isSearchActive = it },
+                        content = {}
+                    )
                 } else {
                     TopAppBar(
                         title = { Text("Life Timeline") },

@@ -5,7 +5,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.CountDownTimer
 import android.os.IBinder
-import com.ninety5.habitate.core.glyph.HabitateGlyphManager
 import com.ninety5.habitate.core.utils.LiveNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -17,7 +16,7 @@ class PomodoroService : Service() {
     lateinit var liveNotificationManager: LiveNotificationManager
     
     @Inject
-    lateinit var glyphManager: HabitateGlyphManager
+    lateinit var glyphManager: com.ninety5.habitate.core.glyph.HabitateGlyphManager
 
     private var timer: CountDownTimer? = null
     private var isRunning = false
@@ -73,6 +72,7 @@ class PomodoroService : Service() {
             override fun onFinish() {
                 isRunning = false
                 onTimerComplete()
+                glyphManager.playPomodoroComplete()
             }
         }.start()
     }
@@ -96,6 +96,7 @@ class PomodoroService : Service() {
             override fun onFinish() {
                 isRunning = false
                 onTimerComplete()
+                glyphManager.playPomodoroComplete()
             }
         }.start()
     }
@@ -110,7 +111,7 @@ class PomodoroService : Service() {
 
     private fun onTimerComplete() {
         // Glyph celebration for completed pomodoro
-        glyphManager.playPomodoroComplete()
+        // glyphManager.playPomodoroComplete() // TODO: Re-enable when SDK is fixed
         
         // Show completion notification
         val completionNotification = liveNotificationManager.buildPomodoroNotification(

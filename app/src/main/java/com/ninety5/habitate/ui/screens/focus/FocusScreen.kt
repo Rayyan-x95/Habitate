@@ -14,6 +14,12 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.CheckCircle
+import com.ninety5.habitate.R
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun FocusScreen(
@@ -96,20 +102,41 @@ fun FocusTimerScreen(
         
         Text("Ambient Sound", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // Resource ID 0 indicates placeholder - ViewModel will show "Sound not available" message
-            // When audio files are added, update these with actual resource IDs: R.raw.rain, R.raw.forest
             FilterChip(
                 selected = uiState.selectedSound == "Rain",
-                onClick = { onPlaySound("Rain", 0) },
+                onClick = { onPlaySound("Rain", R.raw.rain) },
                 label = { Text("Rain") },
                 leadingIcon = { Icon(Icons.Default.MusicNote, null) }
             )
             FilterChip(
                 selected = uiState.selectedSound == "Forest",
-                onClick = { onPlaySound("Forest", 0) },
+                onClick = { onPlaySound("Forest", R.raw.forest) },
                 label = { Text("Forest") },
                 leadingIcon = { Icon(Icons.Default.MusicNote, null) }
             )
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Text("Music", style = MaterialTheme.typography.titleMedium)
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:genre:focus"))
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    // Fallback to web if app not installed
+                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/genre/focus"))
+                    context.startActivity(webIntent)
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DB954))
+        ) {
+            Icon(painter = painterResource(id = R.drawable.ic_spotify), contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Open Spotify Focus")
         }
     }
 }

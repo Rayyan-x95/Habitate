@@ -8,7 +8,7 @@ import com.ninety5.habitate.data.local.entity.ChallengeStatus
 import com.ninety5.habitate.data.local.entity.SyncOperationEntity
 import com.ninety5.habitate.data.local.entity.SyncState
 import com.ninety5.habitate.data.local.entity.SyncStatus
-import com.ninety5.habitate.data.remote.api.HabitateApiService
+import com.ninety5.habitate.data.remote.ApiService
 import com.ninety5.habitate.data.remote.dto.ChallengeCreateRequest
 import com.ninety5.habitate.data.remote.dto.LeaderboardEntryDto
 import com.squareup.moshi.Moshi
@@ -22,7 +22,7 @@ import javax.inject.Singleton
 class ChallengeRepository @Inject constructor(
     private val challengeDao: ChallengeDao,
     private val syncQueueDao: SyncQueueDao,
-    private val apiService: HabitateApiService,
+    private val apiService: ApiService,
     private val moshi: Moshi
 ) {
 
@@ -51,12 +51,21 @@ class ChallengeRepository @Inject constructor(
         )
         challengeDao.upsertProgress(progress)
         
-        // Sync logic would go here (create SyncOperation)
+        val syncOp = SyncOperationEntity(
+            entityType = "challenge_join",
+            entityId = challengeId,
+            operation = "CREATE",
+            payload = "{}",
+            status = SyncStatus.PENDING,
+            createdAt = Instant.now(),
+            lastAttemptAt = null
+        )
+        syncQueueDao.insert(syncOp)
     }
 
     suspend fun getLeaderboard(challengeId: String): Result<List<LeaderboardEntryDto>> {
         return try {
-            val response = apiService.getLeaderboard(challengeId)
+            val response = apiService.getChallengeLeaderboard(challengeId)
             if (response.isSuccessful) {
                 Result.success(response.body() ?: emptyList())
             } else {

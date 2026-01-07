@@ -86,39 +86,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Column {
-                        Text(
-                            user?.displayName ?: "Profile",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (isViewAsMode) {
-                            Text(
-                                "Viewing as Public",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    if (isCurrentUser) {
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(Icons.Rounded.Settings, contentDescription = "Settings")
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -191,7 +159,7 @@ fun ProfileScreen(
                                     Button(
                                         onClick = onEditProfileClick,
                                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -202,7 +170,7 @@ fun ProfileScreen(
                                     Button(
                                         onClick = onTimelineClick,
                                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.weight(1f)
                                     ) {
                                         Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
@@ -220,6 +188,7 @@ fun ProfileScreen(
                         PostItem(
                             post = post,
                             onLikeClick = { viewModel.toggleLike(post.id) },
+                            onReactionClick = { reaction -> viewModel.toggleLike(post.id, reaction) },
                             onCommentClick = { onPostClick(post.id) },
                             onShareClick = {
                                 val sendIntent = Intent().apply {
@@ -230,8 +199,7 @@ fun ProfileScreen(
                                 val shareIntent = Intent.createChooser(sendIntent, null)
                                 context.startActivity(shareIntent)
                             },
-                            onUserClick = { /* Already on profile */ },
-                            onReactionClick = { /* Handle reaction */ }
+                            onUserClick = { /* Already on profile */ }
                         )
                         HorizontalDivider(
                             thickness = 0.5.dp, 

@@ -15,6 +15,9 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id = :id")
     suspend fun getUserByIdOnce(id: String): UserEntity?
 
+    @Query("SELECT * FROM users ORDER BY createdAt DESC")
+    fun getAllUsers(): List<UserEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(user: UserEntity)
 

@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,7 +42,7 @@ import com.ninety5.habitate.data.local.entity.InsightEntity
 import com.ninety5.habitate.data.local.entity.InsightPriority
 import com.ninety5.habitate.data.local.entity.InsightType
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
-import com.ninety5.habitate.ui.viewmodel.InsightsViewModel
+import com.ninety5.habitate.ui.screens.insights.InsightsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,11 +109,11 @@ fun InsightCard(
 
     val icon = when (insight.type) {
         InsightType.STREAK_RISK -> Icons.Default.Warning
-        InsightType.MILESTONE_APPROACHING -> Icons.Default.TrendingUp
+        InsightType.MILESTONE_APPROACHING -> Icons.AutoMirrored.Filled.TrendingUp
         InsightType.PATTERN_DETECTED -> Icons.Default.Lightbulb
         InsightType.SUGGESTION -> Icons.Default.Lightbulb
         InsightType.MOOD_CORRELATION -> Icons.Default.Lightbulb
-        InsightType.WEEKLY_SUMMARY -> Icons.Default.TrendingUp
+        InsightType.WEEKLY_SUMMARY -> Icons.AutoMirrored.Filled.TrendingUp
         InsightType.TASK_FAILURE -> Icons.Default.Warning
         InsightType.HABIT_FRICTION -> Icons.Default.Warning
         InsightType.ENERGY_TREND -> Icons.Default.Lightbulb

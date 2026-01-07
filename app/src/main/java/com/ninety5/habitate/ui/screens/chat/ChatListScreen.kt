@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ninety5.habitate.data.local.entity.ChatEntity
-import com.ninety5.habitate.ui.viewmodel.ChatViewModel
+import com.ninety5.habitate.ui.screens.chat.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

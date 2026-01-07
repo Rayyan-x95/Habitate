@@ -28,19 +28,14 @@ sealed class Screen(val route: String) {
     object Feed : Screen("feed")
     object Habitats : Screen("habitats")
     object Create : Screen("create")
-    object StoryViewer : Screen("story_viewer/{userId}") {
-        fun createRoute(userId: String) = "story_viewer/$userId"
-    }
     object Activity : Screen("activity")
     object Profile : Screen("profile")
-    object Timeline : Screen("timeline")
-    object Archive : Screen("archive")
+    object Studies : Screen("studies")
     object Focus : Screen("focus")
+    object Wellbeing : Screen("wellbeing")
     object ChatList : Screen("chat_list")
-    object DailyCheckIn : Screen("daily_check_in")
-    object PrivacyDashboard : Screen("privacy_dashboard")
-    object ProfileViewAs : Screen("profile_view_as")
-    object Insights : Screen("insights")
+    object Welcome : Screen("welcome")
+    object PublicApi : Screen("public_api")
 
     // Detail screens with arguments
     object Chat : Screen("chat/{roomId}") {
@@ -67,10 +62,6 @@ sealed class Screen(val route: String) {
         fun createRoute(workoutId: String) = "workout/$workoutId"
     }
 
-    object ChallengeDetail : Screen("challenge/{challengeId}") {
-        fun createRoute(challengeId: String) = "challenge/$challengeId"
-    }
-
 
     // Habit screens
     object HabitList : Screen("habits")
@@ -83,7 +74,6 @@ sealed class Screen(val route: String) {
     }
 
     // Auth
-    object Welcome : Screen("auth/welcome")
     object Login : Screen("auth/login")
     object Register : Screen("auth/register")
     object ForgotPassword : Screen("auth/forgot_password")
@@ -93,21 +83,27 @@ sealed class Screen(val route: String) {
     // Features
     object HealthConnect : Screen("health_connect")
     object Journal : Screen("journal")
+    object StoryViewer : Screen("story/{userId}") {
+        fun createRoute(userId: String) = "story/$userId"
+    }
 
     object Planner : Screen("planner")
 
     // Create flow screens
     object CreatePost : Screen("create/post")
     object CreateTask : Screen("create/task")
-    object CreateHabit : Screen("create/habit")
     object CreateWorkout : Screen("create/workout")
     object CreateHabitat : Screen("create/habitat")
-    object CreateStory : Screen("create/story")
-    object CreateChallenge : Screen("create/challenge")
 
     // List screens
     object TaskList : Screen("tasks")
     object WorkoutList : Screen("workouts")
+
+    object ChallengeDetail : Screen("challenge/{challengeId}") {
+        fun createRoute(challengeId: String) = "challenge/$challengeId"
+    }
+
+    object Archive : Screen("archive")
 
     // Settings
     object Settings : Screen("settings")
@@ -115,7 +111,6 @@ sealed class Screen(val route: String) {
     object PrivacySettings : Screen("settings/privacy")
     object NotificationSettings : Screen("settings/notifications")
     object HealthConnectSettings : Screen("settings/health")
-    object Notifications : Screen("notifications")
 }
 
 /**

@@ -51,6 +51,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.ui.components.UserAvatar
+import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
+import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.theme.SageGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,28 +65,8 @@ fun ActivityScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Activity", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.markAllAsRead() },
-                        enabled = uiState.notifications.any { !it.isRead }
-                    ) {
-                        Icon(
-                            Icons.Rounded.DoneAll,
-                            contentDescription = "Mark all as read",
-                            tint = if (uiState.notifications.any { !it.isRead }) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        }
+        containerColor = HabitateDarkGreenStart,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         if (uiState.isLoading) {
             Box(
@@ -148,9 +131,9 @@ private fun NotificationItem(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (notification.isRead) {
-            MaterialTheme.colorScheme.background
+            HabitateDarkGreenStart
         } else {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            SageGreen.copy(alpha = 0.1f)
         },
         animationSpec = tween(500), label = ""
     )
@@ -176,7 +159,7 @@ private fun NotificationItem(
                 fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onBackground
+                color = HabitateOffWhite
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -186,7 +169,7 @@ private fun NotificationItem(
                     DateUtils.MINUTE_IN_MILLIS
                 ).toString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = HabitateOffWhite.copy(alpha = 0.7f)
             )
         }
     }
@@ -194,7 +177,7 @@ private fun NotificationItem(
 
 @Composable
 private fun SwipeBackground(isRead: Boolean) {
-    val color = if (isRead) Color.Transparent else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+    val color = if (isRead) Color.Transparent else SageGreen.copy(alpha = 0.2f)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -206,7 +189,7 @@ private fun SwipeBackground(isRead: Boolean) {
             Icon(
                 Icons.Rounded.Archive,
                 contentDescription = "Mark as read",
-                tint = MaterialTheme.colorScheme.primary
+                tint = SageGreen
             )
         }
     }
@@ -223,12 +206,12 @@ private fun EmptyState(modifier: Modifier = Modifier) {
                 "All Caught Up",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = HabitateOffWhite
             )
             Text(
                 "You have no new notifications.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = HabitateOffWhite.copy(alpha = 0.7f)
             )
         }
     }

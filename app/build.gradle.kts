@@ -33,6 +33,8 @@ android {
         buildConfigField("String", "OPENAI_API_KEY", "\"${localProperties.getProperty("OPENAI_API_KEY") ?: ""}\"")
         buildConfigField("String", "BASE_API_URL", "\"https://api.habitate.app/\"")
         buildConfigField("String", "MEDIA_BASE_URL", "\"https://media.habitate.app/\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: ""}\"")
+        buildConfigField("String", "NOTHING_GLYPH_KEY", "\"${localProperties.getProperty("NOTHING_GLYPH_KEY") ?: "test"}\"")
     }
 
     signingConfigs {
@@ -66,6 +68,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += listOf(
+            "-opt-in=kotlin.RequiresOptIn"
+        )
     }
     buildFeatures {
         compose = true
@@ -99,6 +104,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -149,9 +157,7 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.perf)
     implementation(libs.firebase.remote.config)
-
-    // AI
-    // implementation(libs.google.generativeai)
+    implementation(libs.firebase.firestore)
 
     // Logging
     implementation(libs.timber)
@@ -190,8 +196,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // Nothing Glyph SDKs
-    // implementation(files("libs/KetchumSDK_Community_20250805.jar")) // Included in glyph-matrix-sdk
-    implementation(files("libs/glyph-matrix-sdk-1.0.aar"))
 }

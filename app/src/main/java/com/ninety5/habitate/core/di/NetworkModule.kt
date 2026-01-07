@@ -72,8 +72,16 @@ object NetworkModule {
         authInterceptor: AuthInterceptor,
         tokenAuthenticator: com.ninety5.habitate.data.remote.TokenAuthenticator
     ): OkHttpClient {
+        // Certificate Pinning Configuration
+        // Note: Pins are currently placeholders. Update with real SHA-256 hashes for production.
+        val certificatePinner = CertificatePinner.Builder()
+            .add("api.habitate.app", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+            .add("api.habitate.app", "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=")
+            .build()
+
         val builder = OkHttpClient.Builder()
             .authenticator(tokenAuthenticator)
+            // .certificatePinner(certificatePinner) // TODO: Uncomment when real pins are available
             .addInterceptor(authInterceptor) // Inject Auth Token
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
@@ -150,7 +158,15 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHabitateApiService(retrofit: Retrofit): com.ninety5.habitate.data.remote.api.HabitateApiService {
-        return retrofit.create(com.ninety5.habitate.data.remote.api.HabitateApiService::class.java)
+    fun provideOpenAiApi(
+        okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): com.ninety5.habitate.data.remote.OpenAiApi {
+        val openAiRetrofit = Retrofit.Builder()
+            .baseUrl("https://api.openai.com/")
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+        return openAiRetrofit.create(com.ninety5.habitate.data.remote.OpenAiApi::class.java)
     }
 }

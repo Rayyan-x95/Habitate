@@ -66,4 +66,7 @@ interface PostDao {
 
     @Query("UPDATE posts SET isArchived = 0, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
     suspend fun restorePost(id: String, now: Long = System.currentTimeMillis())
+
+    @Query("DELETE FROM posts WHERE syncState = 'SYNCED'")
+    suspend fun deleteSyncedPosts()
 }

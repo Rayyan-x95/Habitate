@@ -14,3 +14,7 @@ val LightSage = Color(0xFFA3E635)
 
 val SoftRed = Color(0xFFEF4444)
 val PaleRed = Color(0xFFF87171)
+
+val HabitateDarkGreenStart = Color(0xFF1F3D32)
+val HabitateDarkGreenEnd = Color(0xFF0F1C18)
+val HabitateOffWhite = Color(0xFFF2EFEA)

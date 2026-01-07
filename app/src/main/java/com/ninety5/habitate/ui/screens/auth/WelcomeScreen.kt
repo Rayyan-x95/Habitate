@@ -31,8 +31,6 @@ fun WelcomeScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    val colors = HabitateTheme.colors
-    
     // Animation states
     val logoScale = remember { Animatable(0f) }
     val contentAlpha = remember { Animatable(0f) }
@@ -55,16 +53,14 @@ fun WelcomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
     ) {
-        // Subtle gradient overlay for depth
+        // Minimal background
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = GradientSurface
-                )
+                .background(MaterialTheme.colorScheme.background)
         )
         
         Column(
@@ -81,12 +77,12 @@ fun WelcomeScreen(
                     .scale(logoScale.value)
                     .size(140.dp)
                     .clip(CircleShape)
-                    .background(GradientBrand),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 HabitateLogo(
                     size = 72.dp,
-                    tint = colors.onPrimary
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -96,7 +92,7 @@ fun WelcomeScreen(
             Text(
                 text = "Habitate",
                 style = Typography.displayMedium,
-                color = colors.textPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.alpha(contentAlpha.value)
             )
 
@@ -106,7 +102,7 @@ fun WelcomeScreen(
             Text(
                 text = "Build habits. Track progress.\nGrow together.",
                 style = BodyText,
-                color = colors.textSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(contentAlpha.value)
             )
@@ -142,7 +138,7 @@ fun WelcomeScreen(
             Text(
                 text = "By continuing, you agree to our Terms of Service\nand Privacy Policy",
                 style = CaptionText,
-                color = colors.textMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .alpha(contentAlpha.value * 0.8f)

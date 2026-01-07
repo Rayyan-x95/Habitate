@@ -88,11 +88,11 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Subtle gradient background
+            // Minimal background
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(GradientSurface)
+                    .background(MaterialTheme.colorScheme.background)
             )
 
             Column(
