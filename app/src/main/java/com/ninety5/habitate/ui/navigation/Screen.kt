@@ -110,7 +110,10 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("settings/profile")
     object PrivacySettings : Screen("settings/privacy")
     object NotificationSettings : Screen("settings/notifications")
-    object HealthConnectSettings : Screen("settings/health")
+    
+    // Additional features
+    object DailyCheckIn : Screen("daily_checkin")
+    object Insights : Screen("insights")
 }
 
 /**

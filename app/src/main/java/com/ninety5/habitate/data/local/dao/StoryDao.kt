@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ninety5.habitate.data.local.entity.StoryEntity
+import com.ninety5.habitate.data.local.entity.StoryViewEntity
 import com.ninety5.habitate.data.local.relation.StoryWithUser
 import kotlinx.coroutines.flow.Flow
 
@@ -28,5 +29,11 @@ interface StoryDao {
     suspend fun updateSyncState(id: String, status: SyncState)
 
     @Query("DELETE FROM stories WHERE expiresAt < :now")
-    suspend fun deleteExpired(now: Long = System.currentTimeMillis())
+    suspend fun deleteExpiredStories(now: Long = System.currentTimeMillis())
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertStoryView(view: StoryViewEntity)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM story_views WHERE storyId = :storyId AND viewerId = :viewerId)")
+    suspend fun hasViewedStory(storyId: String, viewerId: String): Boolean
 }

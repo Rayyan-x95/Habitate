@@ -102,7 +102,7 @@ import com.ninety5.habitate.data.local.entity.StoryMuteEntity
         com.ninety5.habitate.data.local.entity.InsightEntity::class
     ],
     views = [com.ninety5.habitate.data.local.view.TimelineItem::class],
-    version = 25, // Updated to include all migrations (22->25)
+    version = 26, // Updated to include index optimization migration (25->26)
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -579,6 +579,22 @@ abstract class HabitateDatabase : RoomDatabase() {
         val MIGRATION_24_25 = object : Migration(24, 25) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE notifications ADD COLUMN isDigest INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_25_26 = object : Migration(25, 26) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add indices to journal_entries for query optimization
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_userId ON journal_entries(userId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_date ON journal_entries(date)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_mood ON journal_entries(mood)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_journal_entries_syncState ON journal_entries(syncState)")
+                
+                // Add indices to notifications for query optimization
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_userId ON notifications(userId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_isRead ON notifications(isRead)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_createdAt ON notifications(createdAt)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_type ON notifications(type)")
             }
         }
     }

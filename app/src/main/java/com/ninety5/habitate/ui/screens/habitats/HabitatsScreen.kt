@@ -112,7 +112,7 @@ fun HabitatsScreen(
                     EmptyHabitatsState(onCreateHabitat = onCreateHabitat)
                 }
             } else {
-                items(uiState.myHabitats) { habitat ->
+                items(uiState.myHabitats, key = { it.id }) { habitat ->
                     HabitatCard(
                         habitat = habitat,
                         onClick = { onHabitatClick(habitat.id) }
@@ -129,7 +129,7 @@ fun HabitatsScreen(
                 )
             }
 
-            items(uiState.discoverHabitats) { habitat ->
+            items(uiState.discoverHabitats, key = { it.id }) { habitat ->
                 HabitatCard(
                     habitat = habitat,
                     onClick = { onHabitatClick(habitat.id) }

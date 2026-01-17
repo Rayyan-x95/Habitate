@@ -224,7 +224,7 @@ fun HabitDetailScreen(
                             )
                         }
                     } else {
-                        items(logs) { log ->
+                        items(logs, key = { it.id }) { log ->
                             CompletionLogCard(log = log)
                         }
                     }
@@ -356,7 +356,7 @@ private fun HeatmapCalendar(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 val sortedDates = heatmapData.keys.sorted()
-                items(sortedDates) { date ->
+                items(sortedDates, key = { it.toString() }) { date ->
                     val count = heatmapData[date] ?: 0
                     val intensity = when {
                         count == 0 -> 0.0f

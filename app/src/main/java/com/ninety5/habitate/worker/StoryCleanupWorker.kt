@@ -23,7 +23,7 @@ class StoryCleanupWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return try {
             val now = System.currentTimeMillis()
-            storyDao.deleteExpired(now)
+            storyDao.deleteExpiredStories(now)
             Timber.d("Story cleanup completed - expired stories removed")
             Result.success()
         } catch (e: Exception) {

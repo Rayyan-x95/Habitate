@@ -84,7 +84,7 @@ fun ChatListScreen(
                 }
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(chats) { chat ->
+                        items(chats, key = { it.id }) { chat ->
                             ChatItem(chat = chat, onClick = { onChatClick(chat.id) })
                         }
                     }

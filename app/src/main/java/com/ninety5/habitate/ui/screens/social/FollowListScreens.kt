@@ -98,7 +98,7 @@ fun FollowersListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(uiState.followers) { user ->
+                    items(uiState.followers, key = { it.id }) { user ->
                         UserListItem(
                             user = user,
                             isFollowing = uiState.followingIds.contains(user.id),
@@ -176,7 +176,7 @@ fun FollowingListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(uiState.following) { user ->
+                    items(uiState.following, key = { it.id }) { user ->
                         UserListItem(
                             user = user,
                             isFollowing = true,

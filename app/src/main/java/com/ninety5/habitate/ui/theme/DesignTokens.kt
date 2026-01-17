@@ -9,14 +9,20 @@ import androidx.compose.ui.unit.dp
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - TOKENS                       ║
+ * ║                         Version 2.0 - Minimal Redesign                   ║
  * ║                                                                          ║
- * ║  Spacing, sizing, elevation, and structural tokens                       ║
- * ║  Following Material 3 + Apple-inspired minimalism                        ║
+ * ║  Philosophy:                                                              ║
+ * ║  • Breathable layouts with generous whitespace                           ║
+ * ║  • Subtle elevation (1-2dp max for cards)                                ║
+ * ║  • Consistent touch targets (44dp minimum)                               ║
+ * ║  • Purposeful spacing that creates visual calm                           ║
+ * ║                                                                          ║
+ * ║  Inspiration: Apple Health, Notion, Linear, Calm                         ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SPACING SYSTEM (4dp base unit)
+// SPACING SYSTEM (4dp base unit - Refined for breathing room)
 // ═══════════════════════════════════════════════════════════════════════════
 
 object Spacing {
@@ -53,81 +59,86 @@ object Spacing {
     /** 64dp - Section divider */
     val section: Dp = 64.dp
     
-    // Screen edge padding
+    // Screen edge padding (generous for premium feel)
     val screenHorizontal: Dp = 20.dp
     val screenVertical: Dp = 16.dp
+    val screenPaddingLarge: Dp = 24.dp
     
     // Card internal padding
     val cardPadding: Dp = 16.dp
     val cardPaddingLarge: Dp = 20.dp
+    val cardPaddingCompact: Dp = 12.dp
     
     // List item spacing
     val listItemGap: Dp = 12.dp
     val listSectionGap: Dp = 24.dp
+    val listItemPaddingVertical: Dp = 14.dp
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CORNER RADIUS SYSTEM
+// CORNER RADIUS SYSTEM (Refined for minimal, premium feel)
 // ═══════════════════════════════════════════════════════════════════════════
 
 object Radius {
-    /** 4dp - Micro (tags, tiny chips) */
+    /** 4dp - Micro (tiny chips, progress indicators) */
     val xs: Dp = 4.dp
     
-    /** 8dp - Small (buttons, inputs) */
+    /** 8dp - Small (standard buttons, inputs) */
     val sm: Dp = 8.dp
     
     /** 12dp - Medium (cards, dialogs) */
     val md: Dp = 12.dp
     
-    /** 16dp - Large (modals, sheets) */
+    /** 16dp - Large (featured cards, modals) */
     val lg: Dp = 16.dp
     
-    /** 20dp - Extra large (featured cards) */
+    /** 20dp - Extra large (hero cards) */
     val xl: Dp = 20.dp
     
-    /** 24dp - Huge (bottom sheets) */
+    /** 24dp - Huge (bottom sheets top corners) */
     val xxl: Dp = 24.dp
     
-    /** 28dp - Maximum (overlays) */
+    /** 28dp - Maximum (full-screen overlays) */
     val xxxl: Dp = 28.dp
     
-    /** Full pill shape */
+    /** Full pill shape - Use for pills, tags, FABs */
     val pill: Dp = 100.dp
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SIZING SYSTEM
+// SIZING SYSTEM (Touch-friendly, accessible)
 // ═══════════════════════════════════════════════════════════════════════════
 
 object Size {
-    // Icons
+    // Icons (Material Design standard + custom)
     val iconXs: Dp = 16.dp
     val iconSm: Dp = 20.dp
-    val iconMd: Dp = 24.dp
+    val iconMd: Dp = 24.dp      // Material default
     val iconLg: Dp = 28.dp
     val iconXl: Dp = 32.dp
     val iconXxl: Dp = 40.dp
     val iconHuge: Dp = 48.dp
+    val iconHero: Dp = 64.dp    // For empty states, hero sections
     
     // Avatars
-    val avatarXs: Dp = 24.dp
-    val avatarSm: Dp = 32.dp
-    val avatarMd: Dp = 40.dp
-    val avatarLg: Dp = 48.dp
-    val avatarXl: Dp = 56.dp
-    val avatarXxl: Dp = 72.dp
-    val avatarHuge: Dp = 96.dp
+    val avatarXs: Dp = 24.dp    // Inline mentions
+    val avatarSm: Dp = 32.dp    // List items (compact)
+    val avatarMd: Dp = 40.dp    // List items (standard)
+    val avatarLg: Dp = 48.dp    // Card headers
+    val avatarXl: Dp = 56.dp    // Profile cards
+    val avatarXxl: Dp = 72.dp   // Profile sections
+    val avatarHuge: Dp = 96.dp  // Profile headers
+    val avatarHero: Dp = 120.dp // Profile page hero
     
     // Touch targets (WCAG minimum 44dp)
     val touchTarget: Dp = 44.dp
     val touchTargetLarge: Dp = 48.dp
     
-    // Buttons
-    val buttonHeightSm: Dp = 36.dp
-    val buttonHeightMd: Dp = 44.dp
-    val buttonHeightLg: Dp = 52.dp
-    val buttonHeightXl: Dp = 56.dp
+    // Buttons (refined heights)
+    val buttonHeightSm: Dp = 36.dp    // Compact/inline buttons
+    val buttonHeightMd: Dp = 44.dp    // Standard buttons (touch-friendly)
+    val buttonHeightLg: Dp = 52.dp    // Primary CTAs
+    val buttonHeightXl: Dp = 56.dp    // Hero CTAs
     
     // FAB
     val fabSmall: Dp = 40.dp
@@ -135,77 +146,91 @@ object Size {
     val fabLarge: Dp = 96.dp
     
     // Navigation
-    val bottomNavHeight: Dp = 80.dp
-    val topAppBarHeight: Dp = 64.dp
+    val bottomNavHeight: Dp = 72.dp   // Slightly reduced for cleaner look
+    val topAppBarHeight: Dp = 56.dp   // Standard
+    val topAppBarHeightLarge: Dp = 64.dp
     
     // Cards
-    val cardMinHeight: Dp = 80.dp
+    val cardMinHeight: Dp = 72.dp
     val cardImageHeight: Dp = 200.dp
+    val cardImageHeightCompact: Dp = 160.dp
     
     // Inputs
-    val inputHeight: Dp = 56.dp
+    val inputHeight: Dp = 52.dp       // Comfortable touch target
     val inputHeightSmall: Dp = 44.dp
     
     // Dividers
-    val dividerThickness: Dp = 1.dp
-    val dividerThicknessBold: Dp = 2.dp
+    val dividerThickness: Dp = 0.5.dp  // Subtle dividers
+    val dividerThicknessBold: Dp = 1.dp
     
     // Borders
-    val borderThin: Dp = 1.dp
-    val borderMedium: Dp = 1.5.dp
-    val borderThick: Dp = 2.dp
+    val borderThin: Dp = 0.5.dp
+    val borderMedium: Dp = 1.dp
+    val borderThick: Dp = 1.5.dp
+    
+    // Story ring
+    val storyRingSize: Dp = 68.dp
+    val storyRingBorder: Dp = 2.dp
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ELEVATION SYSTEM (Subtle, no harsh shadows)
+// ELEVATION SYSTEM (Minimal - 1-2dp max for calm aesthetic)
 // ═══════════════════════════════════════════════════════════════════════════
 
 object Elevation {
-    /** No elevation */
+    /** No elevation - Default for most surfaces */
     val none: Dp = 0.dp
     
-    /** 1dp - Subtle lift (cards) */
+    /** 0.5dp - Whisper elevation (subtle lift) */
+    val whisper: Dp = 0.5.dp
+    
+    /** 1dp - Subtle lift (cards, resting state) */
     val xs: Dp = 1.dp
     
-    /** 2dp - Low elevation (buttons) */
+    /** 2dp - Low elevation (pressed buttons, floating elements) */
     val sm: Dp = 2.dp
     
-    /** 4dp - Medium elevation (FAB) */
-    val md: Dp = 4.dp
+    /** 3dp - Medium elevation (FAB resting) */
+    val md: Dp = 3.dp
     
-    /** 6dp - High elevation (dialogs) */
-    val lg: Dp = 6.dp
+    /** 4dp - High elevation (dialogs, menus) */
+    val lg: Dp = 4.dp
     
-    /** 8dp - Highest (modals) */
-    val xl: Dp = 8.dp
+    /** 6dp - Highest (modals, navigation drawers) */
+    val xl: Dp = 6.dp
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GLASSMORPHISM TOKENS
+// GLASSMORPHISM TOKENS (Subtle, non-distracting)
 // ═══════════════════════════════════════════════════════════════════════════
 
 object GlassTokens {
     /** Blur radius for glass effect */
     val blur: Dp = 16.dp
     val blurStrong: Dp = 24.dp
-    val blurSubtle: Dp = 12.dp
+    val blurSubtle: Dp = 10.dp
     
-    /** Background opacity (8-16% range) */
-    const val backgroundAlpha: Float = 0.12f
-    const val backgroundAlphaLight: Float = 0.08f
-    const val backgroundAlphaStrong: Float = 0.16f
+    /** Background opacity (reduced for subtlety) */
+    const val backgroundAlpha: Float = 0.08f
+    const val backgroundAlphaLight: Float = 0.05f
+    const val backgroundAlphaStrong: Float = 0.12f
     
-    /** Border opacity (10-15% range) */
-    const val borderAlpha: Float = 0.12f
-    const val borderAlphaLight: Float = 0.08f
-    const val borderAlphaStrong: Float = 0.18f
+    /** Border opacity (very subtle) */
+    const val borderAlpha: Float = 0.08f
+    const val borderAlphaLight: Float = 0.05f
+    const val borderAlphaStrong: Float = 0.12f
     
     /** Highlight opacity */
-    const val highlightAlpha: Float = 0.15f
+    const val highlightAlpha: Float = 0.08f
     
     /** Border width */
-    val borderWidth: Dp = 1.dp
+    val borderWidth: Dp = 0.5.dp
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MOTION TOKENS - See Motion.kt for full implementation
+// Duration and easing tokens are defined in Motion.kt (Duration, Easing objects)
+// ═══════════════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DESIGN TOKENS COMPOSITION LOCAL

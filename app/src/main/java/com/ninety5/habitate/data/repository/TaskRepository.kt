@@ -11,6 +11,9 @@ import com.ninety5.habitate.data.remote.ApiService
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,6 +47,43 @@ class TaskRepository @Inject constructor(
             lastAttemptAt = null
         )
         syncQueueDao.insert(syncOp)
+    }
+
+    /**
+     * Create a task with simplified parameters
+     */
+    suspend fun createTask(
+        title: String,
+        description: String?,
+        dueDate: LocalDate?
+    ) {
+        val task = TaskEntity(
+            id = UUID.randomUUID().toString(),
+            title = title,
+            description = description,
+            dueAt = dueDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant(),
+            recurrenceRule = null,
+            status = TaskStatus.OPEN,
+            syncState = SyncState.PENDING,
+            updatedAt = Instant.now()
+        )
+        createTask(task)
+    }
+
+    /**
+     * Get tasks due on a specific date
+     */
+    suspend fun getTasksForDate(date: LocalDate): List<TaskEntity> {
+        val startOfDay = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        val endOfDay = date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+        return taskDao.getTasksForDateRange(startOfDay, endOfDay)
+    }
+
+    /**
+     * Complete a task
+     */
+    suspend fun completeTask(taskId: String) {
+        updateStatus(taskId, TaskStatus.DONE)
     }
 
     suspend fun updateStatus(taskId: String, status: TaskStatus) {

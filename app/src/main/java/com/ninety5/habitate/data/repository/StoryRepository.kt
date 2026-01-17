@@ -3,6 +3,7 @@ package com.ninety5.habitate.data.repository
 import com.ninety5.habitate.data.local.dao.StoryDao
 import com.ninety5.habitate.data.local.dao.SyncQueueDao
 import com.ninety5.habitate.data.local.entity.StoryEntity
+import com.ninety5.habitate.data.local.entity.StoryViewEntity
 import com.ninety5.habitate.data.local.entity.SyncOperationEntity
 import com.ninety5.habitate.data.local.entity.SyncState
 import com.ninety5.habitate.data.local.entity.SyncStatus
@@ -28,7 +29,7 @@ class StoryRepository @Inject constructor(
         return storyDao.getActiveStories(userId, System.currentTimeMillis())
     }
 
-    suspend fun createStory(mediaUri: String) {
+    suspend fun createStory(mediaUri: String, caption: String? = null) {
         val userId = authRepository.getCurrentUserId() ?: return
         val storyId = UUID.randomUUID().toString()
         val now = Instant.now()
@@ -40,6 +41,7 @@ class StoryRepository @Inject constructor(
             id = storyId,
             userId = userId,
             mediaUrl = mediaUri,
+            caption = caption,
             createdAt = nowMillis,
             expiresAt = expiresAtMillis,
             syncState = SyncState.PENDING
@@ -48,7 +50,11 @@ class StoryRepository @Inject constructor(
         storyDao.upsert(story)
 
         // Queue sync
-        val payload = "{\"mediaUri\": \"$mediaUri\", \"expiresAt\": \"$expiresAt\"}"
+        val payload = buildString {
+            append("{\"mediaUri\": \"$mediaUri\", \"expiresAt\": \"$expiresAt\"")
+            if (caption != null) append(", \"caption\": \"$caption\"")
+            append("}")
+        }
         
         val op = SyncOperationEntity(
             entityType = "story",
@@ -62,10 +68,24 @@ class StoryRepository @Inject constructor(
         syncQueueDao.insert(op)
     }
 
+    suspend fun markStoryAsSeen(storyId: String) {
+        val userId = authRepository.getCurrentUserId() ?: return
+        val viewEntity = StoryViewEntity(
+            storyId = storyId,
+            viewerId = userId,
+            viewedAt = System.currentTimeMillis()
+        )
+        try {
+            storyDao.insertStoryView(viewEntity)
+        } catch (e: Exception) {
+            // Ignore duplicate view errors
+        }
+    }
+
     suspend fun refreshStories() {
         try {
             // Clean up expired stories first
-            // storyDao.deleteExpired() // Assuming this exists or we add it
+            storyDao.deleteExpiredStories(System.currentTimeMillis())
             
             val storyDtos = apiService.getStories()
             val storyEntities = storyDtos.map { dto ->
@@ -73,6 +93,7 @@ class StoryRepository @Inject constructor(
                     id = dto.id,
                     userId = dto.authorId,
                     mediaUrl = dto.mediaUri,
+                    caption = dto.caption,
                     createdAt = dto.createdAt.toEpochMilli(),
                     expiresAt = dto.expiresAt.toEpochMilli(),
                     syncState = SyncState.SYNCED

@@ -177,7 +177,7 @@ fun HabitatDetailScreen(
                     }
 
                     // Posts
-                    items(uiState.posts) { post ->
+                    items(uiState.posts, key = { it.id }) { post ->
                         PostItem(
                             post = post,
                             onLikeClick = { viewModel.toggleLike(post.id) },

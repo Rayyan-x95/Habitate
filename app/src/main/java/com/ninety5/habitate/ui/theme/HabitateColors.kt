@@ -10,19 +10,24 @@ import androidx.compose.ui.graphics.SolidColor
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - COLORS                       ║
+ * ║                         Version 2.0 - Minimal Redesign                   ║
  * ║                                                                          ║
- * ║  All colors derived from app logo:                                       ║
- * ║  • Primary: Dark Forest Green (#1F3D32)                                 ║
- * ║  • Secondary: Sage Green (desaturated primary)                          ║
- * ║  • Accent: Warm Amber (complementary warmth)                            ║
- * ║  • Neutrals: Desaturated greens (no pure black/white)                   ║
+ * ║  Design Philosophy:                                                       ║
+ * ║  • Quietly powerful, thoughtfully designed, effortless to use           ║
+ * ║  • Calm, minimal, human-centric, premium, non-distracting               ║
  * ║                                                                          ║
- * ║  Philosophy: Calm • Trustworthy • Premium • Human                       ║
+ * ║  Color Strategy (Logo-derived):                                          ║
+ * ║  • Primary: Forest Green (#1F3D32) - Trust, growth, calm                ║
+ * ║  • Accent: Warm Amber (#D4A574) - Warmth, highlights                    ║
+ * ║  • Neutrals: Desaturated greens (warm undertone)                        ║
+ * ║  • Semantics: Muted, non-aggressive tones                               ║
+ * ║                                                                          ║
+ * ║  Inspiration: Apple Health, Notion, Linear, Calm                         ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// BRAND CORE (From Logo)
+// BRAND CORE (From Logo - Refined)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Primary brand color - Forest Green from logo background */
@@ -31,24 +36,24 @@ val BrandPrimary = Color(0xFF1F3D32)
 /** Secondary brand - Lighter sage derived from primary */
 val BrandSecondary = Color(0xFF3D6B5C)
 
-/** Accent - Warm amber for highlights & interactions */
-val BrandAccent = Color(0xFFD4A574)
+/** Accent - Warm amber for highlights & interactions (slightly muted) */
+val BrandAccent = Color(0xFFCFA06A)
 
-/** Cream - Logo color for contrast elements */
-val BrandCream = Color(0xFFF2EFEA)
+/** Cream - Logo color for contrast elements (warmer) */
+val BrandCream = Color(0xFFFAF8F5)
 
 /** Deep Forest - Darkest brand shade */
 val BrandDeepForest = Color(0xFF0F1C18)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PRIMARY PALETTE (5 shades from logo green)
+// PRIMARY PALETTE (5 shades from logo green - Refined for calm aesthetic)
 // ═══════════════════════════════════════════════════════════════════════════
 
-val Primary50 = Color(0xFFF0F5F3)   // Lightest tint
-val Primary100 = Color(0xFFD4E4DE)  // Very light
-val Primary200 = Color(0xFFA8C9BC)  // Light
-val Primary300 = Color(0xFF6B9D89)  // Medium light
-val Primary400 = Color(0xFF3D6B5C)  // Medium (Secondary)
+val Primary50 = Color(0xFFF5F8F7)   // Lightest tint (calmer)
+val Primary100 = Color(0xFFE5EEEA)  // Very light
+val Primary200 = Color(0xFFC5D9D1)  // Light
+val Primary300 = Color(0xFF8BB5A4)  // Medium light (softer)
+val Primary400 = Color(0xFF4D7D6A)  // Medium (Secondary)
 val Primary500 = Color(0xFF1F3D32)  // Brand Primary
 val Primary600 = Color(0xFF1A332A)  // Slightly darker
 val Primary700 = Color(0xFF152822)  // Dark
@@ -56,91 +61,113 @@ val Primary800 = Color(0xFF0F1C18)  // Deep Forest
 val Primary900 = Color(0xFF0A1210)  // Deepest
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ACCENT PALETTE (Warm amber - complementary to forest green)
+// ACCENT PALETTE (Warm amber - Muted for minimal aesthetic)
 // ═══════════════════════════════════════════════════════════════════════════
 
-val Accent50 = Color(0xFFFDF8F3)
-val Accent100 = Color(0xFFF8EBDB)
-val Accent200 = Color(0xFFF0D4B3)
-val Accent300 = Color(0xFFE8BD8B)
-val Accent400 = Color(0xFFD4A574)   // Brand Accent
-val Accent500 = Color(0xFFC08C5B)
-val Accent600 = Color(0xFFA67347)
-val Accent700 = Color(0xFF8A5D3A)
+val Accent50 = Color(0xFFFCF9F5)    // Warmer, softer
+val Accent100 = Color(0xFFF7EFE3)   // Very light
+val Accent200 = Color(0xFFF0DCC5)   // Light
+val Accent300 = Color(0xFFE5C49C)   // Medium light
+val Accent400 = Color(0xFFCFA06A)   // Brand Accent (slightly muted)
+val Accent500 = Color(0xFFB88A52)   // Medium
+val Accent600 = Color(0xFF9A7144)   // Darker
+val Accent700 = Color(0xFF7D5A37)   // Dark
 
 // ═══════════════════════════════════════════════════════════════════════════
-// NEUTRALS (Desaturated forest green - NO pure black/white)
+// NEUTRALS (Refined for calm, premium feel - NO pure black/white)
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Light Mode Neutrals (warm undertone from logo)
-val Neutral50 = Color(0xFFFAFBFA)   // Off-white (warmest)
-val Neutral100 = Color(0xFFF5F7F6)  // Background light
-val Neutral150 = Color(0xFFF2EFEA)  // Cream (from logo)
-val Neutral200 = Color(0xFFE8EDEA)  // Surface
-val Neutral300 = Color(0xFFD4DDD8)  // Dividers
-val Neutral400 = Color(0xFFB0BFB7)  // Borders
-val Neutral500 = Color(0xFF8A9C92)  // Muted text
-val Neutral600 = Color(0xFF667A70)  // Secondary text
-val Neutral700 = Color(0xFF4A5C53)  // Primary text
-val Neutral800 = Color(0xFF2E3D36)  // Headlines
-val Neutral900 = Color(0xFF1A2720)  // Darkest text (not pure black)
+// Light Mode Neutrals (warm undertone, calmer)
+val Neutral50 = Color(0xFFFCFCFB)   // Off-white (warmest, softest)
+val Neutral100 = Color(0xFFF8F8F6)  // Background light
+val Neutral150 = Color(0xFFF5F4F1)  // Cream variant
+val Neutral200 = Color(0xFFEDECE8)  // Surface
+val Neutral300 = Color(0xFFE0DED9)  // Dividers (softer)
+val Neutral400 = Color(0xFFC5C3BD)  // Borders
+val Neutral500 = Color(0xFF9D9B94)  // Muted text
+val Neutral600 = Color(0xFF757370)  // Secondary text (better contrast)
+val Neutral700 = Color(0xFF545250)  // Primary text
+val Neutral800 = Color(0xFF353432)  // Headlines
+val Neutral900 = Color(0xFF1F1E1C)  // Darkest text (not pure black)
 
-// Dark Mode Neutrals (forest undertone)
-val NeutralDark50 = Color(0xFF0A1210)   // Deepest background
-val NeutralDark100 = Color(0xFF0F1C18)  // Background (from logo)
-val NeutralDark200 = Color(0xFF152822)  // Elevated surface
-val NeutralDark300 = Color(0xFF1F3830)  // Cards
-val NeutralDark400 = Color(0xFF2A4A3F)  // Borders
-val NeutralDark500 = Color(0xFF3D5C50)  // Muted elements
-val NeutralDark600 = Color(0xFF5A7A6C)  // Secondary text
-val NeutralDark700 = Color(0xFF8FAEA0)  // Primary text
-val NeutralDark800 = Color(0xFFB8C4BE)  // Bright text
-val NeutralDark900 = Color(0xFFF2EFEA)  // Cream (highest contrast)
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SEMANTIC COLORS (Muted, calm versions)
-// ═══════════════════════════════════════════════════════════════════════════
-
-val SemanticSuccess = Color(0xFF5D9B6D)      // Muted green (not harsh)
-val SemanticSuccessLight = Color(0xFFE8F5EB)
-val SemanticSuccessDark = Color(0xFF3D7A4D)
-
-val SemanticWarning = Color(0xFFD4A574)      // Uses accent amber
-val SemanticWarningLight = Color(0xFFFDF4E8)
-val SemanticWarningDark = Color(0xFFC08C5B)
-
-val SemanticError = Color(0xFFCF6B6B)        // Muted rose (not aggressive red)
-val SemanticErrorLight = Color(0xFFFDF0F0)
-val SemanticErrorDark = Color(0xFFB54B4B)
-
-val SemanticInfo = Color(0xFF6B8ECF)         // Calm blue
-val SemanticInfoLight = Color(0xFFF0F4FD)
-val SemanticInfoDark = Color(0xFF4B6BB5)
+// Dark Mode Neutrals (forest undertone, refined)
+val NeutralDark50 = Color(0xFF0C1410)   // Deepest background
+val NeutralDark100 = Color(0xFF111A15)  // Background (from logo)
+val NeutralDark200 = Color(0xFF182420)  // Elevated surface
+val NeutralDark300 = Color(0xFF223330)  // Cards
+val NeutralDark400 = Color(0xFF2E4440)  // Borders (softer)
+val NeutralDark500 = Color(0xFF3D5650)  // Muted elements
+val NeutralDark600 = Color(0xFF5A7570)  // Secondary text
+val NeutralDark700 = Color(0xFF8AA5A0)  // Primary text
+val NeutralDark800 = Color(0xFFBFCCC8)  // Bright text
+val NeutralDark900 = Color(0xFFF0F2F1)  // Highest contrast (slightly muted)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GRADIENTS (Logo-derived, subtle)
+// SEMANTIC COLORS (Muted, calm versions - Non-aggressive)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Main brand gradient - flattened to solid for minimal look */
+// Success - Soft sage green (calm, not harsh)
+val SemanticSuccess = Color(0xFF5E9E75)
+val SemanticSuccessLight = Color(0xFFEDF5F0)
+val SemanticSuccessDark = Color(0xFF3D7A52)
+
+// Warning - Uses accent amber family (warm, not alarming)
+val SemanticWarning = Color(0xFFCFA06A)
+val SemanticWarningLight = Color(0xFFFCF7F0)
+val SemanticWarningDark = Color(0xFFB88A52)
+
+// Error - Muted rose (noticeable but not aggressive)
+val SemanticError = Color(0xFFCD7070)
+val SemanticErrorLight = Color(0xFFFDF2F2)
+val SemanticErrorDark = Color(0xFFAD5050)
+
+// Info - Calm slate blue (quiet, informative)
+val SemanticInfo = Color(0xFF6889B0)
+val SemanticInfoLight = Color(0xFFF2F5F9)
+val SemanticInfoDark = Color(0xFF4A6B92)
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GRADIENTS (Minimal - Flattened for calm aesthetic, subtle when needed)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Main brand - Solid color for minimal look */
 val GradientBrand = SolidColor(Primary500)
 
-/** Subtle surface gradient for depth - flattened */
-val GradientSurface = SolidColor(Neutral100)
-
-val GradientSurfaceDark = SolidColor(NeutralDark200)
-
-/** Accent gradient for highlights - flattened */
-val GradientAccent = SolidColor(Accent500)
-
-/** Glass highlight gradient */
-val GradientGlassHighlight = Brush.verticalGradient(
+/** Subtle brand gradient for cards and backgrounds */
+val GradientBrandSubtle = Brush.verticalGradient(
     colors = listOf(
-        Color.White.copy(alpha = 0.15f),
-        Color.White.copy(alpha = 0.05f)
+        Primary500.copy(alpha = 0.08f),
+        Primary500.copy(alpha = 0.02f)
     )
 )
 
-/** Skeleton shimmer gradient */
+/** Subtle surface gradient for depth - Very subtle */
+val GradientSurface = Brush.verticalGradient(
+    colors = listOf(
+        Neutral100,
+        Neutral100.copy(alpha = 0.95f)
+    )
+)
+
+val GradientSurfaceDark = Brush.verticalGradient(
+    colors = listOf(
+        NeutralDark200,
+        NeutralDark200.copy(alpha = 0.95f)
+    )
+)
+
+/** Accent - Solid for minimal look */
+val GradientAccent = SolidColor(Accent400)
+
+/** Glass highlight - Very subtle */
+val GradientGlassHighlight = Brush.verticalGradient(
+    colors = listOf(
+        Color.White.copy(alpha = 0.08f),
+        Color.White.copy(alpha = 0.02f)
+    )
+)
+
+/** Skeleton shimmer - Subtle animation */
 val GradientShimmer = Brush.horizontalGradient(
     colors = listOf(
         Neutral200,
@@ -157,8 +184,23 @@ val GradientShimmerDark = Brush.horizontalGradient(
     )
 )
 
+/** Premium subtle gradient for hero sections */
+val GradientPremiumLight = Brush.verticalGradient(
+    colors = listOf(
+        Primary50,
+        Neutral100
+    )
+)
+
+val GradientPremiumDark = Brush.verticalGradient(
+    colors = listOf(
+        NeutralDark100,
+        NeutralDark200
+    )
+)
+
 // ═══════════════════════════════════════════════════════════════════════════
-// COLOR SCHEME OBJECT (For CompositionLocal)
+// COLOR SCHEME OBJECT (For CompositionLocal - Refined)
 // ═══════════════════════════════════════════════════════════════════════════
 
 data class HabitateColorScheme(
@@ -178,7 +220,7 @@ data class HabitateColorScheme(
     val accentContainer: Color,
     val onAccentContainer: Color,
     
-    // Surfaces
+    // Surfaces (Refined for minimal look)
     val background: Color,
     val onBackground: Color,
     val surface: Color,
@@ -186,8 +228,10 @@ data class HabitateColorScheme(
     val surfaceVariant: Color,
     val onSurfaceVariant: Color,
     val surfaceElevated: Color,
+    val surfaceContainerLow: Color,
+    val surfaceContainerHigh: Color,
     
-    // Glass
+    // Glass (Minimal glassmorphism)
     val glassTint: Color,
     val glassBorder: Color,
     val glassHighlight: Brush,
@@ -195,13 +239,15 @@ data class HabitateColorScheme(
     // Structural
     val divider: Color,
     val border: Color,
+    val borderSubtle: Color,
     val shimmer: Brush,
     
-    // Text hierarchy
+    // Text hierarchy (Clear visual hierarchy)
     val textPrimary: Color,
     val textSecondary: Color,
     val textMuted: Color,
     val textDisabled: Color,
+    val textInverse: Color,
     
     // Semantic
     val success: Color,
@@ -217,13 +263,22 @@ data class HabitateColorScheme(
     val onInfo: Color,
     val infoContainer: Color,
     
-    // Component specific
+    // Component specific (Premium feel)
     val fabBackground: Color,
     val fabContent: Color,
     val navBarBackground: Color,
+    val navBarIndicator: Color,
     val cardBackground: Color,
+    val cardBorder: Color,
     val chipBackground: Color,
     val inputBackground: Color,
+    val inputBorder: Color,
+    val inputBorderFocused: Color,
+    
+    // Interactive states
+    val ripple: Color,
+    val scrim: Color,
+    val overlay: Color,
     
     val isDark: Boolean
 )
@@ -237,38 +292,42 @@ val LightHabitateColors = HabitateColorScheme(
     
     secondary = Primary400,
     onSecondary = Neutral50,
-    secondaryContainer = Primary100,
+    secondaryContainer = Primary50,
     onSecondaryContainer = Primary600,
     
     accent = Accent400,
     onAccent = Neutral900,
-    accentContainer = Accent100,
+    accentContainer = Accent50,
     onAccentContainer = Accent700,
     
-    // Surfaces
+    // Surfaces (Refined - cleaner, calmer)
     background = Neutral100,
     onBackground = Neutral800,
     surface = Neutral50,
     onSurface = Neutral800,
     surfaceVariant = Neutral150,
     onSurfaceVariant = Neutral600,
-    surfaceElevated = Color.White.copy(alpha = 0.8f),
+    surfaceElevated = Color.White,
+    surfaceContainerLow = Neutral100,
+    surfaceContainerHigh = Neutral200,
     
-    // Glass
-    glassTint = Primary500.copy(alpha = 0.08f),
-    glassBorder = Primary500.copy(alpha = 0.12f),
+    // Glass (More subtle)
+    glassTint = Primary500.copy(alpha = 0.04f),
+    glassBorder = Primary500.copy(alpha = 0.08f),
     glassHighlight = GradientGlassHighlight,
     
-    // Structural
-    divider = Neutral300,
+    // Structural (Softer dividers)
+    divider = Neutral300.copy(alpha = 0.6f),
     border = Neutral400,
+    borderSubtle = Neutral300,
     shimmer = GradientShimmer,
     
-    // Text
+    // Text (Clear hierarchy)
     textPrimary = Neutral800,
     textSecondary = Neutral600,
     textMuted = Neutral500,
     textDisabled = Neutral400,
+    textInverse = Neutral50,
     
     // Semantic
     success = SemanticSuccess,
@@ -284,85 +343,107 @@ val LightHabitateColors = HabitateColorScheme(
     onInfo = Neutral50,
     infoContainer = SemanticInfoLight,
     
-    // Components
+    // Components (Premium, minimal)
     fabBackground = Primary500,
     fabContent = BrandCream,
-    navBarBackground = Neutral50.copy(alpha = 0.85f),
+    navBarBackground = Neutral50.copy(alpha = 0.92f),
+    navBarIndicator = Primary100,
     cardBackground = Neutral50,
-    chipBackground = Primary100,
-    inputBackground = Neutral200,
+    cardBorder = Neutral300.copy(alpha = 0.5f),
+    chipBackground = Primary50,
+    inputBackground = Neutral100,
+    inputBorder = Neutral400,
+    inputBorderFocused = Primary500,
+    
+    // Interactive
+    ripple = Primary500.copy(alpha = 0.08f),
+    scrim = Primary800.copy(alpha = 0.32f),
+    overlay = Neutral900.copy(alpha = 0.4f),
     
     isDark = false
 )
 
 val DarkHabitateColors = HabitateColorScheme(
-    // Brand
-    primary = Primary400,
+    // Brand (Elevated in dark mode)
+    primary = Primary300,
     onPrimary = NeutralDark100,
     primaryContainer = Primary700,
-    onPrimaryContainer = Primary200,
+    onPrimaryContainer = Primary100,
     
-    secondary = Primary300,
+    secondary = Primary400,
     onSecondary = NeutralDark100,
     secondaryContainer = NeutralDark300,
     onSecondaryContainer = NeutralDark800,
     
-    accent = Accent400,
+    accent = Accent300,
     onAccent = NeutralDark100,
-    accentContainer = Accent700.copy(alpha = 0.3f),
-    onAccentContainer = Accent200,
+    accentContainer = Accent700.copy(alpha = 0.25f),
+    onAccentContainer = Accent100,
     
-    // Surfaces
+    // Surfaces (True dark, premium feel)
     background = NeutralDark100,
     onBackground = NeutralDark800,
     surface = NeutralDark200,
     onSurface = NeutralDark800,
     surfaceVariant = NeutralDark300,
     onSurfaceVariant = NeutralDark600,
-    surfaceElevated = NeutralDark300.copy(alpha = 0.9f),
+    surfaceElevated = NeutralDark300,
+    surfaceContainerLow = NeutralDark100,
+    surfaceContainerHigh = NeutralDark300,
     
-    // Glass
-    glassTint = Primary400.copy(alpha = 0.12f),
-    glassBorder = Primary400.copy(alpha = 0.18f),
+    // Glass (Subtle in dark mode)
+    glassTint = Primary300.copy(alpha = 0.06f),
+    glassBorder = Primary300.copy(alpha = 0.10f),
     glassHighlight = Brush.verticalGradient(
         colors = listOf(
-            Color.White.copy(alpha = 0.08f),
-            Color.White.copy(alpha = 0.02f)
+            Color.White.copy(alpha = 0.05f),
+            Color.White.copy(alpha = 0.01f)
         )
     ),
     
-    // Structural
-    divider = NeutralDark400,
+    // Structural (Subtle)
+    divider = NeutralDark400.copy(alpha = 0.6f),
     border = NeutralDark500,
+    borderSubtle = NeutralDark400,
     shimmer = GradientShimmerDark,
     
-    // Text
+    // Text (High contrast for readability)
     textPrimary = NeutralDark900,
     textSecondary = NeutralDark700,
     textMuted = NeutralDark600,
     textDisabled = NeutralDark500,
+    textInverse = NeutralDark100,
     
     // Semantic
     success = SemanticSuccess,
     onSuccess = NeutralDark100,
-    successContainer = SemanticSuccessDark.copy(alpha = 0.2f),
+    successContainer = SemanticSuccessDark.copy(alpha = 0.15f),
     warning = SemanticWarning,
     onWarning = NeutralDark100,
-    warningContainer = SemanticWarningDark.copy(alpha = 0.2f),
+    warningContainer = SemanticWarningDark.copy(alpha = 0.15f),
     error = SemanticError,
     onError = NeutralDark100,
-    errorContainer = SemanticErrorDark.copy(alpha = 0.2f),
+    errorContainer = SemanticErrorDark.copy(alpha = 0.15f),
     info = SemanticInfo,
     onInfo = NeutralDark100,
-    infoContainer = SemanticInfoDark.copy(alpha = 0.2f),
+    infoContainer = SemanticInfoDark.copy(alpha = 0.15f),
     
-    // Components
+    // Components (Subtle elevation)
     fabBackground = Primary400,
     fabContent = NeutralDark100,
-    navBarBackground = NeutralDark200.copy(alpha = 0.92f),
+    navBarBackground = NeutralDark200.copy(alpha = 0.95f),
+    navBarIndicator = NeutralDark300,
     cardBackground = NeutralDark200,
+    cardBorder = NeutralDark400.copy(alpha = 0.5f),
     chipBackground = NeutralDark300,
     inputBackground = NeutralDark300,
+    inputBorder = NeutralDark500,
+    inputBorderFocused = Primary400,
+    
+    // Interactive
+    ripple = Primary300.copy(alpha = 0.10f),
+    scrim = NeutralDark50.copy(alpha = 0.5f),
+    overlay = NeutralDark50.copy(alpha = 0.6f),
     
     isDark = true
 )

@@ -184,7 +184,7 @@ fun ProfileScreen(
                     }
 
                     // Posts
-                    items(displayedPosts) { post ->
+                    items(displayedPosts, key = { it.id }) { post ->
                         PostItem(
                             post = post,
                             onLikeClick = { viewModel.toggleLike(post.id) },

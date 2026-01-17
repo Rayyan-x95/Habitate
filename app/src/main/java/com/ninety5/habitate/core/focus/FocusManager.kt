@@ -12,6 +12,8 @@ import com.ninety5.habitate.data.local.entity.SyncState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
@@ -24,7 +26,8 @@ class FocusManager @Inject constructor(
     private val focusDao: FocusDao
 ) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    private val scope = CoroutineScope(Dispatchers.IO)
+    // Using SupervisorJob to prevent child coroutine failures from canceling the entire scope
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun startSession(userId: String, durationSeconds: Long, soundTrack: String? = null) {
         scope.launch {

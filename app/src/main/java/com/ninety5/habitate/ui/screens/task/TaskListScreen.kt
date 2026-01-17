@@ -72,7 +72,7 @@ fun TaskListScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(tasks) { task ->
+                    items(tasks, key = { it.id }) { task ->
                         TaskItem(
                             task = task,
                             onTaskClick = { onTaskClick(task.id) },

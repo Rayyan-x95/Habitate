@@ -19,9 +19,15 @@ class StoryViewModel @Inject constructor(
     val activeStories: StateFlow<List<StoryWithUser>> = repository.getActiveStories()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun createStory(mediaUri: String) {
+    fun createStory(mediaUri: String, caption: String? = null) {
         viewModelScope.launch {
-            repository.createStory(mediaUri)
+            repository.createStory(mediaUri, caption)
+        }
+    }
+
+    fun markAsSeen(storyId: String) {
+        viewModelScope.launch {
+            repository.markStoryAsSeen(storyId)
         }
     }
 

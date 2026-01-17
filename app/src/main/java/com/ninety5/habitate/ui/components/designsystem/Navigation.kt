@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,7 +29,8 @@ import com.ninety5.habitate.ui.theme.*
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE COMPONENT LIBRARY - NAVIGATION               ║
  * ║                                                                          ║
- * ║  Bottom nav with glass effect and centered FAB                           ║
+ * ║  Premium navigation with glass effect and minimal visual weight          ║
+ * ║  Design principle: Unobtrusive, clear hierarchy, smooth transitions      ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
@@ -140,7 +142,8 @@ fun HabitateBottomNavBar(
 }
 
 /**
- * Individual nav item with animation.
+ * Individual nav item with smooth animation.
+ * Minimal visual weight, clear selection state.
  */
 @Composable
 private fun HabitateNavItem(
@@ -153,12 +156,19 @@ private fun HabitateNavItem(
     
     val iconColor by animateColorAsState(
         targetValue = if (isSelected) colors.primary else colors.textMuted,
+        animationSpec = tween(durationMillis = Duration.fast),
         label = "navIconColor"
     )
     
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) colors.textPrimary else colors.textMuted,
+        animationSpec = tween(durationMillis = Duration.fast),
+        label = "navTextColor"
+    )
+    
     val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.1f else 1f,
-        animationSpec = spring(),
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = spring(dampingRatio = 0.7f),
         label = "navItemScale"
     )
     
@@ -169,7 +179,7 @@ private fun HabitateNavItem(
                 indication = null,
                 onClick = onClick
             )
-            .padding(Spacing.sm)
+            .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
             .scale(scale),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -178,7 +188,7 @@ private fun HabitateNavItem(
             Icon(
                 imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                 contentDescription = item.label,
-                modifier = Modifier.size(Size.iconLg),
+                modifier = Modifier.size(Size.iconMd),
                 tint = iconColor
             )
             
@@ -202,12 +212,13 @@ private fun HabitateNavItem(
         Text(
             text = item.label,
             style = CaptionText,
-            color = iconColor
+            color = textColor
         )
         
-        // Selection indicator
+        // Subtle selection indicator
         val indicatorWidth by animateDpAsState(
-            targetValue = if (isSelected) 20.dp else 0.dp,
+            targetValue = if (isSelected) 16.dp else 0.dp,
+            animationSpec = tween(durationMillis = Duration.fast),
             label = "navIndicator"
         )
         
@@ -217,14 +228,15 @@ private fun HabitateNavItem(
             modifier = Modifier
                 .width(indicatorWidth)
                 .height(2.dp)
-                .clip(RoundedCornerShape(Radius.pill))
-                .background(colors.primary)
+                .clip(NavIndicatorShape)
+                .background(colors.navBarIndicator)
         )
     }
 }
 
 /**
  * Centered create FAB for bottom nav.
+ * Subtle elevation, smooth press feedback.
  */
 @Composable
 private fun HabitateCreateFab(
@@ -240,8 +252,9 @@ private fun HabitateCreateFab(
         contentColor = colors.fabContent,
         shape = CircleShape,
         elevation = FloatingActionButtonDefaults.elevation(
-            defaultElevation = Elevation.md,
-            pressedElevation = Elevation.sm
+            defaultElevation = Elevation.sm,
+            pressedElevation = Elevation.xs,
+            hoveredElevation = Elevation.md
         )
     ) {
         Icon(
@@ -253,35 +266,47 @@ private fun HabitateCreateFab(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TOP APP BAR
+// TOP APP BAR (Calm header with clear hierarchy)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Standard top app bar with optional navigation and actions.
+ * Clean, minimal elevation, clear title hierarchy.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitateTopBar(
     title: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null,
-    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    transparent: Boolean = false
 ) {
     val colors = HabitateTheme.colors
     
     TopAppBar(
         title = {
-            Text(
-                text = title,
-                style = SectionTitle
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = SectionTitle
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        style = SupportingText,
+                        color = colors.textSecondary
+                    )
+                }
+            }
         },
         modifier = modifier,
         navigationIcon = navigationIcon ?: {},
         actions = actions ?: {},
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colors.background,
+            containerColor = if (transparent) androidx.compose.ui.graphics.Color.Transparent else colors.background,
             scrolledContainerColor = colors.surface,
             titleContentColor = colors.textPrimary,
             navigationIconContentColor = colors.textPrimary,
@@ -292,13 +317,15 @@ fun HabitateTopBar(
 }
 
 /**
- * Large top app bar for feature screens.
+ * Large top app bar for primary screens.
+ * Generous title size, subtle collapse behavior.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitateLargeTopBar(
     title: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null
@@ -307,10 +334,20 @@ fun HabitateLargeTopBar(
     
     LargeTopAppBar(
         title = {
-            Text(
-                text = title,
-                style = ScreenTitle
-            )
+            Column {
+                Text(
+                    text = title,
+                    style = ScreenTitle
+                )
+                if (subtitle != null) {
+                    Spacer(Modifier.height(Spacing.xxs))
+                    Text(
+                        text = subtitle,
+                        style = SupportingText,
+                        color = colors.textSecondary
+                    )
+                }
+            }
         },
         modifier = modifier,
         navigationIcon = navigationIcon ?: {},
@@ -326,44 +363,218 @@ fun HabitateLargeTopBar(
     )
 }
 
+/**
+ * Center-aligned top bar for modal or detail screens.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HabitateCenterTopBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    actions: @Composable (RowScope.() -> Unit)? = null
+) {
+    val colors = HabitateTheme.colors
+    
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = CardTitle
+            )
+        },
+        modifier = modifier,
+        navigationIcon = navigationIcon ?: {},
+        actions = actions ?: {},
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = colors.background,
+            titleContentColor = colors.textPrimary,
+            navigationIconContentColor = colors.textPrimary,
+            actionIconContentColor = colors.textSecondary
+        )
+    )
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
-// BACK BUTTON
+// NAVIGATION BUTTONS (Back, Close, etc.)
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * Standard back navigation button.
+ */
 @Composable
 fun HabitateBackButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentDescription: String = "Back"
 ) {
     val colors = HabitateTheme.colors
     
     IconButton(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier.size(Size.touchTarget)
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            tint = colors.textPrimary
+            contentDescription = contentDescription,
+            tint = colors.textPrimary,
+            modifier = Modifier.size(Size.iconMd)
         )
     }
 }
 
+/**
+ * Close button for modals and sheets.
+ */
 @Composable
 fun HabitateCloseButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentDescription: String = "Close"
 ) {
     val colors = HabitateTheme.colors
     
     IconButton(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier.size(Size.touchTarget)
     ) {
         Icon(
             imageVector = Icons.Default.Close,
-            contentDescription = "Close",
-            tint = colors.textPrimary
+            contentDescription = contentDescription,
+            tint = colors.textPrimary,
+            modifier = Modifier.size(Size.iconMd)
         )
+    }
+}
+
+/**
+ * More options button (three dots).
+ */
+@Composable
+fun HabitateMoreButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    contentDescription: String = "More options"
+) {
+    val colors = HabitateTheme.colors
+    
+    IconButton(
+        onClick = onClick,
+        modifier = modifier.size(Size.touchTarget)
+    ) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = contentDescription,
+            tint = colors.textSecondary,
+            modifier = Modifier.size(Size.iconMd)
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAB BAR (Horizontal navigation within screens)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Tab row for section navigation.
+ */
+@Composable
+fun HabitateTabRow(
+    selectedTabIndex: Int,
+    tabs: List<String>,
+    onTabSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = HabitateTheme.colors
+    
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = modifier,
+        containerColor = colors.background,
+        contentColor = colors.textPrimary,
+        indicator = { tabPositions ->
+            if (selectedTabIndex < tabPositions.size) {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.BottomStart)
+                        .offset(x = tabPositions[selectedTabIndex].left),
+                    height = 2.dp,
+                    color = colors.primary
+                )
+            }
+        },
+        divider = {
+            HorizontalDivider(
+                thickness = Size.dividerThickness,
+                color = colors.divider
+            )
+        }
+    ) {
+        tabs.forEachIndexed { index, title ->
+            val isSelected = index == selectedTabIndex
+            
+            Tab(
+                selected = isSelected,
+                onClick = { onTabSelected(index) },
+                text = {
+                    Text(
+                        text = title,
+                        style = if (isSelected) ButtonText else SupportingText,
+                        color = if (isSelected) colors.textPrimary else colors.textMuted
+                    )
+                }
+            )
+        }
+    }
+}
+
+/**
+ * Scrollable tab row for many tabs.
+ */
+@Composable
+fun HabitateScrollableTabRow(
+    selectedTabIndex: Int,
+    tabs: List<String>,
+    onTabSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = HabitateTheme.colors
+    
+    ScrollableTabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = modifier,
+        containerColor = colors.background,
+        contentColor = colors.textPrimary,
+        edgePadding = Spacing.md,
+        indicator = { tabPositions ->
+            if (selectedTabIndex < tabPositions.size) {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.BottomStart)
+                        .offset(x = tabPositions[selectedTabIndex].left),
+                    height = 2.dp,
+                    color = colors.primary
+                )
+            }
+        },
+        divider = {}
+    ) {
+        tabs.forEachIndexed { index, title ->
+            val isSelected = index == selectedTabIndex
+            
+            Tab(
+                selected = isSelected,
+                onClick = { onTabSelected(index) },
+                text = {
+                    Text(
+                        text = title,
+                        style = if (isSelected) ButtonText else SupportingText,
+                        color = if (isSelected) colors.textPrimary else colors.textMuted
+                    )
+                }
+            )
+        }
     }
 }

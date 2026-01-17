@@ -12,11 +12,14 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.FitnessCenter
-import androidx.compose.material.icons.rounded.Groups
-import androidx.compose.material.icons.rounded.Psychology
-import androidx.compose.material.icons.rounded.Timeline
+import androidx.compose.material.icons.rounded.Diversity3
+import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Rocket
+import androidx.compose.material.icons.rounded.RocketLaunch
+import androidx.compose.material.icons.rounded.SelfImprovement
+import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,31 +43,30 @@ import kotlinx.coroutines.launch
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit
 ) {
-    // Using brand-derived colors for each page
     val pages = listOf(
         OnboardingPage(
-            icon = Icons.Rounded.CheckCircle, // Placeholder for Rocket
+            icon = Icons.Rounded.RocketLaunch,
             title = "Reach your goals with no distractions",
             description = "",
-            accentColor = MaterialTheme.colorScheme.onSurface
+            accentColor = MaterialTheme.colorScheme.primary
         ),
         OnboardingPage(
-            icon = Icons.Rounded.Groups, // Placeholder for Community
+            icon = Icons.Rounded.Diversity3,
             title = "Welcome to the community!",
             description = "",
-            accentColor = MaterialTheme.colorScheme.onSurface
+            accentColor = MaterialTheme.colorScheme.secondary
         ),
         OnboardingPage(
-            icon = Icons.Rounded.Groups, // Placeholder for 3 people
+            icon = Icons.Rounded.Favorite,
             title = "A place where wellbeing combines with social aspects",
             description = "Together for a better us.",
-            accentColor = MaterialTheme.colorScheme.onSurface
+            accentColor = MaterialTheme.colorScheme.tertiary
         ),
         OnboardingPage(
-            icon = Icons.Rounded.Psychology, // Placeholder for Handshake
+            icon = Icons.Rounded.TrendingUp,
             title = "Inspire yourself to do better",
             description = "",
-            accentColor = MaterialTheme.colorScheme.onSurface
+            accentColor = MaterialTheme.colorScheme.primary
         )
     )
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -30,16 +31,18 @@ import com.ninety5.habitate.ui.theme.*
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE COMPONENT LIBRARY - INPUTS                   ║
  * ║                                                                          ║
- * ║  Clean, accessible input components                                       ║
+ * ║  Clean, accessible, calm input components                                ║
+ * ║  Design principle: Clear focus states, helpful feedback, minimal borders ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TEXT FIELD
+// TEXT FIELD (Primary input component)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Standard text field with label and helper text.
+ * Standard text field with label, helper text, and clear focus states.
+ * Calm aesthetic with subtle borders and smooth focus transitions.
  */
 @Composable
 fun HabitateTextField(
@@ -50,7 +53,9 @@ fun HabitateTextField(
     placeholder: String? = null,
     helperText: String? = null,
     errorText: String? = null,
+    successText: String? = null,
     isError: Boolean = errorText != null,
+    isSuccess: Boolean = successText != null,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     leadingIcon: ImageVector? = null,
@@ -62,12 +67,18 @@ fun HabitateTextField(
 ) {
     val colors = HabitateTheme.colors
     
+    val labelColor = when {
+        isError -> colors.error
+        isSuccess -> colors.success
+        else -> colors.textSecondary
+    }
+    
     Column(modifier = modifier) {
         if (label != null) {
             Text(
                 text = label,
                 style = MetaText,
-                color = if (isError) colors.error else colors.textSecondary
+                color = labelColor
             )
             Spacer(Modifier.height(Spacing.sm))
         }
@@ -99,28 +110,38 @@ fun HabitateTextField(
             keyboardActions = keyboardActions,
             shape = InputShape,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = colors.primary,
-                unfocusedBorderColor = colors.border,
-                errorBorderColor = colors.error,
+                // Focus states
+                focusedBorderColor = if (isSuccess) colors.success else colors.inputBorderFocused,
+                unfocusedBorderColor = colors.borderSubtle,
+                errorBorderColor = colors.error.copy(alpha = 0.8f),
+                // Container colors
                 focusedContainerColor = colors.surface,
                 unfocusedContainerColor = colors.inputBackground,
-                errorContainerColor = colors.errorContainer.copy(alpha = 0.1f)
+                errorContainerColor = colors.errorContainer.copy(alpha = 0.08f),
+                // Text colors
+                focusedTextColor = colors.textPrimary,
+                unfocusedTextColor = colors.textPrimary,
+                // Cursor and indicator
+                cursorColor = colors.primary,
+                focusedLabelColor = colors.primary,
+                // Disabled states
+                disabledBorderColor = colors.border.copy(alpha = 0.4f),
+                disabledContainerColor = colors.surfaceVariant.copy(alpha = 0.5f),
+                disabledTextColor = colors.textDisabled
             )
         )
         
-        if (errorText != null) {
+        // Helper/Error/Success text
+        if (errorText != null || helperText != null || successText != null) {
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                text = errorText,
+                text = errorText ?: successText ?: helperText ?: "",
                 style = CaptionText,
-                color = colors.error
-            )
-        } else if (helperText != null) {
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                text = helperText,
-                style = CaptionText,
-                color = colors.textMuted
+                color = when {
+                    errorText != null -> colors.error
+                    successText != null -> colors.success
+                    else -> colors.textMuted
+                }
             )
         }
     }
@@ -177,11 +198,12 @@ fun HabitatePasswordField(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SEARCH FIELD
+// SEARCH FIELD (Prominent, pill-shaped)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Search input with icon and clear button.
+ * Search input with icon and subtle focus state.
+ * Pill-shaped for a friendly, approachable feel.
  */
 @Composable
 fun HabitateSearchField(
@@ -190,32 +212,34 @@ fun HabitateSearchField(
     modifier: Modifier = Modifier,
     placeholder: String = "Search...",
     onSearch: ((String) -> Unit)? = null,
+    onClear: (() -> Unit)? = null,
     enabled: Boolean = true
 ) {
     val colors = HabitateTheme.colors
     var isFocused by remember { mutableStateOf(false) }
     
-    val borderColor = if (isFocused) colors.primary else colors.border
+    val borderColor = if (isFocused) colors.inputBorderFocused else colors.borderSubtle
+    val backgroundColor = if (isFocused) colors.surface else colors.inputBackground
     
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(Size.inputHeightSmall)
-            .clip(RoundedCornerShape(Radius.pill))
-            .background(colors.inputBackground)
+            .clip(SearchBarShape)
+            .background(backgroundColor)
             .border(
-                width = Size.borderThin,
+                width = if (isFocused) 1.5.dp else Size.borderThin,
                 color = borderColor,
-                shape = RoundedCornerShape(Radius.pill)
+                shape = SearchBarShape
             )
-            .padding(horizontal = Spacing.lg),
+            .padding(horizontal = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Outlined.Search,
             contentDescription = null,
             modifier = Modifier.size(Size.iconMd),
-            tint = colors.textMuted
+            tint = if (isFocused) colors.primary else colors.textMuted
         )
         
         Spacer(Modifier.width(Spacing.sm))
@@ -238,7 +262,10 @@ fun HabitateSearchField(
             ),
             cursorBrush = SolidColor(colors.primary),
             decorationBox = { innerTextField ->
-                Box {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
@@ -250,15 +277,31 @@ fun HabitateSearchField(
                 }
             }
         )
+        
+        // Clear button when there's text
+        if (value.isNotEmpty() && onClear != null) {
+            Spacer(Modifier.width(Spacing.xs))
+            IconButton(
+                onClick = onClear,
+                modifier = Modifier.size(Size.iconMd)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Clear,
+                    contentDescription = "Clear",
+                    modifier = Modifier.size(Size.iconSm),
+                    tint = colors.textMuted
+                )
+            }
+        }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TEXT AREA
+// TEXT AREA (Multi-line input)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Multi-line text area for longer content.
+ * Multi-line text area for longer content with character counter.
  */
 @Composable
 fun HabitateTextArea(
@@ -272,10 +315,12 @@ fun HabitateTextArea(
     enabled: Boolean = true,
     minLines: Int = 3,
     maxLines: Int = 6,
-    maxLength: Int? = null
+    maxLength: Int? = null,
+    showCharCount: Boolean = maxLength != null
 ) {
     val colors = HabitateTheme.colors
     val isError = errorText != null
+    val isOverLimit = maxLength != null && value.length > maxLength
     
     Column(modifier = modifier) {
         if (label != null) {
@@ -290,9 +335,8 @@ fun HabitateTextArea(
         OutlinedTextField(
             value = value,
             onValueChange = { newValue ->
-                if (maxLength == null || newValue.length <= maxLength) {
-                    onValueChange(newValue)
-                }
+                // Allow typing but show error if over limit
+                onValueChange(newValue)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -301,45 +345,47 @@ fun HabitateTextArea(
             placeholder = placeholder?.let {
                 { Text(text = it, style = BodyText, color = colors.textMuted) }
             },
-            isError = isError,
+            isError = isError || isOverLimit,
             singleLine = false,
             minLines = minLines,
             maxLines = maxLines,
             shape = InputShape,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = colors.primary,
-                unfocusedBorderColor = colors.border,
-                errorBorderColor = colors.error,
+                focusedBorderColor = if (isOverLimit) colors.error else colors.inputBorderFocused,
+                unfocusedBorderColor = colors.borderSubtle,
+                errorBorderColor = colors.error.copy(alpha = 0.8f),
                 focusedContainerColor = colors.surface,
-                unfocusedContainerColor = colors.inputBackground
+                unfocusedContainerColor = colors.inputBackground,
+                cursorColor = colors.primary
             )
         )
         
+        Spacer(Modifier.height(Spacing.xs))
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (errorText != null) {
-                Text(
-                    text = errorText,
-                    style = CaptionText,
-                    color = colors.error
-                )
-            } else if (helperText != null) {
-                Text(
-                    text = helperText,
-                    style = CaptionText,
-                    color = colors.textMuted
-                )
-            } else {
-                Spacer(Modifier.weight(1f))
-            }
+            // Error or helper text
+            Text(
+                text = errorText ?: helperText ?: "",
+                style = CaptionText,
+                color = if (isError) colors.error else colors.textMuted,
+                modifier = Modifier.weight(1f, fill = false)
+            )
             
-            if (maxLength != null) {
+            // Character counter
+            if (showCharCount && maxLength != null) {
+                Spacer(Modifier.width(Spacing.sm))
                 Text(
                     text = "${value.length}/$maxLength",
                     style = CaptionText,
-                    color = if (value.length >= maxLength) colors.error else colors.textMuted
+                    color = when {
+                        isOverLimit -> colors.error
+                        value.length > maxLength * 0.9 -> colors.warning
+                        else -> colors.textMuted
+                    }
                 )
             }
         }

@@ -21,6 +21,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE status = 'OPEN' AND dueAt < :now")
     suspend fun getOverdueTasks(now: Long): List<TaskEntity>
 
+    @Query("SELECT * FROM tasks WHERE dueAt >= :startTime AND dueAt < :endTime ORDER BY dueAt")
+    suspend fun getTasksForDateRange(startTime: java.time.Instant, endTime: java.time.Instant): List<TaskEntity>
+
     @Query("SELECT * FROM tasks WHERE id = :id")
     suspend fun getTaskById(id: String): TaskEntity?
 

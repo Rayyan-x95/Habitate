@@ -186,7 +186,7 @@ fun PostDetailScreen(
                             )
                         }
                     } else {
-                        items(uiState.comments) { commentWithUser ->
+                        items(uiState.comments, key = { it.comment.id }) { commentWithUser ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

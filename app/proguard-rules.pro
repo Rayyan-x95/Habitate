@@ -140,3 +140,35 @@
 -keepclassmembers class kotlinx.coroutines.** {
     volatile <fields>;
 }
+
+# ============================================
+# HEALTH CONNECT
+# ============================================
+-keep class androidx.health.connect.client.** { *; }
+-keep class androidx.health.platform.client.** { *; }
+-dontwarn androidx.health.connect.client.**
+
+# ============================================
+# APOLLO GRAPHQL (if used)
+# ============================================
+-keep class com.apollographql.apollo3.** { *; }
+-dontwarn com.apollographql.apollo3.**
+
+# ============================================
+# WEBSOCKET / OKHTTP EXTENSIONS
+# ============================================
+-keep class okhttp3.internal.ws.** { *; }
+
+# ============================================
+# ENUM CLASSES
+# ============================================
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# ============================================
+# SECURITY - DO NOT OBFUSCATE
+# ============================================
+-keep class com.ninety5.habitate.data.local.SecurePreferences { *; }
+-keep class com.ninety5.habitate.core.auth.** { *; }

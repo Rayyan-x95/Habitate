@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Inbox
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -33,16 +35,18 @@ import com.ninety5.habitate.ui.theme.*
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE COMPONENT LIBRARY - STATES                   ║
  * ║                                                                          ║
- * ║  Empty, loading, and error state components                              ║
+ * ║  Calm, reassuring empty, loading, and error state components             ║
+ * ║  Design principle: Non-alarming, helpful, and actionable                 ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EMPTY STATE
+// EMPTY STATE (Encouraging, not discouraging)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Empty state with icon, title, description, and optional action.
+ * Designed to feel encouraging, not alarming.
  */
 @Composable
 fun HabitateEmptyState(
@@ -50,34 +54,37 @@ fun HabitateEmptyState(
     description: String,
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.Inbox,
+    iconTint: Color? = null,
     actionText: String? = null,
-    onAction: (() -> Unit)? = null
+    onAction: (() -> Unit)? = null,
+    secondaryActionText: String? = null,
+    onSecondaryAction: (() -> Unit)? = null
 ) {
     val colors = HabitateTheme.colors
     
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(Spacing.xxxl),
+            .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Icon container
+        // Soft icon container
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(72.dp)
                 .clip(CircleShape)
-                .background(colors.primaryContainer),
+                .background(colors.primaryContainer.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(Size.iconXxl),
-                tint = colors.primary
+                contentDescription = null,
+                modifier = Modifier.size(Size.iconXl),
+                tint = iconTint ?: colors.primary.copy(alpha = 0.8f)
             )
         }
         
-        Spacer(Modifier.height(Spacing.xxl))
+        Spacer(Modifier.height(Spacing.xl))
         
         Text(
             text = title,
@@ -90,17 +97,26 @@ fun HabitateEmptyState(
         
         Text(
             text = description,
-            style = SupportingText,
+            style = BodyText,
             color = colors.textSecondary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = Spacing.md)
         )
         
         if (actionText != null && onAction != null) {
-            Spacer(Modifier.height(Spacing.xxl))
+            Spacer(Modifier.height(Spacing.xl))
             HabitatePrimaryButton(
                 text = actionText,
                 onClick = onAction
             )
+            
+            if (secondaryActionText != null && onSecondaryAction != null) {
+                Spacer(Modifier.height(Spacing.sm))
+                HabitateTextButton(
+                    text = secondaryActionText,
+                    onClick = onSecondaryAction
+                )
+            }
         }
     }
 }
@@ -139,11 +155,12 @@ fun HabitateEmptyStateCompact(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ERROR STATE
+// ERROR STATE (Calming, not alarming)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Error state with retry option.
+ * Error state with helpful messaging and retry option.
+ * Designed to be calming rather than alarming.
  */
 @Composable
 fun HabitateErrorState(
@@ -152,33 +169,35 @@ fun HabitateErrorState(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.ErrorOutline,
     retryText: String = "Try Again",
-    onRetry: (() -> Unit)? = null
+    onRetry: (() -> Unit)? = null,
+    secondaryText: String? = null,
+    onSecondary: (() -> Unit)? = null
 ) {
     val colors = HabitateTheme.colors
     
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(Spacing.xxxl),
+            .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Icon container
+        // Soft error container (not aggressive red)
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(72.dp)
                 .clip(CircleShape)
-                .background(colors.errorContainer),
+                .background(colors.errorContainer.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(Size.iconXxl),
-                tint = colors.error
+                modifier = Modifier.size(Size.iconXl),
+                tint = colors.error.copy(alpha = 0.8f)
             )
         }
         
-        Spacer(Modifier.height(Spacing.xxl))
+        Spacer(Modifier.height(Spacing.xl))
         
         Text(
             text = title,
@@ -191,17 +210,26 @@ fun HabitateErrorState(
         
         Text(
             text = description,
-            style = SupportingText,
+            style = BodyText,
             color = colors.textSecondary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = Spacing.md)
         )
         
         if (onRetry != null) {
-            Spacer(Modifier.height(Spacing.xxl))
+            Spacer(Modifier.height(Spacing.xl))
             HabitateSecondaryButton(
                 text = retryText,
                 onClick = onRetry
             )
+            
+            if (secondaryText != null && onSecondary != null) {
+                Spacer(Modifier.height(Spacing.sm))
+                HabitateTextButton(
+                    text = secondaryText,
+                    onClick = onSecondary
+                )
+            }
         }
     }
 }
@@ -240,11 +268,12 @@ fun HabitateSearchEmptyState(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LOADING STATE - SHIMMER SKELETON
+// LOADING STATE - SHIMMER SKELETON (Subtle, calming)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Shimmer effect using logo gradient colors.
+ * Shimmer effect with subtle, calming animation.
+ * Uses brand-derived colors for cohesive feel.
  */
 @Composable
 fun ShimmerBox(
@@ -267,17 +296,18 @@ fun ShimmerBox(
         label = "shimmerTranslate"
     )
     
+    // Softer shimmer colors that don't draw too much attention
     val shimmerColors = if (colors.isDark) {
         listOf(
-            NeutralDark300,
-            NeutralDark400,
-            NeutralDark300
+            NeutralDark300.copy(alpha = 0.4f),
+            NeutralDark400.copy(alpha = 0.6f),
+            NeutralDark300.copy(alpha = 0.4f)
         )
     } else {
         listOf(
-            Neutral200,
-            Neutral300,
-            Neutral200
+            Neutral200.copy(alpha = 0.5f),
+            Neutral300.copy(alpha = 0.7f),
+            Neutral200.copy(alpha = 0.5f)
         )
     }
     
@@ -291,6 +321,23 @@ fun ShimmerBox(
         modifier = modifier
             .clip(shape)
             .background(brush)
+    )
+}
+
+/**
+ * Text-shaped shimmer for line placeholders.
+ */
+@Composable
+fun ShimmerLine(
+    modifier: Modifier = Modifier,
+    width: Float = 1f,
+    height: Dp = 14.dp
+) {
+    ShimmerBox(
+        modifier = modifier
+            .fillMaxWidth(width)
+            .height(height),
+        shape = RoundedCornerShape(Radius.xs)
     )
 }
 
@@ -438,16 +485,17 @@ fun HabitateSkeletonPost(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LOADING INDICATOR
+// LOADING INDICATOR (Minimal, unobtrusive)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Centered loading indicator.
+ * Centered loading indicator with minimal visual weight.
  */
 @Composable
 fun HabitateLoadingIndicator(
     modifier: Modifier = Modifier,
-    size: Dp = 40.dp
+    size: Dp = 36.dp,
+    strokeWidth: Dp = 2.5.dp
 ) {
     val colors = HabitateTheme.colors
     
@@ -457,14 +505,15 @@ fun HabitateLoadingIndicator(
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(size),
-            color = colors.primary,
-            strokeWidth = 3.dp
+            color = colors.primary.copy(alpha = 0.8f),
+            strokeWidth = strokeWidth,
+            trackColor = colors.primaryContainer.copy(alpha = 0.3f)
         )
     }
 }
 
 /**
- * Full screen loading state.
+ * Full screen loading state with optional message.
  */
 @Composable
 fun HabitateLoadingScreen(
@@ -481,9 +530,10 @@ fun HabitateLoadingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = colors.primary,
-                strokeWidth = 4.dp
+                modifier = Modifier.size(44.dp),
+                color = colors.primary.copy(alpha = 0.8f),
+                strokeWidth = 3.dp,
+                trackColor = colors.primaryContainer.copy(alpha = 0.3f)
             )
             
             if (message != null) {
@@ -494,6 +544,92 @@ fun HabitateLoadingScreen(
                     color = colors.textSecondary
                 )
             }
+        }
+    }
+}
+
+/**
+ * Inline loading indicator for buttons or small spaces.
+ */
+@Composable
+fun HabitateInlineLoader(
+    modifier: Modifier = Modifier,
+    size: Dp = 20.dp,
+    color: Color? = null
+) {
+    val colors = HabitateTheme.colors
+    
+    CircularProgressIndicator(
+        modifier = modifier.size(size),
+        color = color ?: colors.primary,
+        strokeWidth = 2.dp
+    )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUCCESS STATE (Celebratory but calm)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Success state for completed actions.
+ */
+@Composable
+fun HabitateSuccessState(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Outlined.CheckCircle,
+    actionText: String? = null,
+    onAction: (() -> Unit)? = null
+) {
+    val colors = HabitateTheme.colors
+    
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(colors.successContainer.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(Size.iconXl),
+                tint = colors.success.copy(alpha = 0.9f)
+            )
+        }
+        
+        Spacer(Modifier.height(Spacing.xl))
+        
+        Text(
+            text = title,
+            style = SectionTitle,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(Modifier.height(Spacing.sm))
+        
+        Text(
+            text = description,
+            style = BodyText,
+            color = colors.textSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = Spacing.md)
+        )
+        
+        if (actionText != null && onAction != null) {
+            Spacer(Modifier.height(Spacing.xl))
+            HabitatePrimaryButton(
+                text = actionText,
+                onClick = onAction
+            )
         }
     }
 }

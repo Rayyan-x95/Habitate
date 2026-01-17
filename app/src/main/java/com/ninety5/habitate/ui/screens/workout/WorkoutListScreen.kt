@@ -103,7 +103,7 @@ fun WorkoutListScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(workouts) { workout ->
+                    items(workouts, key = { it.id }) { workout ->
                         WorkoutItem(
                             workout = workout,
                             onClick = { onWorkoutClick(workout.id) }

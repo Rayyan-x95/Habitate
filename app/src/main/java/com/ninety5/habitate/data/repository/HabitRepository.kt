@@ -53,6 +53,14 @@ class HabitRepository @Inject constructor(
     // ======================
 
     /**
+     * Get all habits for current user (active and inactive).
+     */
+    fun getAllHabits(): Flow<List<HabitEntity>> {
+        val userId = securePreferences.userId ?: return kotlinx.coroutines.flow.flowOf(emptyList())
+        return habitDao.getAllHabits(userId)
+    }
+
+    /**
      * Get all active habits for current user.
      */
     fun getActiveHabits(): Flow<List<HabitEntity>> {

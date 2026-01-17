@@ -20,6 +20,9 @@ interface HabitDao {
     // QUERIES
     // ====================
     
+    @Query("SELECT * FROM habits WHERE userId = :userId ORDER BY createdAt DESC")
+    fun getAllHabits(userId: String): Flow<List<HabitEntity>>
+    
     @Query("SELECT * FROM habits WHERE userId = :userId AND isArchived = 0 ORDER BY createdAt DESC")
     fun getActiveHabits(userId: String): Flow<List<HabitEntity>>
     

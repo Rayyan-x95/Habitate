@@ -57,7 +57,7 @@ fun NotificationsScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.notifications) { notification ->
+                    items(uiState.notifications, key = { it.id }) { notification ->
                         NotificationItem(
                             notification = notification,
                             onClick = { viewModel.markAsRead(notification.id) }

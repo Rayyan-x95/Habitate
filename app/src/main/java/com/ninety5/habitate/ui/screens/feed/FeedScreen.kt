@@ -372,7 +372,7 @@ fun StoriesBar(
             }
         }
 
-        items(stories) { story ->
+        items(stories, key = { it.story.id }) { story ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable { onStoryClick(story.story.userId) }

@@ -455,6 +455,57 @@ fun HabitateNavHost(
         composable(Screen.PublicApi.route) {
             com.ninety5.habitate.ui.screens.publicapi.PublicApiScreen()
         }
+
+        // Privacy Dashboard
+        composable(Screen.PrivacySettings.route) {
+            com.ninety5.habitate.ui.screens.settings.PrivacyDashboardScreen(
+                navController = navController
+            )
+        }
+
+        // Notification Settings - simple placeholder for now
+        composable(Screen.NotificationSettings.route) {
+            com.ninety5.habitate.ui.screens.settings.NotificationSettingsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Journal feature
+        composable(Screen.Journal.route) {
+            com.ninety5.habitate.ui.screens.journal.JournalScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Studies feature
+        composable(Screen.Studies.route) {
+            com.ninety5.habitate.ui.screens.studies.StudiesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToFocus = { navController.navigate(Screen.Focus.route) }
+            )
+        }
+
+        // Wellbeing feature
+        composable(Screen.Wellbeing.route) {
+            com.ninety5.habitate.ui.screens.wellbeing.WellbeingScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToJournal = { navController.navigate(Screen.Journal.route) }
+            )
+        }
+
+        // Daily Check-in feature
+        composable(Screen.DailyCheckIn.route) {
+            com.ninety5.habitate.ui.screens.checkin.DailyCheckInScreen(
+                onDismiss = { navController.popBackStack() }
+            )
+        }
+
+        // Insights Dashboard feature
+        composable(Screen.Insights.route) {
+            com.ninety5.habitate.ui.screens.insights.InsightsDashboardScreen(
+                navController = navController
+            )
+        }
     }
 }
 
