@@ -562,7 +562,7 @@ fun HabitateInputChip(
         trailingIcon = {
             IconButton(
                 onClick = onRemove,
-                modifier = Modifier.size(Size.iconSm)
+                modifier = Modifier.size(Size.touchTarget)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,

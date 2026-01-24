@@ -74,7 +74,7 @@ fun PostItem(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .border(1.dp, SageGreen, CircleShape),
+                            .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
                         contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -83,7 +83,7 @@ fun PostItem(
                             text = post.authorName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = post.createdAt,
@@ -142,14 +142,18 @@ fun PostItem(
                     label = "Like Scale"
                 )
                 val tint by animateColorAsState(
-                    targetValue = if (isLiked) Color(0xFFFF453A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    targetValue = if (isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     label = "Like Color"
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     var showReactions by remember { mutableStateOf(false) }
                     
-                    Box {
+                    Box(
+                        modifier = Modifier
+                            .sizeIn(minWidth = 44.dp, minHeight = 44.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                             contentDescription = if (isLiked) "Unlike" else "Like",
@@ -162,25 +166,25 @@ fun PostItem(
                                     onLongClick = { showReactions = true }
                                 )
                         )
+                    }
 
-                        DropdownMenu(
-                            expanded = showReactions,
-                            onDismissRequest = { showReactions = false },
-                            modifier = Modifier.background(Color(0xFF1A2C24))
-                        ) {
-                            Row(modifier = Modifier.padding(8.dp)) {
-                                listOf("❤️", "🔥", "👏", "😢", "😂").forEach { emoji ->
-                                    Text(
-                                        text = emoji,
-                                        modifier = Modifier
-                                            .clickable { 
-                                                onReactionClick(emoji)
-                                                showReactions = false
-                                            }
-                                            .padding(8.dp),
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                }
+                    DropdownMenu(
+                        expanded = showReactions,
+                        onDismissRequest = { showReactions = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Row(modifier = Modifier.padding(8.dp)) {
+                            listOf("❤️", "🔥", "👏", "😢", "😂").forEach { emoji ->
+                                Text(
+                                    text = emoji,
+                                    modifier = Modifier
+                                        .clickable { 
+                                            onReactionClick(emoji)
+                                            showReactions = false
+                                        }
+                                        .padding(8.dp),
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
                             }
                         }
                     }
@@ -198,13 +202,16 @@ fun PostItem(
                 // Comment Button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable(onClick = onCommentClick)
+                    modifier = Modifier
+                        .sizeIn(minWidth = 44.dp, minHeight = 44.dp)
+                        .clickable(onClick = onCommentClick)
+                        .padding(horizontal = 8.dp)
                 ) {
                     Icon(
                         Icons.Rounded.ChatBubbleOutline,
                         contentDescription = "Comment",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                     if (post.comments > 0) {
                         Spacer(modifier = Modifier.width(8.dp))

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -19,14 +20,15 @@ import androidx.compose.ui.unit.dp
 fun NotificationSettingsScreen(
     onNavigateBack: () -> Unit
 ) {
-    var pushEnabled by remember { mutableStateOf(true) }
-    var habitReminders by remember { mutableStateOf(true) }
-    var taskReminders by remember { mutableStateOf(true) }
-    var socialNotifications by remember { mutableStateOf(true) }
-    var challengeUpdates by remember { mutableStateOf(true) }
-    var focusModeReminders by remember { mutableStateOf(false) }
-    var dailyDigest by remember { mutableStateOf(true) }
-    var weeklyReport by remember { mutableStateOf(true) }
+    // Use rememberSaveable to persist across configuration changes
+    var pushEnabled by rememberSaveable { mutableStateOf(true) }
+    var habitReminders by rememberSaveable { mutableStateOf(true) }
+    var taskReminders by rememberSaveable { mutableStateOf(true) }
+    var socialNotifications by rememberSaveable { mutableStateOf(true) }
+    var challengeUpdates by rememberSaveable { mutableStateOf(true) }
+    var focusModeReminders by rememberSaveable { mutableStateOf(false) }
+    var dailyDigest by rememberSaveable { mutableStateOf(true) }
+    var weeklyReport by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         topBar = {

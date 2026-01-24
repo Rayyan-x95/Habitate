@@ -58,7 +58,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import com.ninety5.habitate.ui.components.ErrorState
+import com.ninety5.habitate.ui.components.designsystem.HabitateErrorState
 import com.ninety5.habitate.ui.components.PostItem
 import com.ninety5.habitate.ui.theme.*
 import com.ninety5.habitate.ui.theme.ReferenceColors
@@ -140,11 +140,22 @@ fun FeedScreen(
             .padding(paddingValues)
         ) {
             
-            if (posts.loadState.refresh is LoadState.Loading) {
-                FeedSkeletonLoader()
-            } else if (posts.loadState.refresh is LoadState.NotLoading && posts.itemCount == 0) {
-                EmptyFeedState(onCreatePostClick = onCreatePostClick)
-            } else {
+            when {
+                posts.loadState.refresh is LoadState.Loading -> {
+                    FeedSkeletonLoader()
+                }
+                posts.loadState.refresh is LoadState.Error -> {
+                    val error = (posts.loadState.refresh as LoadState.Error).error
+                    HabitateErrorState(
+                        title = "Couldn't load feed",
+                        description = error.localizedMessage ?: "Something went wrong",
+                        onRetry = { posts.retry() }
+                    )
+                }
+                posts.loadState.refresh is LoadState.NotLoading && posts.itemCount == 0 -> {
+                    EmptyFeedState(onCreatePostClick = onCreatePostClick)
+                }
+                else -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp) // Space for FAB
@@ -211,12 +222,14 @@ fun FeedScreen(
                         }
                     }
                 }
+                }
             }
             
             val snackbarHostState = LocalSnackbarHostState.current
             LaunchedEffect(uiState.error) {
                 uiState.error?.let { error ->
                     snackbarHostState.showSnackbar(error)
+                    viewModel.clearError()
                 }
             }
         }

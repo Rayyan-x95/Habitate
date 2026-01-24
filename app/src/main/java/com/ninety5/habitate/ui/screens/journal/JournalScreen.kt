@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -68,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -558,7 +561,7 @@ private fun JournalEntryEditor(
     var title by remember(editingEntry) { mutableStateOf(editingEntry?.title ?: "") }
     var content by remember(editingEntry) { mutableStateOf(editingEntry?.content ?: "") }
     var selectedMood by remember(editingEntry) { mutableStateOf(editingEntry?.mood) }
-    var tagInput by remember { mutableStateOf("") }
+    var tagInput by remember(editingEntry) { mutableStateOf("") }
     var tags by remember(editingEntry) { mutableStateOf(editingEntry?.tags ?: emptyList()) }
 
     val moods = listOf("happy", "calm", "anxious", "sad", "excited", "tired", "grateful", "frustrated")
@@ -647,6 +650,16 @@ private fun JournalEntryEditor(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    val trimmed = tagInput.trim()
+                    if (trimmed.isNotBlank() && !tags.contains(trimmed)) {
+                        tags = tags + trimmed
+                        tagInput = ""
+                    }
+                }
+            ),
             trailingIcon = {
                 if (tagInput.isNotBlank()) {
                     IconButton(onClick = {

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -58,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,9 +105,11 @@ fun StudiesScreen(
             ) {
                 // Active session banner
                 item {
-                    AnimatedVisibility(visible = uiState.activeSessionId != null) {
+                    AnimatedVisibility(
+                        visible = uiState.activeSessionId != null && uiState.sessionStartTime != null
+                    ) {
                         ActiveSessionCard(
-                            sessionStartTime = uiState.sessionStartTime ?: 0,
+                            sessionStartTime = uiState.sessionStartTime ?: return@AnimatedVisibility,
                             onStop = { viewModel.endStudySession() }
                         )
                     }
@@ -159,7 +163,7 @@ fun StudiesScreen(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(uiState.studyTips, key = { it }) { tip ->
+                        itemsIndexed(uiState.studyTips) { index, tip ->
                             TipCard(tip = tip)
                         }
                     }
@@ -199,8 +203,8 @@ private fun StatsOverviewCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.LocalFireDepartment,
-                            contentDescription = null,
-                            tint = Color(0xFFFF6B35),
+                            contentDescription = "Study streak",
+                            tint = LocalHabitateColors.current.warning,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -222,7 +226,7 @@ private fun StatsOverviewCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.Timer,
-                            contentDescription = null,
+                            contentDescription = "Today's study time",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -304,7 +308,7 @@ private fun StudyHabitCard(
                         Icon(
                             Icons.Default.CheckCircle,
                             contentDescription = "Completed",
-                            tint = Color(0xFF4CAF50),
+                            tint = LocalHabitateColors.current.success,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -340,13 +344,13 @@ private fun StudyHabitCard(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Stop, contentDescription = "Stop study session", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Stop")
                 }
             } else {
                 OutlinedButton(onClick = onStart) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Start study session", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Start")
                 }
@@ -394,7 +398,7 @@ private fun ActiveSessionCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = String.format("%02d:%02d", minutes, seconds),
+                text = String.format(java.util.Locale.US, "%02d:%02d", minutes, seconds),
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -408,7 +412,7 @@ private fun ActiveSessionCard(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Icon(Icons.Default.Stop, contentDescription = null)
+                Icon(Icons.Default.Stop, contentDescription = "End study session")
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("End Session")
             }

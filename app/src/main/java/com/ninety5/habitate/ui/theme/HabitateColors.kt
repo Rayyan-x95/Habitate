@@ -307,7 +307,7 @@ val LightHabitateColors = HabitateColorScheme(
     onSurface = Neutral800,
     surfaceVariant = Neutral150,
     onSurfaceVariant = Neutral600,
-    surfaceElevated = Color.White,
+    surfaceElevated = Neutral50,
     surfaceContainerLow = Neutral100,
     surfaceContainerHigh = Neutral200,
     

@@ -149,43 +149,46 @@ class FeedRepository @Inject constructor(
     }
 
     /**
-     * Toggle like on a post. Properly creates/deletes LikeEntity.
+     * Toggle like on a post. Uses atomic transaction for concurrency safety.
      * 
      * @param userId ID of the user liking/unliking the post (typically current user)
      * @param postId ID of the post being liked/unliked
+     * @param reactionType Optional reaction type (HEART, LIKE, etc.). null = toggle default HEART
      * 
-     * NEW IMPLEMENTATION:
-     * - Creates/deletes LikeEntity in 'likes' table (source of truth)
+     * IMPLEMENTATION:
+     * - Uses atomic toggle/upsert operation in LikeDao (with @Transaction)
      * - Updates denormalized Post.likesCount for performance
      * - Queues operation for background sync
      * - Optimistic update: changes reflect immediately in UI
-     * 
-     * BREAKING CHANGE from old implementation:
-     * - Now requires userId parameter (no longer assumes from context)
-     * - Uses LikeEntity instead of boolean flag on Post
      */
     suspend fun toggleLike(userId: String, postId: String, reactionType: String? = null) {
-        val existingLike = likeDao.getLike(userId, postId)
+        val currentTime = System.currentTimeMillis()
         
         if (reactionType != null) {
-            // Explicit reaction (Upsert)
-            val likeEntity = LikeEntity(
+            // Explicit reaction: always upsert (add or change reaction)
+            val (isNew, _) = likeDao.upsertReactionAtomic(
                 userId = userId,
                 postId = postId,
                 reactionType = reactionType,
-                createdAt = System.currentTimeMillis(),
+                currentTimeMillis = currentTime,
                 syncState = SyncState.PENDING
             )
-            likeDao.insert(likeEntity)
             
-            // Update denormalized count on Post
+            // Update denormalized count on Post (only increment if new)
             val post = postDao.getPostByIdOneShot(postId)
             if (post != null) {
-                val newCount = if (existingLike != null) post.likesCount else post.likesCount + 1
+                val newCount = if (isNew) post.likesCount + 1 else post.likesCount
                 postDao.updateLikeStatus(postId, isLiked = true, count = newCount, reactionType = reactionType)
             }
             
             // Queue for sync
+            val likeEntity = LikeEntity(
+                userId = userId,
+                postId = postId,
+                reactionType = reactionType,
+                createdAt = currentTime,
+                syncState = SyncState.PENDING
+            )
             val payload = moshi.adapter(LikeEntity::class.java).toJson(likeEntity)
             val syncOp = SyncOperationEntity(
                 entityType = "like",
@@ -198,43 +201,44 @@ class FeedRepository @Inject constructor(
             )
             syncQueueDao.insert(syncOp)
         } else {
-            if (existingLike == null) {
-                // Create like (HEART)
+            // Toggle default HEART reaction using atomic operation
+            val wasCreated = likeDao.toggleLikeAtomic(
+                userId = userId,
+                postId = postId,
+                reactionType = "HEART",
+                currentTimeMillis = currentTime,
+                syncState = SyncState.PENDING
+            )
+            
+            val post = postDao.getPostByIdOneShot(postId)
+            if (post != null) {
+                if (wasCreated) {
+                    postDao.updateLikeStatus(postId, isLiked = true, count = post.likesCount + 1, reactionType = "HEART")
+                } else {
+                    postDao.updateLikeStatus(postId, isLiked = false, count = maxOf(0, post.likesCount - 1), reactionType = null)
+                }
+            }
+            
+            // Queue appropriate sync operation
+            val syncOp = if (wasCreated) {
                 val likeEntity = LikeEntity(
                     userId = userId,
                     postId = postId,
                     reactionType = "HEART",
-                    createdAt = System.currentTimeMillis(),
+                    createdAt = currentTime,
                     syncState = SyncState.PENDING
                 )
-                likeDao.insert(likeEntity)
-                
-                val post = postDao.getPostByIdOneShot(postId)
-                if (post != null) {
-                    postDao.updateLikeStatus(postId, isLiked = true, count = post.likesCount + 1, reactionType = "HEART")
-                }
-                
-                val payload = moshi.adapter(LikeEntity::class.java).toJson(likeEntity)
-                val syncOp = SyncOperationEntity(
+                SyncOperationEntity(
                     entityType = "like",
                     entityId = "${userId}_${postId}",
                     operation = "CREATE",
-                    payload = payload,
+                    payload = moshi.adapter(LikeEntity::class.java).toJson(likeEntity),
                     status = SyncStatus.PENDING,
                     createdAt = Instant.now(),
                     lastAttemptAt = null
                 )
-                syncQueueDao.insert(syncOp)
             } else {
-                // Delete like
-                likeDao.delete(userId, postId)
-                
-                val post = postDao.getPostByIdOneShot(postId)
-                if (post != null) {
-                    postDao.updateLikeStatus(postId, isLiked = false, count = maxOf(0, post.likesCount - 1), reactionType = null)
-                }
-                
-                val syncOp = SyncOperationEntity(
+                SyncOperationEntity(
                     entityType = "like",
                     entityId = "${userId}_${postId}",
                     operation = "DELETE",
@@ -243,8 +247,8 @@ class FeedRepository @Inject constructor(
                     createdAt = Instant.now(),
                     lastAttemptAt = null
                 )
-                syncQueueDao.insert(syncOp)
             }
+            syncQueueDao.insert(syncOp)
         }
     }
     

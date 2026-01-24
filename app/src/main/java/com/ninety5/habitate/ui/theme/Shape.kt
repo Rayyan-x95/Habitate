@@ -112,7 +112,7 @@ val TooltipShape = RoundedCornerShape(Radius.xs)
 /** Navigation bar indicator shape */
 val NavIndicatorShape = RoundedCornerShape(Radius.pill)
 
-/** Search bar shape - Pill-like */
+/** Search bar shape - Medium rounded */
 val SearchBarShape = RoundedCornerShape(Radius.md)
 
 /** Story ring shape */

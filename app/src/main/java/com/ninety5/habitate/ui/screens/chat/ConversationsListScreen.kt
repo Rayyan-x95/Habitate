@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ninety5.habitate.ui.theme.*
+import com.ninety5.habitate.ui.theme.LocalHabitateColors
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
@@ -165,7 +166,7 @@ fun ConversationItem(
                         modifier = Modifier
                             .size(12.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF4CAF50)) // Green for online
+                            .background(LocalHabitateColors.current.success)
                             .align(Alignment.BottomEnd)
                             .border(
                                 width = 2.dp,

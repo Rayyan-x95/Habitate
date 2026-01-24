@@ -11,7 +11,7 @@ Habitate is a mobile-first social super-app combining social networking, fitness
 
 ```
 app/src/main/java/com/ninety5/habitate/
-├── HABITATEAPPLICATION.kt   # Application class
+├── HabitateApplication.kt   # Application class
 ├── MainActivity.kt          # Single-activity entry point + NavHost
 ├── core/
 │   ├── analytics/           # Analytics abstractions
@@ -154,7 +154,7 @@ All DAOs are defined in `data/local/dao/`. Use `Flow` return types for observabl
 
 ## Offline & Sync
 
-- **Sync Queue:** `SyncSameDao` and `SyncWorker` handle offline-first operations.
+- **Sync Queue:** `SyncQueueDao` and `SyncWorker` handle offline-first operations.
 - **Worker:** Located in `worker/` package.
 - **Strategy:** Local changes are written to Room immediately and queued for sync.
 
@@ -198,7 +198,7 @@ All DAOs are defined in `data/local/dao/`. Use `Flow` return types for observabl
 - User data is protected.
 
 **Permissions:**
-- `android.permission.health.READ_Steps`
+- `android.permission.health.READ_STEPS`
 - `android.permission.POST_NOTIFICATIONS`
 
 ---

@@ -77,4 +77,58 @@ interface LikeDao {
      */
     @Query("DELETE FROM likes")
     suspend fun deleteAll()
+    
+    /**
+     * Atomic toggle like operation.
+     * Returns true if like was created, false if removed.
+     * Uses @Transaction to ensure atomicity of read-check-write operation.
+     */
+    @Transaction
+    suspend fun toggleLikeAtomic(
+        userId: String,
+        postId: String,
+        reactionType: String,
+        currentTimeMillis: Long,
+        syncState: SyncState
+    ): Boolean {
+        val existing = getLike(userId, postId)
+        return if (existing == null) {
+            insert(LikeEntity(
+                userId = userId,
+                postId = postId,
+                reactionType = reactionType,
+                createdAt = currentTimeMillis,
+                syncState = syncState
+            ))
+            true
+        } else {
+            delete(userId, postId)
+            false
+        }
+    }
+    
+    /**
+     * Atomic upsert reaction (for explicit reaction changes).
+     * Always inserts/updates, never removes.
+     * Returns pair of (isNew, previousReactionType) for post count updates.
+     */
+    @Transaction
+    suspend fun upsertReactionAtomic(
+        userId: String,
+        postId: String,
+        reactionType: String,
+        currentTimeMillis: Long,
+        syncState: SyncState
+    ): Pair<Boolean, String?> {
+        val existing = getLike(userId, postId)
+        val previousType = existing?.reactionType
+        insert(LikeEntity(
+            userId = userId,
+            postId = postId,
+            reactionType = reactionType,
+            createdAt = currentTimeMillis,
+            syncState = syncState
+        ))
+        return Pair(existing == null, previousType) // (isNew, previousType)
+    }
 }

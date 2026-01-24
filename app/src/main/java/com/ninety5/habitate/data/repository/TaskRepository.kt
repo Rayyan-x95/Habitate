@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,7 +62,7 @@ class TaskRepository @Inject constructor(
             id = UUID.randomUUID().toString(),
             title = title,
             description = description,
-            dueAt = dueDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant(),
+            dueAt = dueDate?.atStartOfDay()?.toInstant(ZoneOffset.UTC),
             recurrenceRule = null,
             status = TaskStatus.OPEN,
             syncState = SyncState.PENDING,
@@ -74,8 +75,8 @@ class TaskRepository @Inject constructor(
      * Get tasks due on a specific date
      */
     suspend fun getTasksForDate(date: LocalDate): List<TaskEntity> {
-        val startOfDay = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        val endOfDay = date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+        val startOfDay = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+        val endOfDay = date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
         return taskDao.getTasksForDateRange(startOfDay, endOfDay)
     }
 

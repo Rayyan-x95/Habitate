@@ -21,8 +21,17 @@ interface JournalDao {
     @Query("SELECT * FROM journal_entries WHERE id = :id")
     suspend fun getEntryByIdSync(id: String): JournalEntryEntity?
 
+    @Query("SELECT * FROM journal_entries WHERE id = :id AND userId = :userId")
+    fun getEntryByIdAndUserId(id: String, userId: String): Flow<JournalEntryEntity?>
+
+    @Query("SELECT * FROM journal_entries WHERE id = :id AND userId = :userId")
+    suspend fun getEntryByIdAndUserIdSync(id: String, userId: String): JournalEntryEntity?
+
     @Query("DELETE FROM journal_entries WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM journal_entries WHERE id = :id AND userId = :userId")
+    suspend fun deleteByIdAndUserId(id: String, userId: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entry: JournalEntryEntity)
@@ -36,11 +45,10 @@ interface JournalDao {
 
     @Query("""
         SELECT * FROM journal_entries 
-        WHERE userId = :userId AND (title LIKE :query OR content LIKE :query)
+        WHERE userId = :userId AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%')
         ORDER BY date DESC
     """)
     fun searchEntries(userId: String, query: String): Flow<List<JournalEntryEntity>>
-
     @Query("SELECT * FROM journal_entries WHERE userId = :userId AND mood = :mood ORDER BY date DESC")
     fun getEntriesByMood(userId: String, mood: String): Flow<List<JournalEntryEntity>>
 

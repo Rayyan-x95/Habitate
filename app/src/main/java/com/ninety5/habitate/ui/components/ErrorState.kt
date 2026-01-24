@@ -19,6 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
+/**
+ * @deprecated Use [com.ninety5.habitate.ui.components.designsystem.HabitateErrorState] instead.
+ * This composable will be removed in a future version.
+ */
+@Deprecated(
+    message = "Use HabitateErrorState from the design system instead",
+    replaceWith = ReplaceWith(
+        "HabitateErrorState(title = \"Error\", description = message, onRetry = onRetry)",
+        "com.ninety5.habitate.ui.components.designsystem.HabitateErrorState"
+    )
+)
 @Composable
 fun ErrorState(
     message: String,

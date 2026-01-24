@@ -112,7 +112,7 @@ fun HabitateTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 // Focus states
                 focusedBorderColor = if (isSuccess) colors.success else colors.inputBorderFocused,
-                unfocusedBorderColor = colors.borderSubtle,
+                unfocusedBorderColor = if (isSuccess) colors.success else colors.borderSubtle,
                 errorBorderColor = colors.error.copy(alpha = 0.8f),
                 // Container colors
                 focusedContainerColor = colors.surface,

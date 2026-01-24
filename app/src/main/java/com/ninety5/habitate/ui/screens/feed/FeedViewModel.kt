@@ -6,6 +6,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,12 +53,24 @@ class FeedViewModel @Inject constructor(
     fun loadFeed(refresh: Boolean = false) {
         viewModelScope.launch {
             if (refresh) {
-                _uiState.update { it.copy(isRefreshing = true) }
-                launch { feedRepository.refreshFeed() }
-                launch { storyRepository.refreshStories() }
-                _uiState.update { it.copy(isRefreshing = false) }
+                _uiState.update { it.copy(isRefreshing = true, error = null) }
+                try {
+                    awaitAll(
+                        async { feedRepository.refreshFeed() },
+                        async { storyRepository.refreshStories() }
+                    )
+                } catch (e: Exception) {
+                    timber.log.Timber.e(e, "Failed to refresh feed")
+                    _uiState.update { it.copy(error = e.message ?: "Failed to refresh feed") }
+                } finally {
+                    _uiState.update { it.copy(isRefreshing = false) }
+                }
             }
         }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 
     private fun loadStories() {
@@ -78,8 +92,17 @@ class FeedViewModel @Inject constructor(
 
     fun toggleLike(postId: String, reactionType: String? = null) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            feedRepository.toggleLike(userId, postId, reactionType)
+            val userId = authRepository.getCurrentUserId()
+            if (userId == null) {
+                _uiState.update { it.copy(error = "Please log in to like posts") }
+                return@launch
+            }
+            try {
+                feedRepository.toggleLike(userId, postId, reactionType)
+            } catch (e: Exception) {
+                timber.log.Timber.e(e, "Failed to toggle like")
+                _uiState.update { it.copy(error = "Failed to update like") }
+            }
         }
     }
 

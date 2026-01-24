@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +57,8 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.ninety5.habitate.data.local.relation.StoryWithUser
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -83,25 +86,41 @@ fun StoryViewerScreen(
         }
     }
 
-    // Auto-progress timer
-    LaunchedEffect(currentIndex, isPaused, userStories) {
-        if (userStories.isEmpty() || isPaused) return@LaunchedEffect
+    // Auto-progress timer - only key on currentIndex and userStories, handle pause internally
+    LaunchedEffect(currentIndex, userStories) {
+        if (userStories.isEmpty()) return@LaunchedEffect
         
         progress.snapTo(0f)
-        progress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = STORY_DURATION_MS.toInt(),
-                easing = LinearEasing
-            )
-        )
         
-        // Move to next story when progress completes
-        if (currentIndex < userStories.size - 1) {
-            currentIndex++
-        } else {
-            onClose()
-        }
+        // Use snapshotFlow to reactively observe isPaused changes
+        snapshotFlow { isPaused to progress.value }
+            .collectLatest { (paused, currentProgress) ->
+                if (!paused && currentProgress < 1f) {
+                    val remaining = 1f - currentProgress
+                    val remainingDuration = (remaining * STORY_DURATION_MS).toLong()
+                    
+                    try {
+                        progress.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(
+                                durationMillis = remainingDuration.toInt(),
+                                easing = LinearEasing
+                            )
+                        )
+                        
+                        // Move to next story when progress completes
+                        if (progress.value >= 1f) {
+                            if (currentIndex < userStories.size - 1) {
+                                currentIndex++
+                            } else {
+                                onClose()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Animation was cancelled (pause or navigation)
+                    }
+                }
+            }
     }
 
     // Pause timer when screen is not visible
@@ -307,10 +326,14 @@ private fun StoryContent(
     val context = LocalContext.current
     val mediaUrl = storyWithUser.story.mediaUrl
     
-    // Check if it's a video (by extension or MIME type pattern)
-    val isVideo = mediaUrl.endsWith(".mp4", ignoreCase = true) ||
-                  mediaUrl.endsWith(".webm", ignoreCase = true) ||
-                  mediaUrl.contains("video", ignoreCase = true)
+    // Determine if media is video by file extension, handling URLs with query strings
+    val isVideo = remember(mediaUrl) {
+        val pathSegment = android.net.Uri.parse(mediaUrl).lastPathSegment ?: ""
+        pathSegment.endsWith(".mp4", ignoreCase = true) ||
+        pathSegment.endsWith(".webm", ignoreCase = true) ||
+        pathSegment.endsWith(".mov", ignoreCase = true) ||
+        pathSegment.endsWith(".avi", ignoreCase = true)
+    }
     
     if (isVideo) {
         // For video, show a placeholder with video icon
@@ -319,19 +342,24 @@ private fun StoryContent(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Video stories coming soon",
-                color = Color.White.copy(alpha = 0.7f)
-            )
-            Icon(
-                imageVector = Icons.Rounded.PlayArrow,
-                contentDescription = "Video",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(64.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    .padding(16.dp)
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayArrow,
+                    contentDescription = "Video",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        .padding(16.dp)
+                )
+                Text(
+                    text = "Video stories coming soon",
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
         }
     } else {
         // Image story

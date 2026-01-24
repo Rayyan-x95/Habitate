@@ -162,7 +162,7 @@ fun ProfileScreen(
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Rounded.Edit, contentDescription = "Edit profile icon", modifier = Modifier.size(18.dp))
                                         Spacer(modifier = Modifier.size(8.dp))
                                         Text("Edit Profile")
                                     }
@@ -173,7 +173,7 @@ fun ProfileScreen(
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                                        Icon(Icons.Default.History, contentDescription = "Timeline icon", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
                                         Spacer(modifier = Modifier.size(8.dp))
                                         Text("Timeline", color = MaterialTheme.colorScheme.onSecondaryContainer)
                                     }

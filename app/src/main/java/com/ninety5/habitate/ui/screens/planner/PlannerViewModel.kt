@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -33,7 +34,11 @@ class PlannerViewModel @Inject constructor(
 
     // Cache for offline support
     private var cachedAdvice: String? = null
-    private var dismissedSuggestionIds = mutableSetOf<String>()
+    private val _dismissedSuggestionIds = MutableStateFlow<Set<String>>(emptySet())
+    
+    // Expose selected date for UI
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     init {
         loadPlan()
@@ -48,6 +53,9 @@ class PlannerViewModel @Inject constructor(
                     _uiState.value = PlannerUiState.Error("User not logged in")
                     return@launch
                 }
+                
+                // Use selected date for loading tasks/habits
+                val selectedDate = _selectedDate.value
 
                 // Load all data in parallel
                 val dailyAdvice = try {
@@ -59,11 +67,11 @@ class PlannerViewModel @Inject constructor(
                     cachedAdvice ?: getFallbackAdvice()
                 }
 
-                val todayTasks = loadTodayTasks()
+                val todayTasks = loadTasksForDate(selectedDate)
                 val todayHabits = loadTodayHabits()
-                val weeklyPlan = generateWeeklyPlan()
+                val weeklyPlan = generateWeeklyPlan(selectedDate)
                 val suggestions = generateSuggestions(currentUser.id)
-                    .filter { it.id !in dismissedSuggestionIds }
+                    .filter { it.id !in _dismissedSuggestionIds.value }
 
                 _uiState.value = PlannerUiState.Success(
                     dailyAdvice = dailyAdvice,
@@ -106,9 +114,9 @@ class PlannerViewModel @Inject constructor(
     }
 
     fun selectDay(date: LocalDate) {
-        // Could navigate to a detailed day view
+        _selectedDate.value = date
         viewModelScope.launch {
-            // For now, we'll just refresh with the selected day in focus
+            // Reload plan with selected date context
             loadPlan()
         }
     }
@@ -148,7 +156,7 @@ class PlannerViewModel @Inject constructor(
                 }
 
                 // Remove from suggestions
-                dismissedSuggestionIds.add(suggestion.id)
+                _dismissedSuggestionIds.update { it + suggestion.id }
                 updateSuggestionsInState()
                 
                 _events.send(PlannerEvent.TaskAccepted)
@@ -159,7 +167,7 @@ class PlannerViewModel @Inject constructor(
     }
 
     fun dismissSuggestion(suggestion: AISuggestion) {
-        dismissedSuggestionIds.add(suggestion.id)
+        _dismissedSuggestionIds.update { it + suggestion.id }
         updateSuggestionsInState()
         viewModelScope.launch {
             _events.send(PlannerEvent.TaskDismissed)
@@ -170,14 +178,14 @@ class PlannerViewModel @Inject constructor(
         val currentState = _uiState.value
         if (currentState is PlannerUiState.Success) {
             _uiState.value = currentState.copy(
-                suggestions = currentState.suggestions.filter { it.id !in dismissedSuggestionIds }
+                suggestions = currentState.suggestions.filter { it.id !in _dismissedSuggestionIds.value }
             )
         }
     }
 
-    private suspend fun loadTodayTasks(): List<PlannedTask> {
+    private suspend fun loadTasksForDate(date: LocalDate): List<PlannedTask> {
         return try {
-            taskRepository.getTasksForDate(LocalDate.now()).map { task ->
+            taskRepository.getTasksForDate(date).map { task ->
                 PlannedTask(
                     id = task.id,
                     title = task.title,
@@ -215,14 +223,17 @@ class PlannerViewModel @Inject constructor(
         }
     }
 
-    private fun generateWeeklyPlan(): List<DayPlan> {
-        val today = LocalDate.now()
+    private fun generateWeeklyPlan(selectedDate: LocalDate): List<DayPlan> {
+        // Start week from the beginning of the week containing selectedDate
+        val startOfWeek = selectedDate.with(java.time.DayOfWeek.MONDAY)
         return (0..6).map { dayOffset ->
-            val date = today.plusDays(dayOffset.toLong())
+            val date = startOfWeek.plusDays(dayOffset.toLong())
+            // Use deterministic values based on day of week
+            val dayOfWeek = date.dayOfWeek.value
             DayPlan(
                 date = date,
-                taskCount = (1..5).random(), // Simulated - would come from actual data
-                habitCount = (2..4).random(),
+                taskCount = 2 + (dayOfWeek % 3), // 2-4 based on day
+                habitCount = 2 + (dayOfWeek % 2), // 2-3 based on day
                 completionRate = if (dayOffset == 0) 0.3f else 0f,
                 focusArea = when (date.dayOfWeek.value) {
                     1 -> "Productivity"
@@ -249,7 +260,7 @@ class PlannerViewModel @Inject constructor(
             if (com.ninety5.habitate.data.local.entity.HabitCategory.FITNESS !in categories) {
                 suggestions.add(
                     AISuggestion(
-                        id = "suggest_fitness_${System.currentTimeMillis()}",
+                        id = "suggest_fitness",
                         type = SuggestionType.NEW_HABIT,
                         title = "Morning Stretch",
                         description = "Start your day with a 5-minute stretch routine",
@@ -262,7 +273,7 @@ class PlannerViewModel @Inject constructor(
             if (com.ninety5.habitate.data.local.entity.HabitCategory.MINDFULNESS !in categories) {
                 suggestions.add(
                     AISuggestion(
-                        id = "suggest_mindfulness_${System.currentTimeMillis()}",
+                        id = "suggest_mindfulness",
                         type = SuggestionType.NEW_HABIT,
                         title = "Daily Gratitude",
                         description = "Write 3 things you're grateful for each morning",

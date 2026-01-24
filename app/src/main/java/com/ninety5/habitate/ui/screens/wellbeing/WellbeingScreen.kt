@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.data.local.entity.JournalEntryEntity
+import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -162,7 +163,7 @@ fun WellbeingScreen(
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(uiState.insights, key = { it.title }) { insight ->
+                            items(uiState.insights, key = { "${it.emoji}_${it.title}" }) { insight ->
                                 InsightCard(insight = insight)
                             }
                         }
@@ -229,10 +230,11 @@ private fun WellbeingScoreCard(score: Int) {
         animatedScore = score.toFloat()
     }
     
+    val colors = LocalHabitateColors.current
     val scoreColor = when {
-        score >= 70 -> Color(0xFF4CAF50)
-        score >= 40 -> Color(0xFFFFC107)
-        else -> Color(0xFFFF5722)
+        score >= 70 -> colors.success
+        score >= 40 -> colors.warning
+        else -> colors.error
     }
 
     Card(
@@ -264,7 +266,7 @@ private fun WellbeingScoreCard(score: Int) {
                 Canvas(modifier = Modifier.size(150.dp)) {
                     // Background circle
                     drawArc(
-                        color = Color.White.copy(alpha = 0.3f),
+                        color = colors.onPrimaryContainer.copy(alpha = 0.3f),
                         startAngle = -90f,
                         sweepAngle = 360f,
                         useCenter = false,
@@ -413,7 +415,7 @@ private fun MoodDistributionCard(moodDistribution: Map<String, Int>) {
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "${((count / total) * 100).toInt()}%",
+                            text = if (total > 0) "${((count / total) * 100).toInt()}%" else "0%",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

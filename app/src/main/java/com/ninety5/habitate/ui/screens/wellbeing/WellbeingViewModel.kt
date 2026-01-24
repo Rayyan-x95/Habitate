@@ -8,6 +8,7 @@ import com.ninety5.habitate.data.repository.HabitRepository
 import com.ninety5.habitate.data.repository.JournalRepository
 import com.ninety5.habitate.data.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,13 +30,16 @@ class WellbeingViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(WellbeingUiState())
     val uiState: StateFlow<WellbeingUiState> = _uiState.asStateFlow()
+    
+    private var wellbeingJob: Job? = null
 
     init {
         loadWellbeingData()
     }
 
     private fun loadWellbeingData() {
-        viewModelScope.launch {
+        wellbeingJob?.cancel()
+        wellbeingJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
             try {
@@ -90,10 +94,11 @@ class WellbeingViewModel @Inject constructor(
     }
 
     private fun analyzeMoodTrends(entries: List<JournalEntryEntity>): MoodData {
+        val cutoffDate = LocalDate.now().minusDays(7)
         val last7Days = entries.filter { entry ->
             val entryDate = Instant.ofEpochMilli(entry.date)
                 .atZone(ZoneId.systemDefault()).toLocalDate()
-            entryDate.isAfter(LocalDate.now().minusDays(7))
+            !entryDate.isBefore(cutoffDate) // Include boundary date
         }
         
         val moodCounts = last7Days.groupBy { it.mood ?: "unknown" }
@@ -128,10 +133,11 @@ class WellbeingViewModel @Inject constructor(
     }
 
     private fun analyzeWorkouts(workouts: List<WorkoutEntity>): WorkoutStats {
+        val cutoffDate = LocalDate.now().minusWeeks(1)
         val thisWeek = workouts.filter { workout ->
             val workoutDate = workout.startTs
                 .atZone(ZoneId.systemDefault()).toLocalDate()
-            workoutDate.isAfter(LocalDate.now().minusWeeks(1))
+            !workoutDate.isBefore(cutoffDate) // Include boundary date
         }
         
         val totalDuration = thisWeek.sumOf { workout ->
@@ -140,13 +146,16 @@ class WellbeingViewModel @Inject constructor(
         
         val totalCalories = thisWeek.sumOf { it.calories?.toInt() ?: 0 }
         
+        // Calculate normalized intensity (calories per minute)
+        val averageIntensity = if (thisWeek.isNotEmpty() && totalDuration > 0) {
+            totalCalories.toFloat() / totalDuration.toFloat()
+        } else 0f
+        
         return WorkoutStats(
             workoutsThisWeek = thisWeek.size,
             totalMinutes = totalDuration.toInt(),
             totalCalories = totalCalories,
-            averageIntensity = if (thisWeek.isNotEmpty()) {
-                thisWeek.mapNotNull { it.calories }.average().toFloat()
-            } else 0f
+            averageIntensity = averageIntensity
         )
     }
 
@@ -155,12 +164,12 @@ class WellbeingViewModel @Inject constructor(
         habitCompletionRate: Float,
         workoutStats: WorkoutStats
     ): Int {
-        // Weighted scoring
+        // Weighted scoring (values already in 0-1 range, multiply by weight)
         val moodScore = moodData.positivityRate * 35 // 35% weight
         val habitScore = habitCompletionRate * 35 // 35% weight
         val activityScore = minOf(workoutStats.workoutsThisWeek.toFloat() / 4, 1f) * 30 // 30% weight
         
-        return ((moodScore + habitScore + activityScore) * 100).toInt().coerceIn(0, 100)
+        return (moodScore + habitScore + activityScore).toInt().coerceIn(0, 100)
     }
 
     private fun generateInsights(

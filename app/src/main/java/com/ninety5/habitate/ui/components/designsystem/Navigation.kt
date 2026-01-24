@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -495,10 +496,7 @@ fun HabitateTabRow(
         indicator = { tabPositions ->
             if (selectedTabIndex < tabPositions.size) {
                 TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.BottomStart)
-                        .offset(x = tabPositions[selectedTabIndex].left),
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
                     height = 2.dp,
                     color = colors.primary
                 )
@@ -550,10 +548,7 @@ fun HabitateScrollableTabRow(
         indicator = { tabPositions ->
             if (selectedTabIndex < tabPositions.size) {
                 TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.BottomStart)
-                        .offset(x = tabPositions[selectedTabIndex].left),
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
                     height = 2.dp,
                     color = colors.primary
                 )

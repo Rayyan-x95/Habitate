@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.ninety5.habitate.data.local.entity.HabitCategory
 import com.ninety5.habitate.data.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,13 +21,16 @@ class StudiesViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(StudiesUiState())
     val uiState: StateFlow<StudiesUiState> = _uiState.asStateFlow()
+    
+    private var studyJob: Job? = null
 
     init {
         loadStudyData()
     }
 
     private fun loadStudyData() {
-        viewModelScope.launch {
+        studyJob?.cancel()
+        studyJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 // Load study sessions (habits with LEARNING category or study-related titles)
@@ -72,12 +77,31 @@ class StudiesViewModel @Inject constructor(
     fun endStudySession() {
         viewModelScope.launch {
             val state = _uiState.value
-            state.activeSessionId?.let { habitId ->
+            val habitId = state.activeSessionId ?: return@launch
+            val startTime = state.sessionStartTime ?: return@launch
+            
+            // Compute session duration
+            val durationMs = System.currentTimeMillis() - startTime
+            val durationMinutes = (durationMs / 1000 / 60).toInt()
+            
+            try {
                 // Mark habit as completed for today
                 habitRepository.completeHabit(habitId)
+                
+                // Update todayMinutes in UI state immediately
+                _uiState.update { it.copy(
+                    todayMinutes = it.todayMinutes + durationMinutes,
+                    weeklyProgress = ((it.todayMinutes + durationMinutes).toFloat() / it.weeklyGoal).coerceIn(0f, 1f)
+                )}
+                
+                Timber.d("Study session completed: $habitId, duration: $durationMinutes minutes")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to complete study session")
+                _uiState.update { it.copy(error = e.message ?: "Failed to end session") }
+            } finally {
+                _uiState.update { it.copy(activeSessionId = null, sessionStartTime = null) }
+                loadStudyData() // Refresh data
             }
-            _uiState.update { it.copy(activeSessionId = null, sessionStartTime = null) }
-            loadStudyData() // Refresh data
         }
     }
 

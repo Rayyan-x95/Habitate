@@ -18,15 +18,35 @@ import com.ninety5.habitate.data.remote.WsMessage
 import com.ninety5.habitate.data.remote.PresenceStatus
 import com.ninety5.habitate.data.remote.dto.MessageDto
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Repository for managing chat data and realtime messaging.
+ * 
+ * Uses a dedicated CoroutineScope for realtime stream collection to:
+ * 1. Prevent lifecycle issues (stream outlives any single ViewModel)
+ * 2. Allow proper cleanup on logout/app destruction
+ * 3. Support reconnection without leaking coroutines
+ */
 @Singleton
 class ChatRepository @Inject constructor(
     private val chatDao: ChatDao,
@@ -42,51 +62,125 @@ class ChatRepository @Inject constructor(
 
     private val _typingEvents = MutableSharedFlow<WsMessage.Typing>()
     val typingEvents = _typingEvents.asSharedFlow()
+    
+    /** Connection state for UI observation */
+    enum class ConnectionState { DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING }
+    
+    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+    
+    /**
+     * Dedicated scope for realtime stream collection.
+     * Uses SupervisorJob to prevent child failures from cancelling the entire scope.
+     */
+    private var realtimeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var realtimeJob: Job? = null
+    private var reconnectAttempt = 0
+    private val maxReconnectAttempts = 5
+    private val baseReconnectDelayMs = 1000L
 
     fun getMessages(chatId: String): Flow<List<MessageWithReactions>> = messageDao.getMessages(chatId)
 
-    suspend fun initializeRealtime() {
-        try {
-            realtimeClient.connect()
-            realtimeClient.messages.collect { msg ->
-                when (msg) {
-                    is WsMessage.NewMessage -> {
-                        val entity = MessageEntity(
-                            id = msg.message.id,
-                            chatId = msg.message.conversationId,
-                            senderId = msg.message.senderId,
-                            content = msg.message.content,
-                            mediaUrl = null, // Domain model doesn't have mediaUrl yet
-                            status = MessageStatus.DELIVERED,
-                            createdAt = msg.message.timestamp.toEpochMilli()
-                        )
-                        messageDao.upsert(entity)
-                    }
-                    is WsMessage.Presence -> {
-                        val isOnline = msg.status == PresenceStatus.ONLINE
-                        userDao.updatePresence(msg.userId, isOnline, System.currentTimeMillis())
-                    }
-                    is WsMessage.Typing -> {
-                        _typingEvents.emit(msg)
-                    }
-                    is WsMessage.Reaction -> {
-                        if (msg.action == "ADD") {
-                            messageReactionDao.upsert(
-                                MessageReactionEntity(
-                                    messageId = msg.messageId,
-                                    userId = msg.userId,
-                                    emoji = msg.emoji
+    /**
+     * Initialize realtime connection and start collecting messages.
+     * Safe to call multiple times - will cancel previous collection job.
+     * Implements exponential backoff for reconnection on failures.
+     */
+    fun initializeRealtime() {
+        // Cancel any existing collection to prevent duplicate processing
+        realtimeJob?.cancel()
+        reconnectAttempt = 0
+        
+        realtimeJob = realtimeScope.launch {
+            while (isActive) {
+                try {
+                    _connectionState.value = if (reconnectAttempt == 0) ConnectionState.CONNECTING else ConnectionState.RECONNECTING
+                    realtimeClient.connect()
+                    _connectionState.value = ConnectionState.CONNECTED
+                    reconnectAttempt = 0 // Reset on successful connection
+                    
+                    realtimeClient.messages.collect { msg ->
+                        when (msg) {
+                            is WsMessage.NewMessage -> {
+                                val entity = MessageEntity(
+                                    id = msg.message.id,
+                                    chatId = msg.message.conversationId,
+                                    senderId = msg.message.senderId,
+                                    content = msg.message.content,
+                                    mediaUrl = null, // Domain model doesn't have mediaUrl yet
+                                    status = MessageStatus.DELIVERED,
+                                    createdAt = msg.message.timestamp.toEpochMilli()
                                 )
-                            )
-                        } else {
-                            messageReactionDao.removeReaction(msg.messageId, msg.userId)
+                                messageDao.upsert(entity)
+                            }
+                            is WsMessage.Presence -> {
+                                val isOnline = msg.status == PresenceStatus.ONLINE
+                                userDao.updatePresence(msg.userId, isOnline, System.currentTimeMillis())
+                            }
+                            is WsMessage.Typing -> {
+                                _typingEvents.emit(msg)
+                            }
+                            is WsMessage.Reaction -> {
+                                if (msg.action == "ADD") {
+                                    messageReactionDao.upsert(
+                                        MessageReactionEntity(
+                                            messageId = msg.messageId,
+                                            userId = msg.userId,
+                                            emoji = msg.emoji
+                                        )
+                                    )
+                                } else {
+                                    messageReactionDao.removeReaction(msg.messageId, msg.userId)
+                                }
+                            }
                         }
+                    }                } catch (e: CancellationException) {
+                    // Re-throw CancellationException immediately for proper coroutine cancellation
+                    throw e                } catch (e: Exception) {
+                    Timber.e(e, "ChatRepository: Realtime connection failed (attempt $reconnectAttempt)")
+                    _connectionState.value = ConnectionState.DISCONNECTED
+                    
+                    if (reconnectAttempt < maxReconnectAttempts) {
+                        // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                        val delayMs = baseReconnectDelayMs * (1L shl reconnectAttempt)
+                        reconnectAttempt++
+                        Timber.d("ChatRepository: Reconnecting in ${delayMs}ms...")
+                        delay(delayMs)
+                    } else {
+                        Timber.e("ChatRepository: Max reconnection attempts reached, giving up")
+                        break
                     }
                 }
             }
-        } catch (e: Exception) {
-            Timber.e(e, "ChatRepository: Failed to initialize realtime connection")
         }
+    }
+    
+    /**
+     * Disconnect realtime and cancel the collection scope.
+     * Call on logout or when chat feature is no longer needed.
+     */
+    fun disconnectRealtime() {
+        realtimeJob?.cancel()
+        realtimeJob = null
+        reconnectAttempt = 0
+        _connectionState.value = ConnectionState.DISCONNECTED
+        realtimeClient.close()
+        Timber.d("ChatRepository: Realtime disconnected")
+    }
+    
+    /**
+     * Clean up all resources. Call from Application.onTerminate() or test teardown.
+     * Recreates the scope so the repository can be reused after destroy (e.g., after logout/login).
+     */
+    fun destroy() {
+        realtimeScope.cancel()
+        realtimeClient.close()
+        // Recreate scope for potential reuse after login
+        realtimeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        realtimeJob = null
+        reconnectAttempt = 0
+        _connectionState.value = ConnectionState.DISCONNECTED
+        Timber.d("ChatRepository: Destroyed")
     }
 
     suspend fun muteChat(chatId: String, isMuted: Boolean) {

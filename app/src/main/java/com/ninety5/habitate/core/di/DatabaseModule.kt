@@ -117,4 +117,7 @@ object DatabaseModule {
 
     @Provides
     fun provideInsightDao(database: HabitateDatabase): com.ninety5.habitate.data.local.dao.InsightDao = database.insightDao()
+
+    @Provides
+    fun provideRemoteKeysDao(database: HabitateDatabase): com.ninety5.habitate.data.local.dao.RemoteKeysDao = database.remoteKeysDao()
 }

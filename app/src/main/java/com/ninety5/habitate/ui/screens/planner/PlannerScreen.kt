@@ -48,6 +48,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -153,12 +154,14 @@ fun PlannerScreen(
 
                 is PlannerUiState.Success -> {
                     val state = uiState as PlannerUiState.Success
+                    val selectedDate by viewModel.selectedDate.collectAsState()
                     
                     when (selectedTab) {
                         0 -> TodayPlanView(
                             dailyAdvice = state.dailyAdvice,
                             todayTasks = state.todayTasks,
                             todayHabits = state.todayHabits,
+                            selectedDate = selectedDate,
                             onTaskComplete = { viewModel.completeTask(it) }
                         )
                         1 -> WeeklyPlanView(
@@ -196,6 +199,7 @@ private fun TodayPlanView(
     dailyAdvice: String,
     todayTasks: List<PlannedTask>,
     todayHabits: List<PlannedHabit>,
+    selectedDate: LocalDate,
     onTaskComplete: (String) -> Unit
 ) {
     LazyColumn(
@@ -220,7 +224,7 @@ private fun TodayPlanView(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMM d")),
+                    text = selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d")),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -271,7 +275,7 @@ private fun DailyAdviceCard(advice: String) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Default.AutoAwesome,
-                    contentDescription = null,
+                    contentDescription = "AI Insight",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -323,7 +327,7 @@ private fun PlannedTaskCard(
                         .size(32.dp)
                         .clip(CircleShape)
                         .background(
-                            if (task.isCompleted) Color(0xFF4CAF50).copy(alpha = 0.2f)
+                            if (task.isCompleted) LocalHabitateColors.current.success.copy(alpha = 0.2f)
                             else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         )
                         .clickable { if (!task.isCompleted) onComplete() },
@@ -333,7 +337,7 @@ private fun PlannedTaskCard(
                         Icon(
                             Icons.Default.Check,
                             contentDescription = "Completed",
-                            tint = Color(0xFF4CAF50),
+                            tint = LocalHabitateColors.current.success,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -355,7 +359,7 @@ private fun PlannedTaskCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 Icons.Default.Schedule,
-                                contentDescription = null,
+                                contentDescription = "Scheduled time",
                                 modifier = Modifier.size(14.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -379,10 +383,11 @@ private fun PlannedTaskCard(
 
 @Composable
 private fun PriorityChip(priority: TaskPriority) {
+    val colors = LocalHabitateColors.current
     val (color, text) = when (priority) {
-        TaskPriority.HIGH -> Color(0xFFFF5722) to "High"
-        TaskPriority.MEDIUM -> Color(0xFFFFC107) to "Med"
-        TaskPriority.LOW -> Color(0xFF4CAF50) to "Low"
+        TaskPriority.HIGH -> colors.error to "High"
+        TaskPriority.MEDIUM -> colors.warning to "Med"
+        TaskPriority.LOW -> colors.success to "Low"
     }
     
     Text(
@@ -433,7 +438,7 @@ private fun PlannedHabitCard(habit: PlannedHabit) {
                 Icon(
                     Icons.Default.Check,
                     contentDescription = "Completed",
-                    tint = Color(0xFF4CAF50)
+                    tint = LocalHabitateColors.current.success
                 )
             }
         }
@@ -531,13 +536,14 @@ private fun DayPlanCard(
             }
             
             // Completion indicator
+            val completionColor = LocalHabitateColors.current
             CircularProgressIndicator(
                 progress = { dayPlan.completionRate },
                 modifier = Modifier.size(32.dp),
                 strokeWidth = 3.dp,
                 color = when {
-                    dayPlan.completionRate >= 0.8f -> Color(0xFF4CAF50)
-                    dayPlan.completionRate >= 0.5f -> Color(0xFFFFC107)
+                    dayPlan.completionRate >= 0.8f -> completionColor.success
+                    dayPlan.completionRate >= 0.5f -> completionColor.warning
                     else -> MaterialTheme.colorScheme.outline
                 }
             )
@@ -673,12 +679,12 @@ private fun SuggestionCard(
                     onClick = onDismiss,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Close, contentDescription = "Dismiss suggestion", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Dismiss")
                 }
                 Button(onClick = onAccept) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Add, contentDescription = "Accept suggestion", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Accept")
                 }

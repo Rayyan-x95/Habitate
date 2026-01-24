@@ -167,8 +167,8 @@ val Typography = Typography(
     labelSmall = TextStyle(
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 10.sp,
-        lineHeight = 14.sp,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     )
 )
@@ -197,7 +197,7 @@ val SupportingText = Typography.bodyMedium
 val MetaText = Typography.labelMedium
 
 /** Captions - Image captions, small annotations */
-val CaptionText = Typography.bodySmall
+val CaptionText = Typography.labelSmall
 
 /** Button text - All button labels */
 val ButtonText = Typography.labelLarge

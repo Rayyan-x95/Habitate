@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             authViewModel.uiState.collect { state ->
                 if (state.isLoggedIn) {
-                    launch { chatRepository.initializeRealtime() }
+                    chatRepository.initializeRealtime()
                 }
             }
         }

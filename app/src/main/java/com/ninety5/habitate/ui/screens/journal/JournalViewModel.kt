@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ninety5.habitate.data.local.entity.JournalEntryEntity
 import com.ninety5.habitate.data.repository.JournalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -12,7 +13,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -30,18 +32,24 @@ class JournalViewModel @Inject constructor(
     private val _events = MutableSharedFlow<JournalEvent>()
     val events: SharedFlow<JournalEvent> = _events.asSharedFlow()
 
-    val entries: StateFlow<List<JournalEntryEntity>> = journalRepository.getAllEntries()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // Job management to prevent collector leaks
+    private var entriesJob: Job? = null
+    private var dateCollectionJob: Job? = null
+    private var searchJob: Job? = null
 
     init {
         loadEntries()
     }
 
     private fun loadEntries() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                journalRepository.getAllEntries().collect { entries ->
+        entriesJob?.cancel()
+        entriesJob = viewModelScope.launch {
+            journalRepository.getAllEntries()
+                .onStart { _uiState.update { it.copy(isLoading = true) } }
+                .catch { e -> 
+                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                }
+                .collect { entries ->
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
@@ -54,15 +62,13 @@ class JournalViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
-            }
         }
     }
 
     fun selectDate(date: LocalDate) {
         _uiState.update { it.copy(selectedDate = date) }
-        viewModelScope.launch {
+        dateCollectionJob?.cancel()
+        dateCollectionJob = viewModelScope.launch {
             journalRepository.getEntriesForDate(date).collect { entries ->
                 _uiState.update { it.copy(selectedDateEntries = entries) }
             }
@@ -126,11 +132,12 @@ class JournalViewModel @Inject constructor(
 
     fun searchEntries(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
+        searchJob?.cancel()
         if (query.isBlank()) {
-            loadEntries()
+            _uiState.update { it.copy(searchResults = emptyList()) }
             return
         }
-        viewModelScope.launch {
+        searchJob = viewModelScope.launch {
             journalRepository.searchEntries(query).collect { results ->
                 _uiState.update { it.copy(searchResults = results) }
             }

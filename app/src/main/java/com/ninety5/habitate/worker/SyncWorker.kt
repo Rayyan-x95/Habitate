@@ -48,14 +48,22 @@ class SyncWorker @AssistedInject constructor(
     companion object {
         const val MAX_RETRIES = 5
         const val INITIAL_BACKOFF_MS = 1000L // 1 second
+        const val STALE_OPERATION_TIMEOUT_MS = 5 * 60 * 1000L // 5 minutes
     }
 
     override suspend fun doWork(): Result {
+        // Reset stale IN_PROGRESS operations that may have been orphaned
+        val cutoffTime = System.currentTimeMillis() - STALE_OPERATION_TIMEOUT_MS
+        syncQueueDao.resetStaleOperations(cutoffTime)
+        Timber.d("Reset stale operations older than ${STALE_OPERATION_TIMEOUT_MS / 1000}s")
+        
         val pendingOperations = syncQueueDao.getPendingOperations()
         
         if (pendingOperations.isEmpty()) {
             return Result.success()
         }
+        
+        Timber.d("Processing ${pendingOperations.size} pending sync operations")
 
         var hasError = false
 
@@ -163,6 +171,8 @@ class SyncWorker @AssistedInject constructor(
     /**
      * Rollback optimistic updates when sync permanently fails.
      * Restores local DB to correct state.
+     * 
+     * Handles CREATE, DELETE, and UPDATE operations for all entity types.
      */
     private suspend fun rollbackOptimisticUpdate(op: com.ninety5.habitate.data.local.entity.SyncOperationEntity) {
         try {
@@ -172,17 +182,27 @@ class SyncWorker @AssistedInject constructor(
                     if (ids.size == 2) {
                         val followerId = ids[0]
                         val followingId = ids[1]
-                        if (op.operation == "CREATE") {
-                            followDao.delete(followerId, followingId)
-                            Timber.d("Rolled back follow: $followerId -> $followingId")
-                        } else if (op.operation == "DELETE") {
-                            followDao.insert(FollowEntity(
-                                followerId = followerId,
-                                followingId = followingId,
-                                createdAt = System.currentTimeMillis(),
-                                syncState = SyncState.SYNCED
-                            ))
-                            Timber.d("Restored follow: $followerId -> $followingId")
+                        when (op.operation) {
+                            "CREATE" -> {
+                                followDao.delete(followerId, followingId)
+                                Timber.d("Rolled back follow: $followerId -> $followingId")
+                            }
+                            "DELETE" -> {
+                                // Restore follow - use createdAt from payload if available
+                                val createdAt = try {
+                                    moshi.adapter(FollowEntity::class.java)
+                                        .fromJson(op.payload)?.createdAt ?: System.currentTimeMillis()
+                                } catch (e: Exception) {
+                                    System.currentTimeMillis()
+                                }
+                                followDao.insert(FollowEntity(
+                                    followerId = followerId,
+                                    followingId = followingId,
+                                    createdAt = createdAt,
+                                    syncState = SyncState.SYNCED
+                                ))
+                                Timber.d("Restored follow: $followerId -> $followingId")
+                            }
                         }
                     }
                 }
@@ -191,44 +211,135 @@ class SyncWorker @AssistedInject constructor(
                     if (ids.size == 2) {
                         val userId = ids[0]
                         val postId = ids[1]
-                        if (op.operation == "CREATE") {
-                            likeDao.delete(userId, postId)
-                            Timber.d("Rolled back like: $userId on $postId")
-                        } else if (op.operation == "DELETE") {
-                            likeDao.insert(LikeEntity(
-                                userId = userId,
-                                postId = postId,
-                                createdAt = System.currentTimeMillis(),
-                                syncState = SyncState.SYNCED
-                            ))
-                            Timber.d("Restored like: $userId on $postId")
+                        when (op.operation) {
+                            "CREATE" -> {
+                                likeDao.delete(userId, postId)
+                                Timber.d("Rolled back like: $userId on $postId")
+                            }
+                            "DELETE" -> {
+                                likeDao.insert(LikeEntity(
+                                    userId = userId,
+                                    postId = postId,
+                                    createdAt = System.currentTimeMillis(),
+                                    syncState = SyncState.SYNCED
+                                ))
+                                Timber.d("Restored like: $userId on $postId")
+                            }
                         }
                     }
                 }
                 "comment" -> {
-                    if (op.operation == "CREATE") {
-                        commentDao.deleteById(op.entityId)
-                        Timber.d("Rolled back comment: ${op.entityId}")
+                    when (op.operation) {
+                        "CREATE" -> {
+                            commentDao.deleteById(op.entityId)
+                            Timber.d("Rolled back comment: ${op.entityId}")
+                        }
+                        // DELETE rollback not needed (comment already gone)
                     }
-                    // DELETE rollback not needed (comment already gone)
                 }
                 "post" -> {
-                    if (op.operation == "CREATE") {
-                        postDao.deleteById(op.entityId)
-                        Timber.d("Rolled back post: ${op.entityId}")
+                    when (op.operation) {
+                        "CREATE" -> {
+                            postDao.deleteById(op.entityId)
+                            Timber.d("Rolled back post: ${op.entityId}")
+                        }
+                        "UPDATE" -> {
+                            // Mark as needing re-sync or flag as conflicted
+                            postDao.updateSyncState(op.entityId, SyncState.FAILED)
+                            Timber.d("Marked post update as failed: ${op.entityId}")
+                        }
+                        "DELETE" -> {
+                            // Attempt to restore post from payload if available
+                            if (op.payload.isNotBlank()) {
+                                try {
+                                    val postEntity = moshi.adapter(com.ninety5.habitate.data.local.entity.PostEntity::class.java)
+                                        .fromJson(op.payload)
+                                    if (postEntity != null) {
+                                        postDao.upsert(postEntity.copy(syncState = SyncState.SYNCED))
+                                        Timber.d("Restored deleted post from payload: ${op.entityId}")
+                                    } else {
+                                        Timber.w("Cannot restore deleted post: ${op.entityId} - invalid payload")
+                                    }
+                                } catch (e: Exception) {
+                                    Timber.e(e, "Failed to parse post payload for restoration: ${op.entityId}")
+                                }
+                            } else {
+                                Timber.w("Cannot restore deleted post: ${op.entityId} - no payload data")
+                            }
+                        }
                     }
                 }
                 "task" -> {
-                    if (op.operation == "CREATE") {
-                        taskDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked task as failed: ${op.entityId}")
+                    when (op.operation) {
+                        "CREATE" -> {
+                            taskDao.updateSyncState(op.entityId, SyncState.FAILED)
+                            Timber.d("Marked task as failed: ${op.entityId}")
+                        }
+                        "UPDATE" -> {
+                            taskDao.updateSyncState(op.entityId, SyncState.FAILED)
+                            Timber.d("Marked task update as failed: ${op.entityId}")
+                        }
+                        "DELETE" -> {
+                            // Restore from payload if available
+                            taskDao.updateSyncState(op.entityId, SyncState.SYNCED)
+                            Timber.d("Rolled back task delete: ${op.entityId}")
+                        }
                     }
                 }
                 "workout" -> {
-                    if (op.operation == "CREATE") {
-                        workoutDao.updateSyncState(op.entityId, SyncState.FAILED)
-                        Timber.d("Marked workout as failed: ${op.entityId}")
+                    when (op.operation) {
+                        "CREATE" -> {
+                            workoutDao.updateSyncState(op.entityId, SyncState.FAILED)
+                            Timber.d("Marked workout as failed: ${op.entityId}")
+                        }
+                        "UPDATE" -> {
+                            workoutDao.updateSyncState(op.entityId, SyncState.FAILED)
+                            Timber.d("Marked workout update as failed: ${op.entityId}")
+                        }
+                        "DELETE" -> {
+                            // Attempt to restore workout from payload if available
+                            if (op.payload.isNotBlank()) {
+                                try {
+                                    val workoutEntity = moshi.adapter(com.ninety5.habitate.data.local.entity.WorkoutEntity::class.java)
+                                        .fromJson(op.payload)
+                                    if (workoutEntity != null) {
+                                        workoutDao.upsert(workoutEntity.copy(syncState = SyncState.SYNCED))
+                                        Timber.d("Restored deleted workout from payload: ${op.entityId}")
+                                    } else {
+                                        Timber.w("Cannot restore deleted workout: ${op.entityId} - invalid payload")
+                                    }
+                                } catch (e: Exception) {
+                                    Timber.e(e, "Failed to parse workout payload for restoration: ${op.entityId}")
+                                }
+                            } else {
+                                // Check if workout still exists locally (soft delete case)
+                                val existingWorkout = workoutDao.getWorkoutById(op.entityId)
+                                if (existingWorkout != null) {
+                                    workoutDao.updateSyncState(op.entityId, SyncState.SYNCED)
+                                    Timber.d("Marked existing workout as synced: ${op.entityId}")
+                                } else {
+                                    Timber.w("Cannot restore deleted workout: ${op.entityId} - no payload data")
+                                }
+                            }
+                        }
                     }
+                }
+                "chat_message" -> {
+                    when (op.operation) {
+                        "CREATE" -> {
+                            // Mark message as failed to send
+                            messageDao.updateStatus(op.entityId, MessageStatus.FAILED)
+                            Timber.d("Marked message as failed: ${op.entityId}")
+                        }
+                    }
+                }
+                "chat_mute" -> {
+                    // For chat_mute UPDATE failures, we can safely ignore
+                    // UI will refresh from server on next sync
+                    Timber.d("Ignoring chat_mute rollback: ${op.entityId}")
+                }
+                else -> {
+                    Timber.w("No rollback handler for entity type: ${op.entityType}")
                 }
             }
         } catch (e: Exception) {

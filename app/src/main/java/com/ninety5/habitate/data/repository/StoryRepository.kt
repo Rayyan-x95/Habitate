@@ -1,5 +1,6 @@
 package com.ninety5.habitate.data.repository
 
+import android.database.sqlite.SQLiteConstraintException
 import com.ninety5.habitate.data.local.dao.StoryDao
 import com.ninety5.habitate.data.local.dao.SyncQueueDao
 import com.ninety5.habitate.data.local.entity.StoryEntity
@@ -9,19 +10,31 @@ import com.ninety5.habitate.data.local.entity.SyncState
 import com.ninety5.habitate.data.local.entity.SyncStatus
 import com.ninety5.habitate.data.local.relation.StoryWithUser
 import com.ninety5.habitate.data.remote.ApiService
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Data class for story creation payload serialization
+ */
+data class StoryPayload(
+    val mediaUri: String,
+    val expiresAt: String,
+    val caption: String? = null
+)
+
 @Singleton
 class StoryRepository @Inject constructor(
     private val storyDao: StoryDao,
     private val apiService: ApiService,
     private val syncQueueDao: SyncQueueDao,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val moshi: Moshi
 ) {
 
     fun getActiveStories(): Flow<List<StoryWithUser>> {
@@ -49,12 +62,13 @@ class StoryRepository @Inject constructor(
 
         storyDao.upsert(story)
 
-        // Queue sync
-        val payload = buildString {
-            append("{\"mediaUri\": \"$mediaUri\", \"expiresAt\": \"$expiresAt\"")
-            if (caption != null) append(", \"caption\": \"$caption\"")
-            append("}")
-        }
+        // Queue sync using proper JSON serialization
+        val storyPayload = StoryPayload(
+            mediaUri = mediaUri,
+            expiresAt = expiresAt.toString(),
+            caption = caption
+        )
+        val payload = moshi.adapter(StoryPayload::class.java).toJson(storyPayload)
         
         val op = SyncOperationEntity(
             entityType = "story",
@@ -77,8 +91,13 @@ class StoryRepository @Inject constructor(
         )
         try {
             storyDao.insertStoryView(viewEntity)
+        } catch (e: SQLiteConstraintException) {
+            // Expected: duplicate view (user already saw this story)
+            Timber.d("Story $storyId already viewed by user $userId")
         } catch (e: Exception) {
-            // Ignore duplicate view errors
+            // Log unexpected errors
+            Timber.e(e, "Failed to mark story as seen: $storyId")
+            throw e
         }
     }
 

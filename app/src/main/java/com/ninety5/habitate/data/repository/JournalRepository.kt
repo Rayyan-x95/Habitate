@@ -13,9 +13,12 @@ import kotlinx.coroutines.flow.flowOf
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+
+class SecurityException(message: String) : Exception(message)
 
 @Singleton
 class JournalRepository @Inject constructor(
@@ -31,7 +34,8 @@ class JournalRepository @Inject constructor(
     }
 
     fun getEntryById(id: String): Flow<JournalEntryEntity?> {
-        return journalDao.getEntryById(id)
+        val userId = authRepository.getCurrentUserId() ?: return flowOf(null)
+        return journalDao.getEntryByIdAndUserId(id, userId)
     }
 
     fun getEntriesForDate(date: LocalDate): Flow<List<JournalEntryEntity>> {
@@ -45,7 +49,10 @@ class JournalRepository @Inject constructor(
         val userId = authRepository.getCurrentUserId() ?: return flowOf(emptyList())
         val startOfMonth = LocalDate.of(year, month, 1)
             .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val endOfMonth = startOfMonth + (32L * 24 * 60 * 60 * 1000) // Rough end of month
+        val endOfMonth = LocalDate.of(year, month, 1)
+            .with(TemporalAdjusters.lastDayOfMonth())
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         return journalDao.getEntriesForDateRange(userId, startOfMonth, endOfMonth)
     }
 
@@ -97,8 +104,16 @@ class JournalRepository @Inject constructor(
     }
 
     suspend fun updateEntry(entry: JournalEntryEntity) {
+        val currentUserId = authRepository.getCurrentUserId()
+            ?: throw SecurityException("User not logged in")
+        
+        // Verify ownership before updating
+        val existingEntry = journalDao.getEntryByIdAndUserIdSync(entry.id, currentUserId)
+            ?: throw SecurityException("Entry not found or unauthorized")
+        
         val now = Instant.now()
         val updatedEntry = entry.copy(
+            userId = existingEntry.userId, // Preserve original owner
             syncState = SyncState.PENDING,
             updatedAt = now.toEpochMilli()
         )
@@ -120,9 +135,17 @@ class JournalRepository @Inject constructor(
     }
 
     suspend fun deleteEntry(entryId: String) {
-        journalDao.deleteById(entryId)
+        val currentUserId = authRepository.getCurrentUserId()
+            ?: throw SecurityException("User not logged in")
         
-        // Queue sync operation
+        // Delete with ownership check, returns row count
+        val deletedCount = journalDao.deleteByIdAndUserId(entryId, currentUserId)
+        
+        if (deletedCount == 0) {
+            throw SecurityException("Entry not found or unauthorized")
+        }
+        
+        // Only queue sync if deletion was successful
         val syncOp = SyncOperationEntity(
             entityType = "journal",
             entityId = entryId,

@@ -164,7 +164,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = { Text("Loisbecket@gmail.com", color = ReferenceColors.textSecondary) },
+                    placeholder = { Text("your@email.com", color = ReferenceColors.textSecondary) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(RefRadiusSM.dp),
                     colors = OutlinedTextFieldDefaults.colors(

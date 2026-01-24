@@ -255,7 +255,10 @@ data class SpacingTokens(
     val xxxl: Dp = Spacing.xxxl,
     val screenHorizontal: Dp = Spacing.screenHorizontal,
     val screenVertical: Dp = Spacing.screenVertical,
-    val cardPadding: Dp = Spacing.cardPadding
+    val cardPadding: Dp = Spacing.cardPadding,
+    val screenPaddingLarge: Dp = Spacing.screenPaddingLarge,
+    val cardPaddingCompact: Dp = Spacing.cardPaddingCompact,
+    val listItemPaddingVertical: Dp = Spacing.listItemPaddingVertical
 )
 
 data class RadiusTokens(
@@ -281,16 +284,24 @@ data class SizeTokens(
 
 data class ElevationTokens(
     val none: Dp = Elevation.none,
+    val whisper: Dp = Elevation.whisper,
     val xs: Dp = Elevation.xs,
     val sm: Dp = Elevation.sm,
     val md: Dp = Elevation.md,
-    val lg: Dp = Elevation.lg
+    val lg: Dp = Elevation.lg,
+    val xl: Dp = Elevation.xl
 )
 
 data class GlassTokensData(
     val blur: Dp = GlassTokens.blur,
+    val blurSubtle: Dp = GlassTokens.blurSubtle,
     val backgroundAlpha: Float = GlassTokens.backgroundAlpha,
+    val backgroundAlphaLight: Float = GlassTokens.backgroundAlphaLight,
+    val backgroundAlphaStrong: Float = GlassTokens.backgroundAlphaStrong,
     val borderAlpha: Float = GlassTokens.borderAlpha,
+    val borderAlphaLight: Float = GlassTokens.borderAlphaLight,
+    val borderAlphaStrong: Float = GlassTokens.borderAlphaStrong,
+    val highlightAlpha: Float = GlassTokens.highlightAlpha,
     val borderWidth: Dp = GlassTokens.borderWidth
 )
 

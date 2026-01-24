@@ -13,11 +13,17 @@ import com.ninety5.habitate.data.repository.UploadState
 import android.net.Uri
 import com.ninety5.habitate.ui.screens.feed.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,36 +40,67 @@ class ProfileViewModel @Inject constructor(
     
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    
+    private var profileJob: Job? = null
 
     init {
         loadProfile()
     }
 
     private fun loadProfile() {
-        viewModelScope.launch {
-            val targetUserId = argUserId ?: authRepository.getCurrentUserId()
-            
-            if (targetUserId == null) {
-                _uiState.update { it.copy(error = "User not found") }
-                return@launch
-            }
+        profileJob?.cancel()
+        
+        val targetUserId = argUserId ?: authRepository.getCurrentUserId()
+        
+        if (targetUserId == null) {
+            _uiState.update { it.copy(isLoading = false, error = "User not found") }
+            return
+        }
+        
+        val isCurrentUser = targetUserId == authRepository.getCurrentUserId()
 
-            // Load User
-            launch {
-                userRepository.getUser(targetUserId).collect { user ->
-                    _uiState.update { it.copy(user = user, isCurrentUser = targetUserId == authRepository.getCurrentUserId()) }
-                }
+        profileJob = viewModelScope.launch {
+            // Combine user and posts flows for atomic state updates
+            combine(
+                userRepository.getUser(targetUserId),
+                feedRepository.getPostsByUser(targetUserId)
+            ) { user, postsWithAuthors ->
+                val postUiModels = postsWithAuthors.map { it.toUiModel() }
+                ProfileData(user, postUiModels)
             }
-
-            // Load Posts
-            launch {
-                feedRepository.getPostsByUser(targetUserId).collect { postsWithAuthors ->
-                    val postUiModels = postsWithAuthors.map { it.toUiModel() }
-                    _uiState.update { it.copy(posts = postUiModels) }
+                .onStart { _uiState.update { it.copy(isLoading = true, error = null) } }
+                .retryWhen { cause, attempt ->
+                    // Retry up to 3 times with increasing delay for transient errors
+                    if (attempt < 3 && cause !is kotlinx.coroutines.CancellationException) {
+                        Timber.w(cause, "Profile load failed, retrying (attempt $attempt)")
+                        kotlinx.coroutines.delay(1000L * (attempt + 1))
+                        true
+                    } else {
+                        false
+                    }
                 }
-            }
+                .catch { e ->
+                    Timber.e(e, "Failed to load profile")
+                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Failed to load profile") }
+                }
+                .collect { data ->
+                    _uiState.update { 
+                        it.copy(
+                            user = data.user, 
+                            posts = data.posts,
+                            isCurrentUser = isCurrentUser,
+                            isLoading = false,
+                            error = null
+                        ) 
+                    }
+                }
         }
     }
+    
+    private data class ProfileData(
+        val user: UserEntity?,
+        val posts: List<PostUiModel>
+    )
 
     fun updateProfile(displayName: String, bio: String) {
         val currentUser = _uiState.value.user ?: return
