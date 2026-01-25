@@ -23,6 +23,7 @@ import com.ninety5.habitate.data.remote.dto.MessageDto
 import com.squareup.moshi.Moshi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
 import timber.log.Timber
 import java.time.Instant
@@ -143,6 +144,9 @@ class SyncWorker @AssistedInject constructor(
                 syncQueueDao.updateStatus(op.id, SyncStatus.COMPLETED)
                 
             } catch (e: Exception) {
+                // Rethrow CancellationException for cooperative cancellation
+                if (e is CancellationException) throw e
+                
                 // Conflict Resolution Logging
                 if (e is retrofit2.HttpException && e.code() == 409) {
                     Timber.w("Conflict detected for operation ${op.id} (Entity: ${op.entityType}, ID: ${op.entityId}). Server state differs from local. Treating as permanent failure (Server Wins).")

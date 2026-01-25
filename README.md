@@ -234,6 +234,12 @@ app/src/main/java/com/ninety5/habitate/
    RELEASE_KEY_PASSWORD=your_key_password
    ```
 
+   > ⚠️ **Security Note**
+   > 
+   > - **Never commit `local.properties` to version control** — it contains sensitive API keys and passwords.
+   > - Ensure `local.properties` is listed in your `.gitignore` (it is by default in this project).
+   > - For CI/CD pipelines, use **environment variables** or a **secret management service** (e.g., GitHub Secrets, Azure Key Vault, AWS Secrets Manager) instead of storing secrets in files.
+
 3. **Sync and build**
    ```bash
    ./gradlew assembleDebug
