@@ -8,5 +8,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
-    alias(libs.plugins.firebase.perf) apply false
+    // Firebase Performance plugin disabled - incompatible with AGP 9.0 (uses deprecated Transform API)
+    // TODO: Re-enable when Firebase releases a compatible version
+    // alias(libs.plugins.firebase.perf) apply false
 }

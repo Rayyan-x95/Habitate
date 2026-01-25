@@ -7,7 +7,9 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.firebase.perf)
+    // Firebase Performance plugin disabled - incompatible with AGP 9.0 (uses deprecated Transform API)
+    // TODO: Re-enable when Firebase releases a compatible version
+    // alias(libs.plugins.firebase.perf)
 }
 
 import java.util.Properties
@@ -80,7 +82,7 @@ android {
         unitTests.isReturnDefaultValues = true
     }
     lint {
-        // Disable Timber lint issues due to incompatibility with AGP 8.13.2
+        // Disable Timber lint issues due to incompatibility with AGP 9.0 (Transform API removed)
         disable += setOf(
             "LogNotTimber",
             "StringFormatInTimber",
@@ -94,7 +96,14 @@ android {
         // Treat LintError as warning instead of error
         warning += "LintError"
         abortOnError = false
+        // Exclude Timber lint checks that use deprecated Transform API
+        checkDependencies = false
     }
+}
+
+configurations.all {
+    // Exclude Timber lint artifact which uses deprecated Transform API
+    exclude(group = "com.jakewharton.timber", module = "timber-lint")
 }
 
 dependencies {
@@ -159,8 +168,10 @@ dependencies {
     implementation(libs.firebase.remote.config)
     implementation(libs.firebase.firestore)
 
-    // Logging
-    implementation(libs.timber)
+    // Logging - exclude lint artifact to fix AGP 9.0 Transform API removal
+    implementation(libs.timber) {
+        exclude(group = "com.jakewharton.timber", module = "timber-lint")
+    }
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
