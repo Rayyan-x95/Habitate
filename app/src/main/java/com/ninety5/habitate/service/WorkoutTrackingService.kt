@@ -9,7 +9,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -24,7 +27,9 @@ class WorkoutTrackingService : Service() {
     @Inject
     lateinit var liveNotificationManager: LiveNotificationManager
 
-    private val serviceScope = CoroutineScope(Dispatchers.Default + Job())
+    // Properly scoped coroutine scope tied to service lifecycle
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
     private var updateJob: Job? = null
     
     private var isTracking = false
@@ -136,7 +141,7 @@ class WorkoutTrackingService : Service() {
     private fun startUpdates() {
         updateJob?.cancel()
         updateJob = serviceScope.launch {
-            while (isTracking) {
+            while (isActive && isTracking) {
                 updateNotification()
                 delay(UPDATE_INTERVAL)
             }
@@ -215,5 +220,7 @@ class WorkoutTrackingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         updateJob?.cancel()
+        // Cancel entire service scope to prevent leaks
+        serviceScope.cancel()
     }
 }

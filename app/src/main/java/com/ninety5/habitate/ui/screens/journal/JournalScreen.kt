@@ -89,7 +89,7 @@ fun JournalScreen(
     viewModel: JournalViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val entries by viewModel.entries.collectAsState()
+    val entries = uiState.entries
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     

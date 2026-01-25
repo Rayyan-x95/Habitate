@@ -23,10 +23,12 @@ import com.ninety5.habitate.data.remote.dto.MessageDto
 import com.squareup.moshi.Moshi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ensureActive
 import timber.log.Timber
 import java.time.Instant
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import kotlin.coroutines.coroutineContext
 import kotlin.math.pow
 
 @HiltWorker
@@ -68,6 +70,9 @@ class SyncWorker @AssistedInject constructor(
         var hasError = false
 
         for (op in pendingOperations) {
+            // Check for cancellation before each operation - cooperative cancellation
+            coroutineContext.ensureActive()
+            
             try {
                 syncQueueDao.updateStatus(op.id, SyncStatus.IN_PROGRESS)
                 
