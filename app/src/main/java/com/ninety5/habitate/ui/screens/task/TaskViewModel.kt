@@ -2,9 +2,9 @@ package com.ninety5.habitate.ui.screens.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.TaskEntity
-import com.ninety5.habitate.data.local.entity.TaskStatus
-import com.ninety5.habitate.data.repository.TaskRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Task
+import com.ninety5.habitate.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,31 +27,56 @@ class TaskViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TaskUiState())
     val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
 
-    val tasks: StateFlow<List<TaskEntity>> = taskRepository.getActiveTasks()
+    val tasks: StateFlow<List<Task>> = taskRepository.observeAllTasks()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    init {
-        refreshTasks()
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
-    fun refreshTasks() {
+    fun completeTask(taskId: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            taskRepository.refreshTasks()
-                .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(error = e.message)
+            when (val result = taskRepository.completeTask(taskId)) {
+                is AppResult.Success -> { /* Room Flow auto-updates */ }
+                is AppResult.Error -> {
+                    _uiState.value = _uiState.value.copy(error = result.error.message)
                 }
-            _uiState.value = _uiState.value.copy(isLoading = false)
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
-    fun updateTaskStatus(taskId: String, status: TaskStatus) {
+    fun toggleTaskCompletion(task: Task) {
         viewModelScope.launch {
-            taskRepository.updateStatus(taskId, status)
+            val result = if (task.status == com.ninety5.habitate.domain.model.TaskStatus.COMPLETED) {
+                // Re-open the task
+                taskRepository.updateTask(task.copy(status = com.ninety5.habitate.domain.model.TaskStatus.PENDING))
+            } else {
+                taskRepository.completeTask(task.id)
+            }
+            when (result) {
+                is AppResult.Success -> { /* Room Flow auto-updates */ }
+                is AppResult.Error -> {
+                    _uiState.value = _uiState.value.copy(error = result.error.message)
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
+        }
+    }
+
+    fun archiveTask(taskId: String) {
+        viewModelScope.launch {
+            when (val result = taskRepository.archiveTask(taskId)) {
+                is AppResult.Success -> { /* Room Flow auto-updates */ }
+                is AppResult.Error -> {
+                    _uiState.value = _uiState.value.copy(error = result.error.message)
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }

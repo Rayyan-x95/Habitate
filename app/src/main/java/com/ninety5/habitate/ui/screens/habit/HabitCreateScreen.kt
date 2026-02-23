@@ -23,9 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.entity.HabitCategory
-import com.ninety5.habitate.data.local.entity.HabitFrequency
+import com.ninety5.habitate.domain.model.HabitCategory
+import com.ninety5.habitate.domain.model.HabitFrequency
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -48,7 +47,7 @@ import androidx.compose.foundation.BorderStroke
 @Composable
 fun HabitCreateScreen(
     habitId: String? = null,
-    navController: NavController,
+    onNavigateBack: () -> Unit,
     viewModel: HabitCreateViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -58,7 +57,7 @@ fun HabitCreateScreen(
 
     LaunchedEffect(uiState.habitSaved) {
         if (uiState.habitSaved) {
-            navController.popBackStack()
+            onNavigateBack()
         }
     }
 
@@ -73,7 +72,7 @@ fun HabitCreateScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back")
                     }
                 },

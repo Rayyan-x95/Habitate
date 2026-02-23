@@ -74,7 +74,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.JournalEntryEntity
+import com.ninety5.habitate.domain.model.JournalEntry
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
@@ -279,11 +279,14 @@ fun JournalScreen(
                 isSaving = uiState.isSaving,
                 onSave = { title, content, mood, tags ->
                     if (uiState.editingEntry != null) {
+                        val moodEnum = mood?.let {
+                            try { com.ninety5.habitate.domain.model.JournalMood.valueOf(it.uppercase()) } catch (_: Exception) { null }
+                        }
                         viewModel.updateEntry(
                             uiState.editingEntry!!.copy(
                                 title = title,
                                 content = content,
-                                mood = mood,
+                                mood = moodEnum,
                                 tags = tags
                             )
                         )
@@ -324,13 +327,13 @@ fun JournalScreen(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun JournalEntryCard(
-    entry: JournalEntryEntity,
+    entry: JournalEntry,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy • h:mm a") }
-    val date = remember(entry.date) {
-        java.time.Instant.ofEpochMilli(entry.date)
+    val date = remember(entry.createdAt) {
+        entry.createdAt
             .atZone(java.time.ZoneId.systemDefault())
             .toLocalDateTime()
     }
@@ -353,7 +356,7 @@ private fun JournalEntryCard(
                 // Mood indicator
                 entry.mood?.let { mood ->
                     Text(
-                        text = getMoodEmoji(mood),
+                        text = getMoodEmoji(mood.name.lowercase()),
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
@@ -432,7 +435,7 @@ private fun JournalEntryCard(
 private fun CalendarView(
     selectedMonth: YearMonth,
     selectedDate: LocalDate,
-    entriesGroupedByDate: Map<LocalDate, List<JournalEntryEntity>>,
+    entriesGroupedByDate: Map<LocalDate, List<JournalEntry>>,
     onDateSelected: (LocalDate) -> Unit,
     onMonthChange: (YearMonth) -> Unit
 ) {
@@ -553,14 +556,14 @@ private fun CalendarView(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun JournalEntryEditor(
-    editingEntry: JournalEntryEntity?,
+    editingEntry: JournalEntry?,
     isSaving: Boolean,
     onSave: (String?, String, String?, List<String>) -> Unit,
     onCancel: () -> Unit
 ) {
     var title by remember(editingEntry) { mutableStateOf(editingEntry?.title ?: "") }
     var content by remember(editingEntry) { mutableStateOf(editingEntry?.content ?: "") }
-    var selectedMood by remember(editingEntry) { mutableStateOf(editingEntry?.mood) }
+    var selectedMood by remember(editingEntry) { mutableStateOf(editingEntry?.mood?.name?.lowercase()) }
     var tagInput by remember(editingEntry) { mutableStateOf("") }
     var tags by remember(editingEntry) { mutableStateOf(editingEntry?.tags ?: emptyList()) }
 
@@ -663,8 +666,9 @@ private fun JournalEntryEditor(
             trailingIcon = {
                 if (tagInput.isNotBlank()) {
                     IconButton(onClick = {
-                        if (tagInput.isNotBlank() && !tags.contains(tagInput)) {
-                            tags = tags + tagInput.trim()
+                        val trimmedTag = tagInput.trim()
+                        if (trimmedTag.isNotBlank() && !tags.contains(trimmedTag)) {
+                            tags = tags + trimmedTag
                             tagInput = ""
                         }
                     }) {

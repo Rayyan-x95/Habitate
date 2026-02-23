@@ -58,6 +58,23 @@ class SecurePreferences @Inject constructor(
         return accessToken != null && System.currentTimeMillis() < tokenExpiry
     }
 
+    /**
+     * Check if the token will expire within the given margin.
+     * Useful for proactive token refresh before actual expiry.
+     *
+     * @param marginMs margin in milliseconds (default: 2 minutes)
+     */
+    fun isTokenExpiringSoon(marginMs: Long = TOKEN_EXPIRY_MARGIN_MS): Boolean {
+        val token = accessToken ?: return true
+        if (token.isBlank()) return true
+        return System.currentTimeMillis() >= (tokenExpiry - marginMs)
+    }
+
+    companion object {
+        /** Refresh token 2 minutes before expiry. */
+        private const val TOKEN_EXPIRY_MARGIN_MS = 2 * 60 * 1000L
+    }
+
     var isOnboarded: Boolean
         get() = sharedPreferences.getBoolean("is_onboarded", false)
         set(value) = sharedPreferences.edit().putBoolean("is_onboarded", value).apply()

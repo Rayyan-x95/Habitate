@@ -186,21 +186,21 @@ fun PostDetailScreen(
                             )
                         }
                     } else {
-                        items(uiState.comments, key = { it.comment.id }) { commentWithUser ->
+                        items(uiState.comments, key = { it.id }) { comment ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
-                                UserAvatar(avatarUrl = commentWithUser.user.avatarUrl, size = 32.dp)
+                                UserAvatar(avatarUrl = comment.authorAvatarUrl, size = 32.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = commentWithUser.user.displayName,
+                                        text = comment.authorDisplayName,
                                         style = MaterialTheme.typography.labelMedium
                                     )
                                     Text(
-                                        text = commentWithUser.comment.text,
+                                        text = comment.text,
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }

@@ -2,20 +2,20 @@ package com.ninety5.habitate.ui.screens.checkin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.dao.DailySummaryDao
-import com.ninety5.habitate.data.local.entity.DailySummaryEntity
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.DailySummary
+import com.ninety5.habitate.domain.repository.DailyCheckInRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class DailyCheckInViewModel @Inject constructor(
-    private val dailySummaryDao: DailySummaryDao
+    private val dailyCheckInRepository: DailyCheckInRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckInUiState())
@@ -27,14 +27,14 @@ class DailyCheckInViewModel @Inject constructor(
 
     private fun loadTodaySummary() {
         viewModelScope.launch {
-            dailySummaryDao.getSummary(LocalDate.now()).collect { summary ->
+            dailyCheckInRepository.observeTodaySummary().collect { summary ->
                 if (summary != null) {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             mood = summary.mood,
                             notes = summary.notes,
                             existingSummary = summary
-                        ) 
+                        )
                     }
                 }
             }
@@ -51,21 +51,14 @@ class DailyCheckInViewModel @Inject constructor(
 
     fun saveCheckIn() {
         viewModelScope.launch {
-            val current = _uiState.value.existingSummary ?: DailySummaryEntity(
-                date = LocalDate.now(),
-                steps = 0,
-                caloriesBurned = 0.0,
-                distanceMeters = 0.0,
-                activeMinutes = 0
-            )
-            
-            val updated = current.copy(
-                mood = _uiState.value.mood,
-                notes = _uiState.value.notes
-            )
-            
-            dailySummaryDao.upsert(updated)
-            _uiState.update { it.copy(isSaved = true) }
+            _uiState.update { it.copy(error = null) }
+            when (val result = dailyCheckInRepository.saveCheckIn(_uiState.value.mood, _uiState.value.notes)) {
+                is AppResult.Success -> _uiState.update { it.copy(isSaved = true) }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }
@@ -73,6 +66,7 @@ class DailyCheckInViewModel @Inject constructor(
 data class CheckInUiState(
     val mood: String? = null,
     val notes: String? = null,
-    val existingSummary: DailySummaryEntity? = null,
-    val isSaved: Boolean = false
+    val existingSummary: DailySummary? = null,
+    val isSaved: Boolean = false,
+    val error: String? = null
 )

@@ -26,6 +26,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.ninety5.habitate.core.auth.SessionState
 import com.ninety5.habitate.ui.navigation.HabitateNavHost
 import com.ninety5.habitate.ui.navigation.Screen
 import com.ninety5.habitate.ui.navigation.bottomNavItems
@@ -33,10 +34,8 @@ import com.ninety5.habitate.ui.screens.auth.AuthViewModel
 import com.ninety5.habitate.ui.theme.HabitateTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import com.ninety5.habitate.data.repository.ChatRepository
 import com.ninety5.habitate.ui.screens.settings.SettingsViewModel
+import com.ninety5.habitate.ui.viewmodel.AppViewModel
 import com.ninety5.habitate.util.FeatureFlags
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -51,11 +50,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var featureFlags: FeatureFlags
 
-    @Inject
-    lateinit var chatRepository: ChatRepository
-
     private val authViewModel: AuthViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val appViewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -64,13 +61,8 @@ class MainActivity : ComponentActivity() {
 
         handleIntent(intent)
 
-        lifecycleScope.launch {
-            authViewModel.uiState.collect { state ->
-                if (state.isLoggedIn) {
-                    chatRepository.initializeRealtime()
-                }
-            }
-        }
+        // AppViewModel auto-observes SessionManager in its init block
+        // No need to manually call observeAuthAndInitServices
 
         setContent {
             val settingsState by settingsViewModel.uiState.collectAsState()
@@ -81,7 +73,7 @@ class MainActivity : ComponentActivity() {
             }
 
             HabitateTheme(darkTheme = darkTheme) {
-                HabitateApp(authViewModel, featureFlags)
+                HabitateApp(authViewModel, featureFlags, appViewModel)
             }
         }
     }
@@ -99,12 +91,23 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags) {
+fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags, appViewModel: AppViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val uiState by viewModel.uiState.collectAsState()
+    val sessionState by appViewModel.sessionState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // React to session expiry — navigate to login from any screen
+    androidx.compose.runtime.LaunchedEffect(sessionState) {
+        if (sessionState is SessionState.SessionExpired) {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+            appViewModel.onSessionExpiredHandled()
+        }
+    }
 
     // Screens that should show bottom navigation
     val bottomNavScreens = mutableListOf(
@@ -179,23 +182,16 @@ fun HabitateBottomNavigation(
 
     NavigationBar {
         items.forEach { item ->
-            val selected = currentRoute == item.screen.route
-            
             NavigationBarItem(
-                selected = selected,
+                selected = currentRoute == item.screen.route,
                 onClick = { onNavigate(item.screen) },
                 icon = {
                     Icon(
-                        imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                        imageVector = if (currentRoute == item.screen.route) item.selectedIcon else item.unselectedIcon,
                         contentDescription = item.label
                     )
                 },
-                label = { Text(text = item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
+                label = { Text(item.label) }
             )
         }
     }

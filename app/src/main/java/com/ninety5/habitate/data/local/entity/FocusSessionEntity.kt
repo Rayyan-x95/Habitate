@@ -11,7 +11,7 @@ data class FocusSessionEntity(
     val startTime: Instant,
     val endTime: Instant?,
     val durationSeconds: Long,
-    val status: FocusSessionStatus, // COMPLETED, ABORTED, IN_PROGRESS
+    val status: FocusSessionStatus, // IN_PROGRESS, PAUSED, COMPLETED, ABORTED
     val soundTrack: String? = null,
     val rating: Int? = null,
     val syncState: SyncState,
@@ -20,6 +20,7 @@ data class FocusSessionEntity(
 
 enum class FocusSessionStatus {
     IN_PROGRESS,
+    PAUSED,
     COMPLETED,
     ABORTED
 }

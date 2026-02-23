@@ -58,14 +58,20 @@ interface PostDao {
     @Query("UPDATE posts SET isLiked = :isLiked, likesCount = :count, reactionType = :reactionType WHERE id = :id")
     suspend fun updateLikeStatus(id: String, isLiked: Boolean, count: Int, reactionType: String?)
 
+    @Query("UPDATE posts SET isLiked = 1, likesCount = likesCount + 1, reactionType = :reactionType WHERE id = :id AND isLiked = 0")
+    suspend fun incrementLikeCount(id: String, reactionType: String)
+
+    @Query("UPDATE posts SET isLiked = 0, likesCount = MAX(0, likesCount - 1), reactionType = NULL WHERE id = :id AND isLiked = 1")
+    suspend fun decrementLikeCount(id: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(post: PostEntity)
 
     @Query("UPDATE posts SET isArchived = 1, syncState = 'PENDING', updatedAt = :now WHERE createdAt < :cutoff")
-    suspend fun archiveOldPosts(cutoff: Long, now: Long = System.currentTimeMillis())
+    suspend fun archiveOldPosts(cutoff: Long, now: Long)
 
     @Query("UPDATE posts SET isArchived = 0, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
-    suspend fun restorePost(id: String, now: Long = System.currentTimeMillis())
+    suspend fun restorePost(id: String, now: Long)
 
     @Query("DELETE FROM posts WHERE syncState = 'SYNCED'")
     suspend fun deleteSyncedPosts()

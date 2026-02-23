@@ -34,9 +34,8 @@ interface TaskDao {
     suspend fun upsert(task: TaskEntity)
 
     @Query("UPDATE tasks SET status = :status, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
-    suspend fun updateStatus(id: String, status: TaskStatus, now: Long = System.currentTimeMillis())
+    suspend fun updateStatus(id: String, status: TaskStatus, now: Long)
 
-    @Transaction
     suspend fun upsertAndMarkSynced(task: TaskEntity) {
         upsert(task.copy(syncState = SyncState.SYNCED))
     }
@@ -44,6 +43,6 @@ interface TaskDao {
     @Query("UPDATE tasks SET syncState = :state WHERE id = :id")
     suspend fun updateSyncState(id: String, state: SyncState)
 
-    @Query("UPDATE tasks SET status = 'ARCHIVED', syncState = 'PENDING', updatedAt = :now WHERE status = 'DONE' AND updatedAt < :cutoff")
-    suspend fun archiveOldTasks(cutoff: java.time.Instant, now: java.time.Instant = java.time.Instant.now())
+    @Query("UPDATE tasks SET status = 'ARCHIVED', syncState = 'PENDING', updatedAt = :now WHERE dueAt < :cutoff AND status != 'ARCHIVED'")
+    suspend fun archiveOldTasks(cutoff: java.time.Instant, now: java.time.Instant)
 }

@@ -15,14 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.entity.ChatEntity
+import com.ninety5.habitate.domain.model.Conversation
 import com.ninety5.habitate.ui.screens.chat.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
-    navController: NavController,
     onChatClick: (String) -> Unit,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
@@ -95,10 +93,10 @@ fun ChatListScreen(
 }
 
 @Composable
-fun ChatItem(chat: ChatEntity, onClick: () -> Unit) {
+fun ChatItem(chat: Conversation, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(chat.title ?: "Unknown Chat") },
-        supportingContent = { Text(chat.lastMessage ?: "No messages") },
+        headlineContent = { Text(chat.name ?: "Unknown Chat") },
+        supportingContent = { Text(chat.lastMessageText ?: "No messages") },
         modifier = Modifier.clickable(onClick = onClick)
     )
 }

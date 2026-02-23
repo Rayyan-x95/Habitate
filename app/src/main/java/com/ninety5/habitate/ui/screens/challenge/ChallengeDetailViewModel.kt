@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ninety5.habitate.core.analytics.AnalyticsEvent
 import com.ninety5.habitate.core.analytics.AnalyticsManager
-import com.ninety5.habitate.data.local.entity.ChallengeEntity
-import com.ninety5.habitate.data.repository.ChallengeRepository
-import com.ninety5.habitate.data.repository.AuthRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Challenge
+import com.ninety5.habitate.domain.repository.ChallengeRepository
+import com.ninety5.habitate.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 data class ChallengeDetailUiState(
-    val challenge: ChallengeEntity? = null,
+    val challenge: Challenge? = null,
     val isJoined: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null,
@@ -48,77 +49,77 @@ class ChallengeDetailViewModel @Inject constructor(
 
     init {
         loadChallenge()
-        checkJoinStatus()
         loadLeaderboard()
     }
 
     private fun loadChallenge() {
         viewModelScope.launch {
-            try {
-                challengeRepository.getChallengeById(challengeId).collect { challenge ->
-                    _uiState.update { it.copy(challenge = challenge, isLoading = false) }
+            when (val result = challengeRepository.getChallenge(challengeId)) {
+                is AppResult.Success -> {
+                    val challenge = result.data
+                    _uiState.update { it.copy(
+                        challenge = challenge,
+                        isJoined = challenge.isJoined,
+                        isLoading = false
+                    ) }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = "Failed to load challenge: ${e.message}", isLoading = false) }
-            }
-        }
-    }
-
-    private fun checkJoinStatus() {
-        viewModelScope.launch {
-            try {
-                val userId = authRepository.getCurrentUserId() ?: return@launch
-                challengeRepository.getChallengeProgress(challengeId, userId).collect { progress ->
-                    _uiState.update { it.copy(isJoined = progress != null) }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(error = "Failed to load challenge: ${result.error.message}", isLoading = false) }
                 }
-            } catch (e: Exception) {
-                // Silent failure for join status check - defaults to not joined
-                Timber.d(e, "Could not determine join status for challenge $challengeId")
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
 
     fun joinChallenge() {
         viewModelScope.launch {
-            try {
-                val userId = authRepository.getCurrentUserId() ?: return@launch
-                challengeRepository.joinChallenge(challengeId, userId)
-
-                analyticsManager.logEvent(
-                    AnalyticsEvent(
-                        name = "challenge_joined",
-                        userId = userId,
-                        properties = mapOf(
-                            "challengeId" to challengeId,
-                            "habitatId" to (uiState.value.challenge?.habitatId ?: "")
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            when (val result = challengeRepository.joinChallenge(challengeId)) {
+                is AppResult.Success -> {
+                    _uiState.update { it.copy(isLoading = false) }
+                    val userId = authRepository.getCurrentUserId()
+                    analyticsManager.logEvent(
+                        AnalyticsEvent(
+                            name = "challenge_joined",
+                            userId = userId ?: "",
+                            properties = mapOf(
+                                "challengeId" to challengeId,
+                                "habitatId" to (uiState.value.challenge?.habitatId ?: "")
+                            )
                         )
                     )
-                )
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = "Failed to join challenge: ${e.message}") }
+                    loadChallenge() // Refresh to update join status
+                    loadLeaderboard() // Refresh leaderboard
+                }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to join challenge: ${result.error.message}") }
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
 
     private fun loadLeaderboard() {
         viewModelScope.launch {
-            challengeRepository.getLeaderboard(challengeId)
-                .onSuccess { dtos ->
+            when (val result = challengeRepository.getLeaderboard(challengeId)) {
+                is AppResult.Success -> {
                     val currentUserId = authRepository.getCurrentUserId()
-                    val entries = dtos.map { dto ->
+                    val entries = result.data.map { progress ->
                         LeaderboardEntry(
-                            rank = dto.rank,
-                            userName = dto.displayName,
-                            avatarUrl = dto.avatarUrl,
-                            score = dto.score,
-                            isCurrentUser = dto.userId == currentUserId
+                            rank = progress.rank ?: 0,
+                            userName = progress.userId,
+                            avatarUrl = null,
+                            score = progress.currentValue,
+                            isCurrentUser = progress.userId == currentUserId
                         )
                     }
                     _uiState.update { it.copy(leaderboard = entries) }
                 }
-                .onFailure { e ->
-                    _uiState.update { it.copy(error = "Failed to load leaderboard: ${e.message}") }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(error = "Failed to load leaderboard: ${result.error.message}") }
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }

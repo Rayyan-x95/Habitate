@@ -9,10 +9,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.ninety5.habitate.core.FirebaseConfigChecker
+import com.ninety5.habitate.core.result.AppError
+import com.ninety5.habitate.core.result.AppResult
 import com.ninety5.habitate.data.local.SecurePreferences
 import com.ninety5.habitate.data.remote.ApiService
 import com.ninety5.habitate.data.remote.dto.RefreshTokenRequest
 import com.ninety5.habitate.data.remote.dto.RegisterRequest
+import com.ninety5.habitate.domain.repository.AuthRepository
 import com.ninety5.habitate.worker.UserSyncWorker
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
@@ -24,16 +27,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Auth state data class
+ * Auth state data class for internal use.
  */
 data class AuthState(
     val isLoggedIn: Boolean,
@@ -51,27 +56,27 @@ data class AuthState(
  * 3. Config errors never surface as scary runtime errors
  */
 @Singleton
-class AuthRepository @Inject constructor(
+class AuthRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val apiService: ApiService,
     private val securePreferences: SecurePreferences,
     private val firebaseAuth: FirebaseAuth,
     private val firebaseConfigChecker: FirebaseConfigChecker,
     private val database: HabitateDatabase
-) {
+) : AuthRepository {
     private val refreshMutex = Mutex()
 
     private val _isAuthenticated = MutableStateFlow(securePreferences.isTokenValid() || firebaseAuth.currentUser != null)
-    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+    override val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
     private val _currentUserId = MutableStateFlow(securePreferences.userId ?: firebaseAuth.currentUser?.uid)
-    val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
+    override val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
 
-    fun getCurrentUserId(): String? {
+    override fun getCurrentUserId(): String? {
         return _currentUserId.value
     }
 
-    suspend fun signInWithGoogle(idToken: String): Result<Unit> {
+    override suspend fun loginWithGoogle(idToken: String): AppResult<Unit> {
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val authResult = firebaseAuth.signInWithCredential(credential).await()
@@ -97,10 +102,10 @@ class AuthRepository @Inject constructor(
 
             _currentUserId.value = user.uid
             _isAuthenticated.value = true
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Google Sign-In failed")
-            Result.failure(e)
+            AppResult.Error(AppError.Unknown(e.message ?: "Google Sign-In failed", e))
         }
     }
 
@@ -108,22 +113,22 @@ class AuthRepository @Inject constructor(
      * Check if email link authentication is available.
      * This should be called before showing the email link sign-in option.
      */
-    fun isEmailLinkAuthAvailable(): Boolean {
+    override fun isEmailLinkAuthAvailable(): Boolean {
         return firebaseConfigChecker.isEmailLinkAuthAvailable()
     }
 
     /**
      * Get user-friendly reason why email link auth is unavailable.
      */
-    fun getEmailLinkUnavailableReason(): String {
+    override fun getEmailLinkUnavailableReason(): String {
         return firebaseConfigChecker.getEmailLinkUnavailableReason()
     }
 
-    suspend fun sendSignInLinkToEmail(email: String): Result<Unit> {
+    override suspend fun sendSignInLinkToEmail(email: String): AppResult<Unit> {
         // Pre-check: Ensure email link auth is available
         if (!firebaseConfigChecker.isEmailLinkAuthAvailable()) {
-            return Result.failure(
-                Exception(firebaseConfigChecker.getEmailLinkUnavailableReason())
+            return AppResult.Error(
+                AppError.Unknown(firebaseConfigChecker.getEmailLinkUnavailableReason())
             )
         }
 
@@ -145,35 +150,34 @@ class AuthRepository @Inject constructor(
 
             firebaseAuth.sendSignInLinkToEmail(email, actionCodeSettings).await()
             securePreferences.pendingEmail = email
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: Exception) {
-            Timber.e( "sendSignInLinkToEmail failed", e)
+            Timber.e(e, "sendSignInLinkToEmail failed")
             // Map technical errors to user-friendly messages
-            val userMessage = when {
+            when {
                 e.message?.contains("CONFIGURATION_NOT_FOUND") == true ||
                 e.message?.contains("FDL domain") == true ||
                 e.message?.contains("Dynamic Links") == true ->
-                    "Sign in with email link is currently unavailable"
+                    AppResult.Error(AppError.Unknown("Sign in with email link is currently unavailable", e))
                 e.message?.contains("invalid-email") == true ->
-                    "Please enter a valid email address"
+                    AppResult.Error(AppError.Validation("Please enter a valid email address", "email"))
                 e.message?.contains("network") == true ->
-                    "Network error. Please check your connection"
+                    AppResult.Error(AppError.NoConnection("Network error. Please check your connection", e))
                 else ->
-                    "Unable to send sign-in link. Please try again later"
+                    AppResult.Error(AppError.Unknown("Unable to send sign-in link. Please try again later", e))
             }
-            Result.failure(Exception(userMessage))
         }
     }
 
-    fun isSignInWithEmailLink(emailLink: String): Boolean {
+    override fun isSignInWithEmailLink(emailLink: String): Boolean {
         return firebaseAuth.isSignInWithEmailLink(emailLink)
     }
 
-    suspend fun signInWithEmailLink(email: String, emailLink: String): Result<String> {
+    override suspend fun signInWithEmailLink(email: String, emailLink: String): AppResult<String> {
         return try {
             val emailToUse = if (email.isNotBlank()) email else securePreferences.pendingEmail ?: ""
             if (emailToUse.isBlank()) {
-                return Result.failure(Exception("Please enter your email address to continue"))
+                return AppResult.Error(AppError.Validation("Please enter your email address to continue", "email"))
             }
 
             val authResult = firebaseAuth.signInWithEmailLink(emailToUse, emailLink).await()
@@ -195,33 +199,32 @@ class AuthRepository @Inject constructor(
                         )
                     }
                 } catch (e: Exception) {
-                    Timber.w( "Token fetch after email link sign-in failed", e)
+                    Timber.w(e, "Token fetch after email link sign-in failed")
                 }
                 
-                Result.success(user.uid)
+                AppResult.Success(user.uid)
             } else {
-                Result.failure(Exception("Unable to sign in. Please try again."))
+                AppResult.Error(AppError.Unknown("Unable to sign in. Please try again."))
             }
         } catch (e: Exception) {
-            Timber.e( "Email link sign-in failed", e)
+            Timber.e(e, "Email link sign-in failed")
             // Map errors to user-friendly messages
-            val userMessage = when {
+            when {
                 e.message?.contains("expired", ignoreCase = true) == true ->
-                    "This sign-in link has expired. Please request a new one"
+                    AppResult.Error(AppError.Unknown("This sign-in link has expired. Please request a new one", e))
                 e.message?.contains("invalid", ignoreCase = true) == true ->
-                    "This sign-in link is invalid. Please request a new one"
+                    AppResult.Error(AppError.Unknown("This sign-in link is invalid. Please request a new one", e))
                 e.message?.contains("already-used", ignoreCase = true) == true ->
-                    "This sign-in link has already been used"
+                    AppResult.Error(AppError.Conflict("This sign-in link has already been used", e))
                 e.message?.contains("network", ignoreCase = true) == true ->
-                    "Network error. Please check your connection"
+                    AppResult.Error(AppError.NoConnection("Network error. Please check your connection", e))
                 else ->
-                    "Unable to sign in. Please try again"
+                    AppResult.Error(AppError.Unknown("Unable to sign in. Please try again", e))
             }
-            Result.failure(Exception(userMessage))
         }
     }
 
-    suspend fun login(email: String, password: String): Result<String> {
+    override suspend fun login(email: String, password: String): AppResult<String> {
         return try {
             // 1. Login with Firebase (PRIMARY - success means user is authenticated)
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -250,7 +253,7 @@ class AuthRepository @Inject constructor(
                         false
                     }
                 } catch (e: Exception) {
-                    Timber.w( "Backend login exception (non-fatal)", e)
+                    Timber.w(e, "Backend login exception (non-fatal)")
                     false
                 }
 
@@ -267,41 +270,40 @@ class AuthRepository @Inject constructor(
                             Timber.d( "Using Firebase token as fallback")
                         }
                     } catch (e: Exception) {
-                        Timber.w( "Firebase token fallback failed", e)
+                        Timber.w(e, "Firebase token fallback failed")
                     }
                 }
 
-                Result.success(user.uid)
+                AppResult.Success(user.uid)
             } else {
-                Result.failure(Exception("Unable to sign in. Please try again."))
+                AppResult.Error(AppError.Unknown("Unable to sign in. Please try again."))
             }
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Result.failure(Exception("Invalid email or password"))
+            AppResult.Error(AppError.Unauthorized("Invalid email or password", e))
         } catch (e: FirebaseAuthInvalidUserException) {
-            Result.failure(Exception("No account found with this email"))
+            AppResult.Error(AppError.NotFound("No account found with this email", e))
         } catch (e: Exception) {
-            Timber.e( "Login failed", e)
+            Timber.e(e, "Login failed")
             // Map errors to user-friendly messages
-            val userMessage = when {
+            when {
                 e.message?.contains("network", ignoreCase = true) == true ->
-                    "Network error. Please check your connection"
+                    AppResult.Error(AppError.NoConnection("Network error. Please check your connection", e))
                 e.message?.contains("timeout", ignoreCase = true) == true ->
-                    "Connection timed out. Please try again"
+                    AppResult.Error(AppError.Timeout("Connection timed out. Please try again", e))
                 e.message?.contains("too-many-requests", ignoreCase = true) == true ->
-                    "Too many attempts. Please wait and try again"
+                    AppResult.Error(AppError.RateLimited("Too many attempts. Please wait and try again", e))
                 else ->
-                    "Unable to sign in. Please try again"
+                    AppResult.Error(AppError.Unknown("Unable to sign in. Please try again", e))
             }
-            Result.failure(Exception(userMessage))
         }
     }
 
-    suspend fun register(
+    override suspend fun register(
         email: String,
         password: String,
-        displayName: String,
-        username: String
-    ): Result<String> {
+        username: String,
+        displayName: String
+    ): AppResult<String> {
         return try {
             // 1. Create user with Firebase Auth (THIS IS FINAL - never rollback)
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -323,7 +325,7 @@ class AuthRepository @Inject constructor(
                 val backendSyncSuccess = try {
                     syncWithBackend(email, password, displayName, username)
                 } catch (e: Exception) {
-                    Timber.w( "Initial backend sync failed, queuing for retry", e)
+                    Timber.w(e, "Initial backend sync failed, queuing for retry")
                     false
                 }
 
@@ -333,28 +335,27 @@ class AuthRepository @Inject constructor(
                 }
 
                 Timber.d( "Registration successful. Backend synced: $backendSyncSuccess")
-                Result.success(firebaseUser.uid)
+                AppResult.Success(firebaseUser.uid)
             } else {
-                Result.failure(Exception("Registration failed. Please try again."))
+                AppResult.Error(AppError.Unknown("Registration failed. Please try again."))
             }
         } catch (e: com.google.firebase.auth.FirebaseAuthUserCollisionException) {
-            Result.failure(Exception("An account already exists with this email"))
+            AppResult.Error(AppError.Conflict("An account already exists with this email", e))
         } catch (e: com.google.firebase.auth.FirebaseAuthWeakPasswordException) {
-            Result.failure(Exception("Password is too weak. Use at least 8 characters"))
+            AppResult.Error(AppError.Validation("Password is too weak. Use at least 8 characters", "password"))
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Result.failure(Exception("Please enter a valid email address"))
+            AppResult.Error(AppError.Validation("Please enter a valid email address", "email"))
         } catch (e: Exception) {
-            Timber.e( "Registration failed", e)
+            Timber.e(e, "Registration failed")
             // Map technical errors to user-friendly messages
-            val userMessage = when {
+            when {
                 e.message?.contains("network") == true ->
-                    "Network error. Please check your connection"
+                    AppResult.Error(AppError.NoConnection("Network error. Please check your connection", e))
                 e.message?.contains("timeout") == true ->
-                    "Connection timed out. Please try again"
+                    AppResult.Error(AppError.Timeout("Connection timed out. Please try again", e))
                 else ->
-                    "Registration failed. Please try again"
+                    AppResult.Error(AppError.Unknown("Registration failed. Please try again", e))
             }
-            Result.failure(Exception(userMessage))
         }
     }
 
@@ -396,7 +397,7 @@ class AuthRepository @Inject constructor(
                 false
             }
         } catch (e: Exception) {
-            Timber.e( "Backend sync exception", e)
+            Timber.e(e, "Backend sync exception")
             false
         }
     }
@@ -450,7 +451,7 @@ class AuthRepository @Inject constructor(
      * Check if there's a pending backend sync and retry if needed.
      * Called on app launch.
      */
-    fun retryPendingSyncIfNeeded() {
+    override fun retryPendingSyncIfNeeded() {
         if (securePreferences.hasPendingSync() || securePreferences.hasFailedSync()) {
             val email = securePreferences.pendingSyncEmail ?: return
             val password = securePreferences.pendingSyncPassword ?: return
@@ -467,11 +468,11 @@ class AuthRepository @Inject constructor(
      * Check if backend sync is pending/failed.
      * Can be used to show subtle UI indicator.
      */
-    fun hasPendingBackendSync(): Boolean {
+    override fun hasPendingBackendSync(): Boolean {
         return securePreferences.hasPendingSync() || securePreferences.hasFailedSync()
     }
 
-    suspend fun refreshAccessToken(): Result<String> = refreshMutex.withLock {
+    override suspend fun refreshToken(): AppResult<String> = refreshMutex.withLock {
         return try {
             val refreshToken = securePreferences.refreshToken
             if (!refreshToken.isNullOrBlank() && refreshToken != "firebase_refresh_managed") {
@@ -484,10 +485,10 @@ class AuthRepository @Inject constructor(
                         refresh = body.refreshToken,
                         expiresInMs = 15 * 60 * 1000L
                     )
-                    Result.success(body.accessToken)
+                    AppResult.Success(body.accessToken)
                 } else {
                     // Refresh failed, maybe token expired or revoked
-                    Result.failure(Exception("Backend token refresh failed: ${response.code()}"))
+                    AppResult.Error(AppError.Unauthorized("Backend token refresh failed: ${response.code()}"))
                 }
             } else {
                 // Fallback to Firebase Refresh (if we are in legacy mode or just using Firebase)
@@ -501,63 +502,65 @@ class AuthRepository @Inject constructor(
                             refresh = "firebase_refresh_managed",
                             expiresInMs = 3600 * 1000L
                         )
-                        Result.success(token)
+                        AppResult.Success(token)
                     } else {
-                        Result.failure(Exception("Failed to refresh Firebase token"))
+                        AppResult.Error(AppError.Unknown("Failed to refresh Firebase token"))
                     }
                 } else {
-                    Result.failure(Exception("No user logged in and no refresh token available"))
+                    AppResult.Error(AppError.Unauthorized("No user logged in and no refresh token available"))
                 }
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            AppResult.Error(AppError.Unknown(e.message ?: "Token refresh failed", e))
         }
     }
 
-    suspend fun getAccessToken(): String? {
+    override suspend fun getAccessToken(): String? {
         if (securePreferences.isTokenValid()) {
             return securePreferences.accessToken
         }
-        return refreshAccessToken().getOrNull()
+        return when (val result = refreshToken()) {
+            is AppResult.Success -> result.data
+            else -> null
+        }
     }
 
-    fun getAccessTokenSync(): String? = securePreferences.accessToken
+    override fun getAccessTokenSync(): String? = securePreferences.accessToken
 
     /**
      * Send password reset email.
      * Uses Firebase Auth's built-in password reset flow.
      */
-    suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+    override suspend fun sendPasswordResetEmail(email: String): AppResult<Unit> {
         return try {
             if (email.isBlank()) {
-                return Result.failure(Exception("Please enter your email address"))
+                return AppResult.Error(AppError.Validation("Please enter your email address", "email"))
             }
             
             firebaseAuth.sendPasswordResetEmail(email).await()
             Timber.d( "Password reset email sent to $email")
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: FirebaseAuthInvalidUserException) {
             // Don't reveal if email exists for security
             Timber.w( "Password reset - user not found: $email")
-            Result.success(Unit) // Pretend success for security
+            AppResult.Success(Unit) // Pretend success for security
         } catch (e: Exception) {
-            Timber.e( "Password reset failed", e)
-            val userMessage = when {
+            Timber.e(e, "Password reset failed")
+            when {
                 e.message?.contains("network", ignoreCase = true) == true ->
-                    "Network error. Please check your connection"
+                    AppResult.Error(AppError.NoConnection("Network error. Please check your connection", e))
                 e.message?.contains("invalid-email", ignoreCase = true) == true ->
-                    "Please enter a valid email address"
+                    AppResult.Error(AppError.Validation("Please enter a valid email address", "email"))
                 e.message?.contains("too-many-requests", ignoreCase = true) == true ->
-                    "Too many requests. Please wait and try again"
+                    AppResult.Error(AppError.RateLimited("Too many requests. Please wait and try again", e))
                 else ->
-                    "Unable to send reset email. Please try again"
+                    AppResult.Error(AppError.Unknown("Unable to send reset email. Please try again", e))
             }
-            Result.failure(Exception(userMessage))
         }
     }
 
-    suspend fun logout() {
-        try {
+    override suspend fun logout(): AppResult<Unit> {
+        return try {
             // Sign out from Firebase
             firebaseAuth.signOut()
 
@@ -566,87 +569,98 @@ class AuthRepository @Inject constructor(
                 try {
                     apiService.logout()
                 } catch (e: Exception) {
-                    Timber.w( "Server logout failed", e)
+                    Timber.w(e, "Server logout failed")
                 }
             }
-        } catch (e: Exception) {
-            Timber.w( "Logout error", e)
-        } finally {
+
             // Clear local data to ensure privacy
-            database.clearAllTables()
+            withContext(Dispatchers.IO) { database.clearAllTables() }
             securePreferences.clearAuth()
             _isAuthenticated.value = false
             _currentUserId.value = null
+
+            AppResult.Success(Unit)
+        } catch (e: Exception) {
+            Timber.w(e, "Logout error")
+            // Still clear local state even on error
+            withContext(Dispatchers.IO) { database.clearAllTables() }
+            securePreferences.clearAuth()
+            _isAuthenticated.value = false
+            _currentUserId.value = null
+            AppResult.Success(Unit) // logout always "succeeds" locally
         }
     }
 
-    fun isOnboarded(): Boolean = securePreferences.isOnboarded
+    override fun isLoggedIn(): Boolean = _isAuthenticated.value
 
-    fun setOnboarded(onboarded: Boolean) {
+    override fun isOnboarded(): Boolean = securePreferences.isOnboarded
+
+    override fun setOnboarded(onboarded: Boolean) {
         securePreferences.isOnboarded = onboarded
     }
 
-    fun isBiometricEnabled(): Boolean = securePreferences.biometricEnabled
+    override fun isBiometricEnabled(): Boolean = securePreferences.biometricEnabled
 
-    fun setBiometricEnabled(enabled: Boolean) {
+    override fun setBiometricEnabled(enabled: Boolean) {
         securePreferences.biometricEnabled = enabled
     }
 
     /**
      * Send email verification to the current user.
      */
-    suspend fun sendEmailVerification(): Result<Unit> {
-        val user = firebaseAuth.currentUser ?: return Result.failure(Exception("User not logged in"))
+    override suspend fun sendEmailVerification(): AppResult<Unit> {
+        val user = firebaseAuth.currentUser ?: return AppResult.Error(AppError.Unauthorized("User not logged in"))
         
         return try {
             user.sendEmailVerification().await()
             Timber.d( "Verification email sent to ${user.email}")
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: Exception) {
-            Timber.e( "Failed to send verification email", e)
-            val message = when {
-                e.message?.contains("too-many-requests") == true -> "Too many requests. Please wait."
-                else -> "Failed to send verification email."
+            Timber.e(e, "Failed to send verification email")
+            when {
+                e.message?.contains("too-many-requests") == true ->
+                    AppResult.Error(AppError.RateLimited("Too many requests. Please wait.", e))
+                else ->
+                    AppResult.Error(AppError.Unknown("Failed to send verification email.", e))
             }
-            Result.failure(Exception(message))
         }
     }
 
     /**
      * Check if the current user's email is verified.
      */
-    fun isEmailVerified(): Boolean {
+    override fun isEmailVerified(): Boolean {
         return firebaseAuth.currentUser?.isEmailVerified == true
     }
 
     /**
      * Reload user data from Firebase (to refresh email verification status).
      */
-    suspend fun reloadUser(): Result<Unit> {
-        val user = firebaseAuth.currentUser ?: return Result.failure(Exception("User not logged in"))
+    override suspend fun reloadUser(): AppResult<Unit> {
+        val user = firebaseAuth.currentUser ?: return AppResult.Error(AppError.Unauthorized("User not logged in"))
         return try {
             user.reload().await()
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            AppResult.Error(AppError.Unknown(e.message ?: "Failed to reload user", e))
         }
     }
 
-    suspend fun deleteAccount(): Result<Unit> {
+    override suspend fun deleteAccount(): AppResult<Unit> {
         return try {
             // 1. Delete from backend API (best effort - don't block on failure)
             try {
                 apiService.deleteAccount()
             } catch (e: Exception) {
                 // Log but continue - Firebase deletion is primary
-                Timber.w( "Backend account deletion failed", e)
+                Timber.w(e, "Backend account deletion failed")
             }
             
             // 2. Delete from Firebase (PRIMARY - this is the source of truth)
             firebaseAuth.currentUser?.delete()?.await()
             
             // 3. Clear local DB
-            database.clearAllTables()
+            withContext(Dispatchers.IO) { database.clearAllTables() }
             
             // 4. Clear preferences
             securePreferences.clearAuth()
@@ -655,9 +669,9 @@ class AuthRepository @Inject constructor(
             _isAuthenticated.value = false
             _currentUserId.value = null
             
-            Result.success(Unit)
+            AppResult.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            AppResult.Error(AppError.Unknown(e.message ?: "Failed to delete account", e))
         }
     }
     

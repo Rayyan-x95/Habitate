@@ -3,8 +3,8 @@ package com.ninety5.habitate.ui.screens.insights
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ninety5.habitate.core.insights.InsightGenerator
-import com.ninety5.habitate.data.local.entity.InsightEntity
-import com.ninety5.habitate.data.repository.InsightRepository
+import com.ninety5.habitate.domain.model.Insight
+import com.ninety5.habitate.domain.repository.InsightRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,8 +19,8 @@ class InsightsViewModel @Inject constructor(
     private val insightGenerator: InsightGenerator
 ) : ViewModel() {
 
-    private val _insights = MutableStateFlow<List<InsightEntity>>(emptyList())
-    val insights: StateFlow<List<InsightEntity>> = _insights.asStateFlow()
+    private val _insights = MutableStateFlow<List<Insight>>(emptyList())
+    val insights: StateFlow<List<Insight>> = _insights.asStateFlow()
 
     init {
         loadInsights()
@@ -29,7 +29,7 @@ class InsightsViewModel @Inject constructor(
 
     private fun loadInsights() {
         viewModelScope.launch {
-            insightRepository.getActiveInsights().collectLatest {
+            insightRepository.observeActiveInsights().collectLatest {
                 _insights.value = it
             }
         }
@@ -41,15 +41,17 @@ class InsightsViewModel @Inject constructor(
         }
     }
 
-    fun dismissInsight(insight: InsightEntity) {
+    fun dismissInsight(insight: Insight) {
         viewModelScope.launch {
             insightRepository.dismissInsight(insight.id)
         }
     }
-    
-    fun markAsActioned(insight: InsightEntity) {
+
+    fun actOnInsight(insight: Insight) {
         viewModelScope.launch {
-            insightRepository.markAsActioned(insight.id)
+            // Mark as actioned (dismissed) and let the UI navigate if needed
+            insightRepository.dismissInsight(insight.id)
         }
     }
+    
 }

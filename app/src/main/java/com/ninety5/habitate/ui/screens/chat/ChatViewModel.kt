@@ -2,19 +2,20 @@ package com.ninety5.habitate.ui.screens.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.ChatEntity
-import com.ninety5.habitate.data.local.relation.MessageWithReactions
-import com.ninety5.habitate.data.repository.AuthRepository
-import com.ninety5.habitate.data.repository.ChatRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Conversation
+import com.ninety5.habitate.domain.model.Message
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,7 +26,7 @@ class ChatViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    val chats: StateFlow<List<ChatEntity>> = repository.chats
+    val chats: StateFlow<List<Conversation>> = repository.observeConversations()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isLoading = MutableStateFlow(false)
@@ -38,11 +39,11 @@ class ChatViewModel @Inject constructor(
         get() = authRepository.getCurrentUserId()
 
     private val _currentChatId = MutableStateFlow<String?>(null)
-    val messages: StateFlow<List<MessageWithReactions>> = _currentChatId
+    val messages: StateFlow<List<Message>> = _currentChatId
         .asStateFlow()
         .flatMapLatest { chatId ->
             if (chatId != null) {
-                repository.getMessages(chatId)
+                repository.observeMessages(chatId)
             } else {
                 flowOf(emptyList())
             }
@@ -55,10 +56,10 @@ class ChatViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             repository.initializeRealtime()
-            repository.typingEvents.collect { typingEvent ->
-                if (typingEvent.chatId == _currentChatId.value && typingEvent.isTyping) {
+            repository.observeTypingEvents().collect { typingEvent ->
+                if (typingEvent.conversationId == _currentChatId.value && typingEvent.isTyping) {
                     _typingUsers.value = _typingUsers.value + typingEvent.userId
-                } else if (typingEvent.chatId == _currentChatId.value && !typingEvent.isTyping) {
+                } else if (typingEvent.conversationId == _currentChatId.value && !typingEvent.isTyping) {
                     _typingUsers.value = _typingUsers.value - typingEvent.userId
                 }
             }
@@ -69,31 +70,33 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            try {
-                repository.refreshChats()
-            } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to refresh chats"
-            } finally {
-                _isLoading.value = false
+            when (val result = repository.refreshConversations()) {
+                is AppResult.Success -> { /* conversations updated via Flow */ }
+                is AppResult.Error -> {
+                    _error.value = result.error.message
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
+            _isLoading.value = false
         }
     }
 
     fun loadMessages(chatId: String) {
         _currentChatId.value = chatId
         viewModelScope.launch {
-            try {
-                repository.refreshMessages(chatId)
-            } catch (e: Exception) {
-                // Handle error silently or show snackbar
-            }
+            repository.refreshMessages(chatId)
         }
     }
 
     fun sendMessage(chatId: String, content: String) {
-        val userId = currentUserId ?: return
         viewModelScope.launch {
-            repository.sendMessage(chatId, content, userId, null)
+            when (val result = repository.sendMessage(chatId, content, null)) {
+                is AppResult.Success -> { /* Message sent, UI updated via Flow */ }
+                is AppResult.Error -> {
+                    _error.value = result.error.message
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -106,13 +109,37 @@ class ChatViewModel @Inject constructor(
 
     fun toggleMute(chatId: String, isMuted: Boolean) {
         viewModelScope.launch {
-            repository.muteChat(chatId, isMuted)
+            repository.muteConversation(chatId, isMuted)
         }
     }
 
     fun retryMessage(messageId: String) {
         viewModelScope.launch {
             // Retry logic would go here
+        }
+    }
+
+    fun addReaction(messageId: String, emoji: String) {
+        viewModelScope.launch {
+            when (val result = repository.addReaction(messageId, emoji)) {
+                is AppResult.Success -> { /* Reaction added via Flow */ }
+                is AppResult.Error -> {
+                    _error.value = result.error.message
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
+        }
+    }
+
+    fun deleteMessage(messageId: String) {
+        viewModelScope.launch {
+            when (val result = repository.deleteMessage(messageId)) {
+                is AppResult.Success -> { /* Message deleted via Flow */ }
+                is AppResult.Error -> {
+                    _error.value = result.error.message
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }

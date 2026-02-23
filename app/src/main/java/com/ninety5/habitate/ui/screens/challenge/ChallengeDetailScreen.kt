@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.ninety5.habitate.data.local.entity.ChallengeEntity
+import com.ninety5.habitate.domain.model.Challenge
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -108,7 +108,7 @@ fun ChallengeDetailScreen(
 }
 
 @Composable
-fun ChallengeHeader(challenge: ChallengeEntity) {
+fun ChallengeHeader(challenge: Challenge) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         modifier = Modifier.fillMaxWidth()
@@ -139,7 +139,7 @@ fun ChallengeHeader(challenge: ChallengeEntity) {
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
                     )
                     Text(
-                        "${challenge.targetValue.toInt()} ${challenge.metricType}",
+                        "${challenge.targetValue.toInt()} ${challenge.metricType.name}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer

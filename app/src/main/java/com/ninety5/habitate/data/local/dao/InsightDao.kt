@@ -15,6 +15,9 @@ interface InsightDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(insight: InsightEntity)
 
+    @Query("SELECT * FROM insights WHERE type = :type AND relatedEntityId = :entityId AND createdAt >= :since ORDER BY createdAt DESC LIMIT 1")
+    suspend fun findByTypeAndEntitySince(type: String, entityId: String, since: Long): InsightEntity?
+
     @Query("UPDATE insights SET isDismissed = 1 WHERE id = :id")
     suspend fun dismiss(id: String)
 

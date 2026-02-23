@@ -27,7 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import com.ninety5.habitate.data.local.view.TimelineItem
+import com.ninety5.habitate.domain.model.TimelineItem
 import com.ninety5.habitate.ui.components.TimelineItemCard
 import com.ninety5.habitate.ui.screens.archive.ArchiveViewModel
 

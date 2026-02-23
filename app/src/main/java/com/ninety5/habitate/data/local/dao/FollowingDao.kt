@@ -37,6 +37,19 @@ interface FollowDao {
         ORDER BY follows.createdAt DESC
     """)
     fun getFollowing(userId: String): Flow<List<UserEntity>>
+
+    /**
+     * Get users that a user is following (one-shot).
+     */
+    @Transaction
+    @Query("""
+        SELECT users.* 
+        FROM users 
+        INNER JOIN follows ON users.id = follows.followingId 
+        WHERE follows.followerId = :userId 
+        ORDER BY follows.createdAt DESC
+    """)
+    suspend fun getFollowingOnce(userId: String): List<UserEntity>
     
     /**
      * Get users following a user.
@@ -50,6 +63,19 @@ interface FollowDao {
         ORDER BY follows.createdAt DESC
     """)
     fun getFollowers(userId: String): Flow<List<UserEntity>>
+
+    /**
+     * Get users following a user (one-shot).
+     */
+    @Transaction
+    @Query("""
+        SELECT users.* 
+        FROM users 
+        INNER JOIN follows ON users.id = follows.followerId 
+        WHERE follows.followingId = :userId 
+        ORDER BY follows.createdAt DESC
+    """)
+    suspend fun getFollowersOnce(userId: String): List<UserEntity>
     
     /**
      * Get following count for a user.

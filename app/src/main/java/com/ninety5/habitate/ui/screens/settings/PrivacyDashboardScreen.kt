@@ -12,13 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.ninety5.habitate.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyDashboardScreen(
-    navController: NavController,
+    onNavigateBack: () -> Unit,
+    onDeleteAllData: () -> Unit,
+    onViewProfileAs: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -39,9 +40,7 @@ fun PrivacyDashboardScreen(
                     onClick = {
                         viewModel.deleteAllData()
                         showDeleteDialog = false
-                        navController.navigate("welcome") {
-                            popUpTo(0) { inclusive = true }
-                        }
+                        onDeleteAllData()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -88,7 +87,7 @@ fun PrivacyDashboardScreen(
             TopAppBar(
                 title = { Text("Privacy Dashboard") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -116,7 +115,7 @@ fun PrivacyDashboardScreen(
             SettingsItem(
                 icon = Icons.Rounded.Visibility,
                 title = "View As...",
-                onClick = { navController.navigate("profile_view_as") }
+                onClick = onViewProfileAs
             )
             HorizontalDivider()
             SettingsItem(

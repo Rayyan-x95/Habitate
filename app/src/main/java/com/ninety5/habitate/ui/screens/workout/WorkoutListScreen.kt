@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.WorkoutEntity
-import com.ninety5.habitate.data.local.entity.WorkoutSource
+import com.ninety5.habitate.domain.model.Workout
+import com.ninety5.habitate.domain.model.WorkoutSource
 import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
 import com.ninety5.habitate.ui.theme.HabitateOffWhite
 import com.ninety5.habitate.ui.theme.SageGreen
@@ -123,7 +123,7 @@ fun WorkoutListScreen(
 
 @Composable
 fun WorkoutItem(
-    workout: WorkoutEntity,
+    workout: Workout,
     onClick: () -> Unit
 ) {
     Card(
@@ -153,14 +153,14 @@ fun WorkoutItem(
                     .padding(start = 16.dp)
             ) {
                 Text(
-                    text = workout.type,
+                    text = workout.type.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = HabitateOffWhite
                 )
                 Text(
                     text = DateTimeFormatter.ofPattern("MMM dd, HH:mm")
                         .withZone(ZoneId.systemDefault())
-                        .format(workout.startTs),
+                        .format(workout.startTime),
                     style = MaterialTheme.typography.bodyMedium,
                     color = HabitateOffWhite.copy(alpha = 0.7f)
                 )
@@ -174,9 +174,9 @@ fun WorkoutItem(
                             modifier = Modifier.padding(end = 8.dp)
                         )
                     }
-                    if (workout.calories != null && workout.calories > 0) {
+                    if (workout.caloriesBurned != null && workout.caloriesBurned > 0) {
                         Text(
-                            text = "${workout.calories.toInt()} kcal",
+                            text = "${workout.caloriesBurned.toInt()} kcal",
                             style = MaterialTheme.typography.labelMedium,
                             color = SageGreen
                         )

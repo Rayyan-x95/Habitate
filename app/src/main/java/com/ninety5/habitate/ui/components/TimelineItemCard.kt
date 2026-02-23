@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ninety5.habitate.data.local.view.TimelineItem
+import com.ninety5.habitate.domain.model.TimelineItem
 import com.ninety5.habitate.ui.theme.MutedLilac
 import com.ninety5.habitate.ui.theme.SageGreen
 import com.ninety5.habitate.ui.theme.SoftIndigo

@@ -9,36 +9,36 @@ import androidx.compose.ui.unit.dp
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - SHAPES                       ║
- * ║                         Version 2.0 - Minimal Redesign                   ║
+ * ║                         Version 3.0 - 2026 Spatial UI                    ║
  * ║                                                                          ║
  * ║  Philosophy:                                                              ║
- * ║  • Consistent rounded corners (8-16dp primary range)                     ║
+ * ║  • Consistent rounded corners (16-20dp primary range for cards)          ║
  * ║  • Softer, more approachable shapes                                      ║
  * ║  • Pill shapes for interactive elements                                  ║
  * ║                                                                          ║
- * ║  Inspiration: Apple Health, Linear, Notion                               ║
+ * ║  Inspiration: VisionOS, Apple Health, Linear                             ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MATERIAL 3 SHAPES (Refined)
+// MATERIAL 3 SHAPES (Refined for 2026 Standard)
 // ═══════════════════════════════════════════════════════════════════════════
 
 val Shapes = Shapes(
     // Tags, tiny chips, status badges
-    extraSmall = RoundedCornerShape(Radius.xs),
+    extraSmall = RoundedCornerShape(8.dp),
     
     // Buttons, text fields, small cards
-    small = RoundedCornerShape(Radius.sm),
+    small = RoundedCornerShape(12.dp),
     
-    // Standard cards, dialogs, menus
-    medium = RoundedCornerShape(Radius.md),
+    // Standard cards, dialogs, menus (16-20dp range)
+    medium = RoundedCornerShape(20.dp),
     
     // Featured cards, large dialogs
-    large = RoundedCornerShape(Radius.lg),
+    large = RoundedCornerShape(24.dp),
     
     // Bottom sheets, full-screen dialogs
-    extraLarge = RoundedCornerShape(Radius.xxl)
+    extraLarge = RoundedCornerShape(32.dp)
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -46,44 +46,44 @@ val Shapes = Shapes(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Pill-shaped buttons, tags (full rounded) */
-val PillShape = RoundedCornerShape(Radius.pill)
+val PillShape = CircleShape
 
-/** Standard button shape - Slightly rounded */
-val ButtonShape = RoundedCornerShape(Radius.sm)
+/** Standard button shape - Fully rounded for modern feel */
+val ButtonShape = CircleShape
 
-/** Primary CTA button - More prominent rounding */
-val PrimaryButtonShape = RoundedCornerShape(Radius.md)
+/** Primary CTA button - Fully rounded */
+val PrimaryButtonShape = CircleShape
 
-/** Standard card shape */
-val CardShape = RoundedCornerShape(Radius.md)
+/** Standard card shape (20dp) */
+val CardShape = RoundedCornerShape(20.dp)
 
-/** Featured/highlighted card - More prominent */
-val FeaturedCardShape = RoundedCornerShape(Radius.lg)
+/** Featured/highlighted card - More prominent (24dp) */
+val FeaturedCardShape = RoundedCornerShape(24.dp)
 
-/** Compact card (list items) */
-val CardShapeCompact = RoundedCornerShape(Radius.sm)
+/** Compact card (list items) (16dp) */
+val CardShapeCompact = RoundedCornerShape(16.dp)
 
-/** Input field shape */
-val InputShape = RoundedCornerShape(Radius.sm)
+/** Input field shape (16dp) */
+val InputShape = RoundedCornerShape(16.dp)
 
 /** Chip/tag shape - Pill-like */
-val ChipShape = RoundedCornerShape(Radius.pill)
+val ChipShape = CircleShape
 
-/** Dialog shape */
-val DialogShape = RoundedCornerShape(Radius.lg)
+/** Dialog shape (24dp) */
+val DialogShape = RoundedCornerShape(24.dp)
 
-/** Bottom sheet shape - Rounded top corners only */
+/** Bottom sheet shape - Rounded top corners only (32dp) */
 val BottomSheetShape = RoundedCornerShape(
-    topStart = Radius.xxl,
-    topEnd = Radius.xxl,
+    topStart = 32.dp,
+    topEnd = 32.dp,
     bottomStart = 0.dp,
     bottomEnd = 0.dp
 )
 
-/** Modal sheet shape - Slightly smaller radius */
+/** Modal sheet shape - Slightly smaller radius (24dp) */
 val ModalSheetShape = RoundedCornerShape(
-    topStart = Radius.xl,
-    topEnd = Radius.xl,
+    topStart = 24.dp,
+    topEnd = 24.dp,
     bottomStart = 0.dp,
     bottomEnd = 0.dp
 )
@@ -91,32 +91,20 @@ val ModalSheetShape = RoundedCornerShape(
 /** Avatar shape - Perfect circle */
 val AvatarShape: Shape = CircleShape
 
-/** Image shape in cards */
-val ImageShape = RoundedCornerShape(Radius.md)
+/** Image shape in cards (16dp) */
+val ImageShape = RoundedCornerShape(16.dp)
 
-/** Image shape compact */
-val ImageShapeCompact = RoundedCornerShape(Radius.sm)
+/** Image shape compact (12dp) */
+val ImageShapeCompact = RoundedCornerShape(12.dp)
 
-/** FAB shape - More rounded for floating appearance */
-val FabShape = RoundedCornerShape(Radius.lg)
+/** FAB shape - Fully rounded */
+val FabShape = CircleShape
 
-/** Extended FAB shape */
-val ExtendedFabShape = RoundedCornerShape(Radius.lg)
+/** Search bar shape - Pill / fully rounded */
+val SearchBarShape = CircleShape
 
-/** Snackbar shape */
-val SnackbarShape = RoundedCornerShape(Radius.sm)
+/** Navigation indicator shape - Pill-shaped selection indicator */
+val NavIndicatorShape = CircleShape
 
-/** Tooltip shape */
-val TooltipShape = RoundedCornerShape(Radius.xs)
-
-/** Navigation bar indicator shape */
-val NavIndicatorShape = RoundedCornerShape(Radius.pill)
-
-/** Search bar shape - Medium rounded */
-val SearchBarShape = RoundedCornerShape(Radius.md)
-
-/** Story ring shape */
-val StoryRingShape: Shape = CircleShape
-
-/** Menu/dropdown shape */
-val MenuShape = RoundedCornerShape(Radius.md)
+/** Extended FAB shape - Fully rounded */
+val ExtendedFabShape = CircleShape

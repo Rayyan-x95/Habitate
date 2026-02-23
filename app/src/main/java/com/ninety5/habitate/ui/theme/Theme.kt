@@ -19,6 +19,7 @@ import androidx.core.view.WindowCompat
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - THEME                        ║
+ * ║                         Version 3.0 - 2026 Spatial UI                    ║
  * ║                                                                          ║
  * ║  Provides:                                                                ║
  * ║  • Material 3 color scheme                                               ║
@@ -35,19 +36,19 @@ import androidx.core.view.WindowCompat
 private val LightColorScheme = lightColorScheme(
     // Primary
     primary = Primary500,
-    onPrimary = BrandCream,
+    onPrimary = Neutral50,
     primaryContainer = Primary100,
-    onPrimaryContainer = Primary700,
+    onPrimaryContainer = Primary800,
     
     // Secondary
     secondary = Primary400,
     onSecondary = Neutral50,
-    secondaryContainer = Primary100,
-    onSecondaryContainer = Primary600,
+    secondaryContainer = Primary50,
+    onSecondaryContainer = Primary700,
     
     // Tertiary (Accent)
-    tertiary = Accent400,
-    onTertiary = Neutral900,
+    tertiary = Accent500,
+    onTertiary = Neutral50,
     tertiaryContainer = Accent100,
     onTertiaryContainer = Accent700,
     
@@ -111,7 +112,7 @@ private val DarkColorScheme = darkColorScheme(
     // Error
     error = SemanticError,
     onError = NeutralDark100,
-    errorContainer = SemanticErrorDark.copy(alpha = 0.2f),
+    errorContainer = SemanticErrorDark.copy(alpha = 0.3f),
     onErrorContainer = SemanticErrorLight,
     
     // Outline & Dividers
@@ -127,21 +128,20 @@ private val DarkColorScheme = darkColorScheme(
     scrim = NeutralDark50.copy(alpha = 0.5f),
     
     // Surface tones
-    surfaceTint = Primary400
+    surfaceTint = Primary300
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-// HABITATE THEME COMPOSABLE
+// THEME COMPOSABLE
 // ═══════════════════════════════════════════════════════════════════════════
 
 @Composable
 fun HabitateTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Disable dynamic color to use our brand colors
-    dynamicColor: Boolean = false,
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = false, // Disabled by default to maintain brand identity
     content: @Composable () -> Unit
 ) {
-    // Select Material 3 color scheme
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -151,23 +151,24 @@ fun HabitateTheme(
         else -> LightColorScheme
     }
     
-    // Select Habitate custom colors
     val habitateColors = if (darkTheme) DarkHabitateColors else LightHabitateColors
-
-    // Configure status bar
+    
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Use WindowCompat to set status bar color
-            WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = !darkTheme
-                isAppearanceLightNavigationBars = !darkTheme
-            }
+            // Make status bar transparent for edge-to-edge
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
-    // Provide all design tokens
     CompositionLocalProvider(
         LocalHabitateColors provides habitateColors,
         LocalHabitateTokens provides DefaultHabitateTokens
@@ -182,18 +183,27 @@ fun HabitateTheme(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// THEME ACCESS HELPERS
+// THEME ACCESSOR
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Access Habitate-specific colors: HabitateTheme.colors.primary
+ * Accessor for custom Habitate theme properties.
+ * Usage: HabitateTheme.colors.primary
  */
 object HabitateTheme {
     val colors: HabitateColorScheme
         @Composable
         get() = LocalHabitateColors.current
-    
+        
     val tokens: HabitateTokens
         @Composable
         get() = LocalHabitateTokens.current
+
+    val typography: androidx.compose.material3.Typography
+        @Composable
+        get() = MaterialTheme.typography
+
+    val shapes: androidx.compose.material3.Shapes
+        @Composable
+        get() = MaterialTheme.shapes
 }

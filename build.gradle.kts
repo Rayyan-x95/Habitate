@@ -11,4 +11,5 @@ plugins {
     // Firebase Performance plugin disabled - incompatible with AGP 9.0 (uses deprecated Transform API)
     // TODO: Re-enable when Firebase releases a compatible version
     // alias(libs.plugins.firebase.perf) apply false
+    alias(libs.plugins.detekt) apply false
 }

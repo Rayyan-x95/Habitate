@@ -4,14 +4,14 @@ import com.ninety5.habitate.data.local.SecurePreferences
 import com.ninety5.habitate.data.local.dao.DailySummaryDao
 import com.ninety5.habitate.data.local.dao.HabitDao
 import com.ninety5.habitate.data.local.dao.HabitLogDao
+import com.ninety5.habitate.data.local.dao.InsightDao
 import com.ninety5.habitate.data.local.dao.TaskDao
+import com.ninety5.habitate.data.local.dao.WorkoutDao
 import com.ninety5.habitate.data.local.entity.HabitFrequency
 import com.ninety5.habitate.data.local.entity.InsightEntity
 import com.ninety5.habitate.data.local.entity.InsightPriority
 import com.ninety5.habitate.data.local.entity.InsightType
-import com.ninety5.habitate.data.repository.HabitRepository
-import com.ninety5.habitate.data.repository.InsightRepository
-import com.ninety5.habitate.data.repository.WorkoutRepository
+import com.ninety5.habitate.domain.repository.HabitRepository
 import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.LocalDate
@@ -22,8 +22,8 @@ import javax.inject.Singleton
 @Singleton
 class InsightGenerator @Inject constructor(
     private val habitRepository: HabitRepository,
-    private val workoutRepository: WorkoutRepository,
-    private val insightRepository: InsightRepository,
+    private val workoutDao: WorkoutDao,
+    private val insightDao: InsightDao,
     private val dailySummaryDao: DailySummaryDao,
     private val taskDao: TaskDao,
     private val habitDao: HabitDao,
@@ -42,25 +42,29 @@ class InsightGenerator @Inject constructor(
     }
 
     private suspend fun generateStreakRiskInsights() {
-        val habitsWithStreaks = habitRepository.getActiveHabitsWithStreaks().first()
+        val habitsWithStreaks = habitRepository.observeActiveHabitsWithStreaks().first()
         val today = LocalDate.now()
+        val startOfToday = today.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         habitsWithStreaks.forEach { habitWithStreak ->
             val streak = habitWithStreak.streak
-            if (streak != null && streak.currentStreak > 3) {
-                // Check if completed today
-                // This logic assumes we can check if it's done today. 
-                // HabitWithStreak usually contains the habit and the streak info.
-                // We might need to check the last log date.
-                
-                val lastCompletedDateStr = streak.lastCompletedDate
-                if (lastCompletedDateStr != null) {
-                    val lastCompletedDate = LocalDate.parse(lastCompletedDateStr)
+            if (streak.currentStreak > 3) {
+                val lastCompletedAt = streak.lastCompletedAt
+                if (lastCompletedAt != null) {
+                    val lastCompletedDate = lastCompletedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
                     if (lastCompletedDate.isBefore(today)) {
                         // Not done today yet
                         // If it's late in the day (e.g. after 8 PM), generate a risk insight
                         val currentHour = java.time.LocalTime.now().hour
                         if (currentHour >= 20) {
+                            // Dedup: skip if we already generated one today for this habit
+                            val existing = insightDao.findByTypeAndEntitySince(
+                                InsightType.STREAK_RISK.name,
+                                habitWithStreak.habit.id,
+                                startOfToday
+                            )
+                            if (existing != null) return@forEach
+
                             val insight = InsightEntity(
                                 id = UUID.randomUUID().toString(),
                                 type = InsightType.STREAK_RISK,
@@ -70,7 +74,7 @@ class InsightGenerator @Inject constructor(
                                 relatedEntityId = habitWithStreak.habit.id,
                                 createdAt = Instant.now()
                             )
-                            insightRepository.addInsight(insight)
+                            insightDao.insert(insight)
                         }
                     }
                 }
@@ -79,12 +83,12 @@ class InsightGenerator @Inject constructor(
     }
 
     private suspend fun generateMilestoneInsights() {
-        val habitsWithStreaks = habitRepository.getActiveHabitsWithStreaks().first()
+        val habitsWithStreaks = habitRepository.observeActiveHabitsWithStreaks().first()
         
         habitsWithStreaks.forEach { habitWithStreak ->
             val streak = habitWithStreak.streak
-            if (streak != null) {
-                val current = streak.currentStreak
+            val current = streak.currentStreak
+            if (current > 0) {
                 val nextMilestone = getNextMilestone(current)
                 
                 if (nextMilestone - current == 1) {
@@ -97,7 +101,7 @@ class InsightGenerator @Inject constructor(
                         relatedEntityId = habitWithStreak.habit.id,
                         createdAt = Instant.now()
                     )
-                    insightRepository.addInsight(insight)
+                    insightDao.insert(insight)
                 }
             }
         }
@@ -116,7 +120,7 @@ class InsightGenerator @Inject constructor(
     }
 
     private suspend fun generateInactivityInsights() {
-        val workouts = workoutRepository.getAllWorkouts().first()
+        val workouts = workoutDao.getAllWorkouts().first()
         if (workouts.isEmpty()) return
 
         val lastWorkout = workouts.maxByOrNull { it.endTs } ?: return
@@ -132,7 +136,7 @@ class InsightGenerator @Inject constructor(
                 relatedEntityId = null,
                 createdAt = Instant.now()
             )
-            insightRepository.addInsight(insight)
+            insightDao.insert(insight)
         }
     }
 
@@ -157,7 +161,7 @@ class InsightGenerator @Inject constructor(
                 relatedEntityId = null,
                 createdAt = Instant.now()
             )
-            insightRepository.addInsight(insight)
+            insightDao.insert(insight)
         }
     }
 
@@ -174,7 +178,7 @@ class InsightGenerator @Inject constructor(
                 relatedEntityId = null,
                 createdAt = Instant.now()
             )
-            insightRepository.addInsight(insight)
+            insightDao.insert(insight)
         }
     }
 
@@ -214,7 +218,7 @@ class InsightGenerator @Inject constructor(
                         relatedEntityId = habit.id,
                         createdAt = Instant.now()
                     )
-                    insightRepository.addInsight(insight)
+                    insightDao.insert(insight)
                 }
             }
         }
@@ -260,7 +264,7 @@ class InsightGenerator @Inject constructor(
                     relatedEntityId = null,
                     createdAt = Instant.now()
                 )
-                insightRepository.addInsight(insight)
+                insightDao.insert(insight)
             }
         }
     }

@@ -92,7 +92,7 @@ fun EditProfileScreen(
 
 @Composable
 fun EditProfileForm(
-    initialUser: com.ninety5.habitate.data.local.entity.UserEntity,
+    initialUser: com.ninety5.habitate.domain.model.User,
     saveError: String?,
     isUploading: Boolean,
     uploadProgress: Float,

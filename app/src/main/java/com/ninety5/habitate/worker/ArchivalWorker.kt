@@ -27,15 +27,15 @@ class ArchivalWorker @AssistedInject constructor(
             
             // Archive tasks completed > 30 days ago
             val taskCutoff = now.minus(30, ChronoUnit.DAYS)
-            taskDao.archiveOldTasks(taskCutoff)
+            taskDao.archiveOldTasks(taskCutoff, now)
 
             // Archive posts > 1 year ago
             val postCutoff = now.minus(365, ChronoUnit.DAYS).toEpochMilli()
-            postDao.archiveOldPosts(postCutoff)
+            postDao.archiveOldPosts(postCutoff, now.toEpochMilli())
 
             // Archive workouts > 1 year ago
             val workoutCutoff = now.minus(365, ChronoUnit.DAYS)
-            workoutDao.archiveOldWorkouts(workoutCutoff)
+            workoutDao.archiveOldWorkouts(workoutCutoff, now)
 
             Result.success()
         } catch (e: Exception) {

@@ -8,6 +8,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.ninety5.habitate.core.auth.SessionManager
 import com.ninety5.habitate.worker.SyncWorker
 import com.ninety5.habitate.worker.StoryCleanupWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class HabitateApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var sessionManager: SessionManager
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -35,6 +37,7 @@ class HabitateApplication : Application(), Configuration.Provider {
         }
         scheduleSync()
         StoryCleanupWorker.schedule(this)
+        sessionManager.startObserving()
     }
 
     private fun scheduleSync() {

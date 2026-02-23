@@ -3,9 +3,11 @@ package com.ninety5.habitate.ui.screens.habit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitCategory
-import com.ninety5.habitate.data.local.entity.HabitFrequency
-import com.ninety5.habitate.data.repository.HabitRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Habit
+import com.ninety5.habitate.domain.model.HabitCategory
+import com.ninety5.habitate.domain.model.HabitFrequency
+import com.ninety5.habitate.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +16,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalTime
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -38,6 +42,9 @@ class HabitCreateViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HabitCreateUiState())
     val uiState: StateFlow<HabitCreateUiState> = _uiState.asStateFlow()
 
+    /** Preserved original createdAt for edit mode */
+    private var originalCreatedAt: Instant? = null
+
     init {
         if (isEditMode && habitId != null) {
             loadHabitForEdit(habitId)
@@ -46,20 +53,20 @@ class HabitCreateViewModel @Inject constructor(
 
     private fun loadHabitForEdit(habitId: String) {
         viewModelScope.launch {
-            habitRepository.getHabitWithLogs(habitId)
-                .collect { habitWithLogs ->
-                    habitWithLogs?.let { hwl ->
+            habitRepository.observeHabitWithDetails(habitId)
+                .collect { habitWithDetails ->
+                    habitWithDetails?.let { hwd ->
+                        originalCreatedAt = hwd.habit.createdAt
                         _uiState.update {
                             it.copy(
-                                title = hwl.habit.title,
-                                description = hwl.habit.description ?: "",
-                                selectedCategory = hwl.habit.category,
-                                selectedColor = hwl.habit.color,
-                                selectedIcon = hwl.habit.icon,
-                                selectedFrequency = hwl.habit.frequency,
-                                customSchedule = hwl.habit.customSchedule ?: emptyList(),
-                                reminderTime = hwl.habit.reminderTime,
-                                reminderEnabled = hwl.habit.reminderEnabled,
+                                title = hwd.habit.title,
+                                description = hwd.habit.description ?: "",
+                                selectedCategory = hwd.habit.category,
+                                selectedColor = hwd.habit.color,
+                                selectedIcon = hwd.habit.icon,
+                                selectedFrequency = hwd.habit.frequency,
+                                customSchedule = hwd.habit.customSchedule,
+                                reminderTime = hwd.habit.reminderTime,
                                 isLoading = false
                             )
                         }
@@ -136,47 +143,51 @@ class HabitCreateViewModel @Inject constructor(
         _uiState.update { it.copy(isSaving = true) }
 
         viewModelScope.launch {
+            val now = Instant.now()
+            val habit = Habit(
+                id = habitId ?: UUID.randomUUID().toString(),
+                userId = "", // Repository fills this from SecurePreferences
+                title = state.title,
+                description = state.description.ifBlank { null },
+                category = state.selectedCategory,
+                color = state.selectedColor,
+                icon = state.selectedIcon,
+                frequency = state.selectedFrequency,
+                customSchedule = if (state.selectedFrequency == HabitFrequency.CUSTOM) state.customSchedule else emptyList(),
+                reminderTime = if (state.reminderEnabled) state.reminderTime else null,
+                isArchived = false,
+                createdAt = originalCreatedAt ?: now,
+                updatedAt = now
+            )
+
             val result = if (isEditMode && habitId != null) {
-                habitRepository.updateHabit(
-                    habitId = habitId,
-                    title = state.title,
-                    description = state.description.ifBlank { null },
-                    category = state.selectedCategory,
-                    color = state.selectedColor,
-                    icon = state.selectedIcon,
-                    frequency = state.selectedFrequency,
-                    customSchedule = if (state.selectedFrequency == HabitFrequency.CUSTOM) state.customSchedule else null,
-                    reminderTime = if (state.reminderEnabled) state.reminderTime else null,
-                    reminderEnabled = state.reminderEnabled
-                )
+                habitRepository.updateHabit(habit)
             } else {
-                habitRepository.createHabit(
-                    title = state.title,
-                    description = state.description.ifBlank { null },
-                    category = state.selectedCategory,
-                    color = state.selectedColor,
-                    icon = state.selectedIcon,
-                    frequency = state.selectedFrequency,
-                    customSchedule = if (state.selectedFrequency == HabitFrequency.CUSTOM) state.customSchedule else null,
-                    reminderTime = if (state.reminderEnabled) state.reminderTime else null,
-                    reminderEnabled = state.reminderEnabled
-                ).map { Unit }
+                // Map AppResult<Habit> → AppResult<Unit>
+                @Suppress("UNCHECKED_CAST")
+                when (val createResult = habitRepository.createHabit(habit)) {
+                    is AppResult.Success -> AppResult.Success(Unit)
+                    is AppResult.Error -> createResult as AppResult<Unit>
+                    is AppResult.Loading -> AppResult.Loading
+                }
             }
 
-            result
-                .onSuccess {
+            when (result) {
+                is AppResult.Success -> {
                     Timber.d("Habit saved successfully")
                     _uiState.update { it.copy(isSaving = false, habitSaved = true) }
                 }
-                .onFailure { e ->
-                    Timber.e(e, "Failed to save habit")
+                is AppResult.Error -> {
+                    Timber.e("Failed to save habit: ${result.error.message}")
                     _uiState.update {
                         it.copy(
                             isSaving = false,
-                            error = e.message ?: "Failed to save habit"
+                            error = result.error.message
                         )
                     }
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 

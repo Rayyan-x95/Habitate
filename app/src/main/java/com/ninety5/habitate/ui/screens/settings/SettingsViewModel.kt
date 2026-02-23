@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-import com.ninety5.habitate.data.repository.AppTheme
-import com.ninety5.habitate.data.repository.UserPreferencesRepository
+import com.ninety5.habitate.domain.model.AppTheme
+import com.ninety5.habitate.domain.repository.UserPreferencesRepository
 
 data class SettingsUiState(
     val themeMode: String = "system", // system, light, dark
@@ -25,8 +25,8 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val securePreferences: SecurePreferences,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val userRepository: com.ninety5.habitate.data.repository.UserRepository,
-    private val authRepository: com.ninety5.habitate.data.repository.AuthRepository,
+    private val userRepository: com.ninety5.habitate.domain.repository.UserRepository,
+    private val authRepository: com.ninety5.habitate.domain.repository.AuthRepository,
     private val realtimeClient: com.ninety5.habitate.data.remote.RealtimeClient
 ) : ViewModel() {
 
@@ -43,7 +43,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = authRepository.getCurrentUserId()
             if (userId != null) {
-                userRepository.getUser(userId).collect { user ->
+                userRepository.observeUser(userId).collect { user ->
                     if (user != null) {
                         _uiState.update { it.copy(isStealthMode = user.isStealthMode) }
                     }
@@ -63,8 +63,7 @@ class SettingsViewModel @Inject constructor(
 
     fun toggleStealthMode(enabled: Boolean) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            userRepository.updateStealthMode(userId, enabled)
+            userRepository.toggleStealthMode(enabled)
             
             if (enabled) {
                 realtimeClient.sendPresence(com.ninety5.habitate.data.remote.PresenceStatus.OFFLINE)

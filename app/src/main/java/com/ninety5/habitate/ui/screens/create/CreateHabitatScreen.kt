@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.HabitatPrivacy
+import com.ninety5.habitate.domain.model.HabitatPrivacy
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

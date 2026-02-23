@@ -2,8 +2,9 @@ package com.ninety5.habitate.ui.screens.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.repository.AuthRepository
-import com.ninety5.habitate.data.repository.NotificationRepository
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.NotificationRepository
+import com.ninety5.habitate.domain.model.Notification
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import com.ninety5.habitate.data.local.entity.NotificationEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
@@ -31,13 +31,13 @@ data class NotificationUiModel(
     val targetId: String?
 )
 
-fun NotificationEntity.toUiModel() = NotificationUiModel(
+fun Notification.toUiModel() = NotificationUiModel(
     id = id,
     title = title,
     message = body,
     timestamp = createdAt.toEpochMilli(),
     isRead = isRead,
-    type = type,
+    type = type.name,
     targetId = targetId
 )
 
@@ -54,7 +54,7 @@ class ActivityViewModel @Inject constructor(
                 // Handle no user case if necessary
                 kotlinx.coroutines.flow.flowOf(ActivityUiState(isLoading = false))
             } else {
-                notificationRepository.getAllNotifications(userId)
+                notificationRepository.observeNotifications()
                     .map { notifications ->
                         ActivityUiState(
                             notifications = notifications.map { it.toUiModel() },
@@ -77,10 +77,8 @@ class ActivityViewModel @Inject constructor(
     }
 
     fun markAllAsRead() {
-        uiState.value.userId?.let { userId ->
-            viewModelScope.launch {
-                notificationRepository.markAllAsRead(userId)
-            }
+        viewModelScope.launch {
+            notificationRepository.markAllAsRead()
         }
     }
 }

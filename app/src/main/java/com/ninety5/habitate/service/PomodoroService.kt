@@ -110,8 +110,9 @@ class PomodoroService : Service() {
     }
 
     private fun onTimerComplete() {
-        // Glyph celebration for completed pomodoro
-        // glyphManager.playPomodoroComplete() // TODO: Re-enable when SDK is fixed
+        // Glyph celebration is disabled until the Nothing Glyph SDK is integrated.
+        // Re-enable after GlyphInterfaceManager is backed by the real SDK.
+        // glyphManager.playPomodoroComplete()
         
         // Show completion notification
         val completionNotification = liveNotificationManager.buildPomodoroNotification(

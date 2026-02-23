@@ -71,12 +71,12 @@ fun PublicApiScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 Text(
-                                    text = "${it.currentWeather.temperature}°",
+                                    text = "${it.temperature}°",
                                     style = MaterialTheme.typography.displayMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Column {
-                                    Text("Wind: ${it.currentWeather.windSpeed} km/h")
+                                    Text("Wind: ${it.windSpeed} km/h")
                                     Text("Lat: 52.52, Long: 13.41", style = MaterialTheme.typography.bodySmall)
                                 }
                             }
@@ -98,7 +98,7 @@ fun PublicApiScreen(
                         uiState.quote?.let {
                             Column(modifier = Modifier.padding(8.dp)) {
                                 Text(
-                                    text = "“${it.quote}”",
+                                    text = "\u201c${it.text}\u201d",
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontStyle = FontStyle.Italic
                                 )
@@ -127,7 +127,7 @@ fun PublicApiScreen(
                         uiState.meal?.let {
                             Column {
                                 AsyncImage(
-                                    model = it.thumbUrl,
+                                    model = it.thumbnailUrl,
                                     contentDescription = it.name,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -171,7 +171,7 @@ fun PublicApiScreen(
                         headlineContent = { Text(book.title, fontWeight = FontWeight.SemiBold) },
                         supportingContent = {
                             Column {
-                                book.authorName?.let { Text("By ${it.joinToString(", ")}") }
+                                if (book.authors.isNotEmpty()) { Text("By ${book.authors.joinToString(", ")}") }
                                 book.firstPublishYear?.let { Text("Published: $it") }
                             }
                         },

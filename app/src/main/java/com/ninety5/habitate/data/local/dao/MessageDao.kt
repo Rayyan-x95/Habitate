@@ -18,6 +18,9 @@ interface MessageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(message: MessageEntity)
 
+    @Query("SELECT * FROM messages WHERE id = :messageId")
+    suspend fun getMessageById(messageId: String): MessageEntity?
+
     @Query("UPDATE messages SET isDeleted = 1 WHERE id = :messageId")
     suspend fun deleteMessage(messageId: String)
 

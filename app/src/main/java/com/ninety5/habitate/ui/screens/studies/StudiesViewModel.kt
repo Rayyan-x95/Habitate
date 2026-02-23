@@ -2,8 +2,10 @@ package com.ninety5.habitate.ui.screens.studies
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitCategory
-import com.ninety5.habitate.data.repository.HabitRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Habit
+import com.ninety5.habitate.domain.model.HabitCategory
+import com.ninety5.habitate.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +36,7 @@ class StudiesViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 // Load study sessions (habits with LEARNING category or study-related titles)
-                habitRepository.getAllHabits().collect { habits ->
+                habitRepository.observeAllHabits().collect { habits ->
                     val studyHabits = habits.filter { habit ->
                         habit.category == HabitCategory.LEARNING ||
                         habit.title.lowercase().contains("study") ||
@@ -42,6 +44,20 @@ class StudiesViewModel @Inject constructor(
                         habit.title.lowercase().contains("read")
                     }
                     
+                    // Compute weekly minutes from recent logs across study habits
+                    val startOfWeek = java.time.LocalDate.now()
+                        .with(java.time.DayOfWeek.MONDAY)
+                        .atStartOfDay(java.time.ZoneOffset.UTC)
+                        .toInstant()
+                    val weeklyMinutesTotal = studyHabits.sumOf { habit ->
+                        try {
+                            val logs = habitRepository.getCompletionHistory(habit.id, 50)
+                            if (logs is AppResult.Success) {
+                                logs.data.filter { it.completedAt >= startOfWeek }.size * 30L // Estimate 30 min per session
+                            } else 0L
+                        } catch (_: Exception) { 0L }
+                    }.toInt()
+
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
@@ -57,8 +73,9 @@ class StudiesViewModel @Inject constructor(
                             },
                             currentStreak = 0,
                             todayMinutes = 0,
+                            weeklyMinutes = weeklyMinutesTotal,
                             weeklyGoal = 420, // 7 hours per week default
-                            weeklyProgress = 0f
+                            weeklyProgress = (weeklyMinutesTotal.toFloat() / 420f).coerceIn(0f, 1f)
                         )
                     }
                 }
@@ -86,17 +103,24 @@ class StudiesViewModel @Inject constructor(
             
             try {
                 // Mark habit as completed for today
-                habitRepository.completeHabit(habitId)
-                
-                // Update todayMinutes in UI state immediately
-                _uiState.update { it.copy(
-                    todayMinutes = it.todayMinutes + durationMinutes,
-                    weeklyProgress = ((it.todayMinutes + durationMinutes).toFloat() / it.weeklyGoal).coerceIn(0f, 1f)
-                )}
-                
-                Timber.d("Study session completed: $habitId, duration: $durationMinutes minutes")
+                when (val result = habitRepository.logCompletion(habitId)) {
+                    is AppResult.Success -> {
+                        // Update todayMinutes and weeklyMinutes in UI state immediately
+                        _uiState.update { it.copy(
+                            todayMinutes = it.todayMinutes + durationMinutes,
+                            weeklyMinutes = it.weeklyMinutes + durationMinutes,
+                            weeklyProgress = ((it.weeklyMinutes + durationMinutes).toFloat() / it.weeklyGoal).coerceIn(0f, 1f)
+                        )}
+                        Timber.d("Study session completed: $habitId, duration: $durationMinutes minutes")
+                    }
+                    is AppResult.Error -> {
+                        Timber.e("Failed to complete study session: ${result.error.message}")
+                        _uiState.update { it.copy(error = result.error.message) }
+                    }
+                    is AppResult.Loading -> { /* no-op */ }
+                }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to complete study session")
+                Timber.e(e, "Unexpected error in study session")
                 _uiState.update { it.copy(error = e.message ?: "Failed to end session") }
             } finally {
                 _uiState.update { it.copy(activeSessionId = null, sessionStartTime = null) }
@@ -120,6 +144,7 @@ data class StudiesUiState(
     val studyHabits: List<StudyHabit> = emptyList(),
     val currentStreak: Int = 0,
     val todayMinutes: Int = 0,
+    val weeklyMinutes: Int = 0,
     val weeklyGoal: Int = 420, // 7 hours
     val weeklyProgress: Float = 0f,
     val activeSessionId: String? = null,

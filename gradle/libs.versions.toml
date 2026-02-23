@@ -1,6 +1,6 @@
 
 [versions]
-agp = "9.0.0"
+agp = "9.0.1"
 kotlin = "2.2.10"
 ksp = "2.3.2"
 coreKtx = "1.15.0"
@@ -11,9 +11,9 @@ lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.0"
 composeBom = "2025.01.01"
 navigationCompose = "2.9.0"
-hilt = "2.54"
+hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
-room = "2.6.1"
+room = "2.7.1"
 work = "2.10.0"
 hiltWork = "1.2.0"
 datastore = "1.1.4"
@@ -37,6 +37,7 @@ mockitoKotlin = "5.4.0"
 mockitoInline = "5.2.0"
 coreTesting = "2.2.0"
 generativeAi = "0.9.0"
+detekt = "1.23.7"
 paging = "3.3.5"
 credentials = "1.5.0"
 googleid = "1.1.1"
@@ -144,4 +145,5 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 

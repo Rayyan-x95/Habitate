@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.ninety5.habitate.ui.screens.activity.ActivityScreen
 import com.ninety5.habitate.ui.screens.create.CreateScreen
 import com.ninety5.habitate.ui.screens.feed.FeedScreen
@@ -95,9 +96,7 @@ fun HabitateNavHost(
         }
 
         composable(Screen.Focus.route) {
-            FocusScreen(
-                navController = navController
-            )
+            FocusScreen()
         }
 
         composable(Screen.Planner.route) {
@@ -108,7 +107,6 @@ fun HabitateNavHost(
 
         composable(Screen.ChatList.route) {
             ChatListScreen(
-                navController = navController,
                 onChatClick = { roomId ->
                     navController.navigate(Screen.Chat.createRoute(roomId))
                 }
@@ -121,14 +119,18 @@ fun HabitateNavHost(
         ) { backStackEntry ->
             val roomId = backStackEntry.arguments?.getString("roomId") ?: return@composable
             ChatScreen(
-                navController = navController,
-                roomId = roomId
+                roomId = roomId,
+                onBackClick = { navController.popBackStack() }
             )
         }
 
         composable(
             route = Screen.StoryViewer.route,
-            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            arguments = listOf(navArgument("userId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://habitate.app/story/{userId}" },
+                navDeepLink { uriPattern = "habitate://story/{userId}" }
+            )
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
             StoryViewerScreen(
@@ -179,7 +181,11 @@ fun HabitateNavHost(
         // Detail screens with arguments
         composable(
             route = Screen.PostDetail.route,
-            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+            arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://habitate.app/post/{postId}" },
+                navDeepLink { uriPattern = "habitate://post/{postId}" }
+            )
         ) { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
             PostDetailScreen(
@@ -193,7 +199,11 @@ fun HabitateNavHost(
 
         composable(
             route = Screen.UserProfile.route,
-            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            arguments = listOf(navArgument("userId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://habitate.app/user/{userId}" },
+                navDeepLink { uriPattern = "habitate://user/{userId}" }
+            )
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
             ProfileScreen(
@@ -234,7 +244,11 @@ fun HabitateNavHost(
 
         composable(
             route = Screen.HabitatDetail.route,
-            arguments = listOf(navArgument("habitatId") { type = NavType.StringType })
+            arguments = listOf(navArgument("habitatId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://habitate.app/habitat/{habitatId}" },
+                navDeepLink { uriPattern = "habitate://habitat/{habitatId}" }
+            )
         ) { backStackEntry ->
             val habitatId = backStackEntry.arguments?.getString("habitatId") ?: return@composable
             HabitatDetailScreen(
@@ -255,7 +269,8 @@ fun HabitateNavHost(
         // Habit screens
         composable(Screen.HabitList.route) {
             com.ninety5.habitate.ui.screens.habit.HabitListScreen(
-                navController = navController
+                onCreateHabitClick = { navController.navigate(Screen.HabitCreate.route) },
+                onHabitClick = { habitId -> navController.navigate(Screen.HabitDetail.createRoute(habitId)) }
             )
         }
 
@@ -266,13 +281,14 @@ fun HabitateNavHost(
             val habitId = backStackEntry.arguments?.getString("habitId") ?: return@composable
             com.ninety5.habitate.ui.screens.habit.HabitDetailScreen(
                 habitId = habitId,
-                navController = navController
+                onNavigateBack = { navController.popBackStack() },
+                onEditHabit = { id -> navController.navigate(Screen.HabitEdit.createRoute(id)) }
             )
         }
 
         composable(Screen.HabitCreate.route) {
             com.ninety5.habitate.ui.screens.habit.HabitCreateScreen(
-                navController = navController
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -283,7 +299,7 @@ fun HabitateNavHost(
             val habitId = backStackEntry.arguments?.getString("habitId")
             com.ninety5.habitate.ui.screens.habit.HabitCreateScreen(
                 habitId = habitId,
-                navController = navController
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -438,7 +454,11 @@ fun HabitateNavHost(
 
         composable(
             route = Screen.ChallengeDetail.route,
-            arguments = listOf(navArgument("challengeId") { type = NavType.StringType })
+            arguments = listOf(navArgument("challengeId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://habitate.app/challenge/{challengeId}" },
+                navDeepLink { uriPattern = "habitate://challenge/{challengeId}" }
+            )
         ) { backStackEntry ->
             // challengeId is retrieved by ViewModel via SavedStateHandle
             ChallengeDetailScreen(
@@ -459,7 +479,13 @@ fun HabitateNavHost(
         // Privacy Dashboard
         composable(Screen.PrivacySettings.route) {
             com.ninety5.habitate.ui.screens.settings.PrivacyDashboardScreen(
-                navController = navController
+                onNavigateBack = { navController.popBackStack() },
+                onDeleteAllData = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onViewProfileAs = { /* Not yet implemented */ }
             )
         }
 
@@ -503,7 +529,7 @@ fun HabitateNavHost(
         // Insights Dashboard feature
         composable(Screen.Insights.route) {
             com.ninety5.habitate.ui.screens.insights.InsightsDashboardScreen(
-                navController = navController
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

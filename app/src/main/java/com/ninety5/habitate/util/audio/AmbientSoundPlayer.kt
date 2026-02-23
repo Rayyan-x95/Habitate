@@ -1,69 +1,30 @@
 package com.ninety5.habitate.util.audio
 
-import android.content.Context
-import android.media.MediaPlayer
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.ninety5.habitate.core.audio.HabitateAudioManager
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * @deprecated Use [HabitateAudioManager] directly instead.
+ * This class is kept for backward compatibility and delegates to [HabitateAudioManager].
+ */
+@Deprecated(
+    message = "Use HabitateAudioManager from core/audio/ instead",
+    replaceWith = ReplaceWith(
+        "HabitateAudioManager",
+        "com.ninety5.habitate.core.audio.HabitateAudioManager"
+    )
+)
 @Singleton
 class AmbientSoundPlayer @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val audioManager: HabitateAudioManager
 ) {
-    private var mediaPlayer: MediaPlayer? = null
-    private val _isPlaying = MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    val isPlaying: StateFlow<Boolean> = audioManager.isPlaying
+    val currentTrack: StateFlow<String?> = audioManager.currentTrack
 
-    private val _currentTrack = MutableStateFlow<String?>(null)
-    val currentTrack: StateFlow<String?> = _currentTrack.asStateFlow()
-
-    fun play(trackResId: Int, trackName: String) {
-        stop()
-        try {
-            mediaPlayer = MediaPlayer.create(context, trackResId)
-            mediaPlayer?.apply {
-                isLooping = true
-                start()
-            }
-            if (mediaPlayer != null) {
-                _isPlaying.value = true
-                _currentTrack.value = trackName
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun stop() {
-        try {
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        mediaPlayer = null
-        _isPlaying.value = false
-        _currentTrack.value = null
-    }
-    
-    fun pause() {
-        try {
-            mediaPlayer?.pause()
-            _isPlaying.value = false
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-    
-    fun resume() {
-        try {
-            mediaPlayer?.start()
-            _isPlaying.value = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    fun play(trackResId: Int, trackName: String) = audioManager.playResource(trackResId, trackName)
+    fun stop() = audioManager.stop()
+    fun pause() = audioManager.pause()
+    fun resume() = audioManager.resume()
 }

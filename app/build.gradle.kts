@@ -10,6 +10,7 @@ plugins {
     // Firebase Performance plugin disabled - incompatible with AGP 9.0 (uses deprecated Transform API)
     // TODO: Re-enable when Firebase releases a compatible version
     // alias(libs.plugins.firebase.perf)
+    alias(libs.plugins.detekt)
 }
 
 import java.util.Properties
@@ -74,6 +75,12 @@ android {
             "-opt-in=kotlin.RequiresOptIn"
         )
     }
+    // Room schema export for migration verification
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+        arg("room.generateKotlin", "true")
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -93,9 +100,14 @@ android {
             "TimberTagLength",
             "TimberExceptionLogging"
         )
-        // Treat LintError as warning instead of error
+        // Treat LintError as warning to not block builds on lint infrastructure issues
         warning += "LintError"
-        abortOnError = false
+        // Abort on lint errors in release builds to catch real issues
+        abortOnError = true
+        // Show all warnings/errors
+        warningsAsErrors = false
+        // Baseline file for known issues (generate with: ./gradlew lintDebug -Dlint.baselines.continue=true)
+        baseline = file("lint-baseline.xml")
         // Exclude Timber lint checks that use deprecated Transform API
         checkDependencies = false
     }
@@ -208,4 +220,17 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// Detekt code analysis configuration
+detekt {
+    config.setFrom(files("${rootProject.projectDir}/detekt.yml"))
+    buildUponDefaultConfig = true
+    parallel = true
+    // Generate reports
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        sarif.required.set(true)
+    }
 }

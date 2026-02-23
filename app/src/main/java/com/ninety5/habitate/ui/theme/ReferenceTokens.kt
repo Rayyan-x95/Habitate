@@ -6,13 +6,22 @@ import androidx.compose.ui.graphics.SolidColor
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
- * ║              HABITATE REFERENCE DESIGN TOKENS (PIXEL-PERFECT)             ║
+ * ║          DEPRECATED — HABITATE REFERENCE DESIGN TOKENS                    ║
  * ║                                                                          ║
- * ║  Extracted from provided reference images for exact replication:         ║
- * ║  • Colors matched to hex values from screenshots                          ║
- * ║  • Spacing measured in pixels/dp                                         ║
- * ║  • Typography sized to match reference                                   ║
- * ║  • Component dimensions precisely measured                               ║
+ * ║  This file is a parallel color/token system extracted from screenshots.  ║
+ * ║  It duplicates HabitateColors.kt and DesignTokens.kt and violates the   ║
+ * ║  brand guidelines (pure black text, alien blue accent).                  ║
+ * ║                                                                          ║
+ * ║  Migration:                                                              ║
+ * ║    ReferenceColors.primary     → HabitateTheme.colors.primary           ║
+ * ║    ReferenceColors.onPrimary   → HabitateTheme.colors.onPrimary         ║
+ * ║    ReferenceColors.background  → HabitateTheme.colors.background        ║
+ * ║    ReferenceColors.accent      → HabitateTheme.colors.accent            ║
+ * ║    ReferenceColors.textPrimary → HabitateTheme.colors.textPrimary       ║
+ * ║    ReferenceColors.border      → HabitateTheme.colors.border            ║
+ * ║                                                                          ║
+ * ║  Screens to migrate: LoginScreen, ConversationsListScreen,              ║
+ * ║                       FeedbackSystem                                     ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
@@ -220,9 +229,10 @@ val RefOpacityDivider = 0.3f
 val RefOpacityOverlay = 0.1f
 
 // ═══════════════════════════════════════════════════════════════════════════
-// REFERENCE COLOR SCHEME OBJECT
+// REFERENCE COLOR SCHEME OBJECT — DEPRECATED
 // ═══════════════════════════════════════════════════════════════════════════
 
+@Deprecated("Use HabitateTheme.colors instead — this parallel color system will be removed")
 data class ReferenceColorScheme(
     // Primary colors from reference
     val primary: Color = RefDarkGreen,
@@ -262,5 +272,7 @@ data class ReferenceColorScheme(
     val lightGradient: Brush = RefLightGrayGradient
 )
 
-/** Reference color scheme instance */
+/** Reference color scheme instance — DEPRECATED: Use HabitateTheme.colors */
+@Deprecated("Use HabitateTheme.colors instead — this parallel color system will be removed")
+@Suppress("DEPRECATION")
 val ReferenceColors = ReferenceColorScheme()

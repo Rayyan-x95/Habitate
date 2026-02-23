@@ -61,6 +61,12 @@ interface CommentDao {
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(comment: CommentEntity)
+
+    /**
+     * Batch upsert comments. Replaces existing entries on conflict.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(comments: List<CommentEntity>)
     
     /**
      * Delete a comment.

@@ -2,11 +2,13 @@ package com.ninety5.habitate.ui.screens.wellbeing
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.JournalEntryEntity
-import com.ninety5.habitate.data.local.entity.WorkoutEntity
-import com.ninety5.habitate.data.repository.HabitRepository
-import com.ninety5.habitate.data.repository.JournalRepository
-import com.ninety5.habitate.data.repository.WorkoutRepository
+import com.ninety5.habitate.domain.model.Habit
+import com.ninety5.habitate.domain.model.JournalEntry
+import com.ninety5.habitate.domain.model.JournalMood
+import com.ninety5.habitate.domain.model.Workout
+import com.ninety5.habitate.domain.repository.HabitRepository
+import com.ninety5.habitate.domain.repository.JournalRepository
+import com.ninety5.habitate.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,10 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,28 +43,18 @@ class WellbeingViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             
             try {
-                // Combine data from multiple sources
                 combine(
-                    journalRepository.getAllEntries(),
-                    habitRepository.getAllHabits(),
-                    workoutRepository.getAllWorkouts()
+                    journalRepository.observeAllEntries(),
+                    habitRepository.observeAllHabits(),
+                    workoutRepository.observeAllWorkouts()
                 ) { journalEntries, habits, workouts ->
                     Triple(journalEntries, habits, workouts)
                 }.collect { (journalEntries, habits, workouts) ->
                     
-                    // Analyze mood trends from journal entries
                     val moodData = analyzeMoodTrends(journalEntries)
-                    
-                    // Calculate habit completion rate
                     val habitCompletionRate = calculateHabitCompletionRate(habits)
-                    
-                    // Analyze workout data
                     val workoutStats = analyzeWorkouts(workouts)
-                    
-                    // Calculate overall wellbeing score (0-100)
                     val wellbeingScore = calculateWellbeingScore(moodData, habitCompletionRate, workoutStats)
-                    
-                    // Generate insights
                     val insights = generateInsights(moodData, habitCompletionRate, workoutStats)
                     
                     _uiState.update { state ->
@@ -80,9 +70,10 @@ class WellbeingViewModel @Inject constructor(
                             activeHabits = habits.count { !it.isArchived },
                             totalWorkouts = workouts.size,
                             workoutsThisWeek = workouts.count { workout ->
-                                val workoutDate = workout.startTs
+                                val workoutDate = workout.startTime
                                     .atZone(ZoneId.systemDefault()).toLocalDate()
-                                workoutDate.isAfter(LocalDate.now().minusWeeks(1))
+                                val cutoff = LocalDate.now().minusWeeks(1)
+                                !workoutDate.isBefore(cutoff)
                             }
                         )
                     }
@@ -93,21 +84,21 @@ class WellbeingViewModel @Inject constructor(
         }
     }
 
-    private fun analyzeMoodTrends(entries: List<JournalEntryEntity>): MoodData {
+    private fun analyzeMoodTrends(entries: List<JournalEntry>): MoodData {
         val cutoffDate = LocalDate.now().minusDays(7)
         val last7Days = entries.filter { entry ->
-            val entryDate = Instant.ofEpochMilli(entry.date)
+            val entryDate = entry.createdAt
                 .atZone(ZoneId.systemDefault()).toLocalDate()
-            !entryDate.isBefore(cutoffDate) // Include boundary date
+            !entryDate.isBefore(cutoffDate)
         }
         
-        val moodCounts = last7Days.groupBy { it.mood ?: "unknown" }
+        val moodCounts = last7Days.groupBy { it.mood?.name?.lowercase() ?: "unknown" }
             .mapValues { it.value.size }
         
         val dominantMood = moodCounts.maxByOrNull { it.value }?.key ?: "neutral"
         
         val positiveCount = last7Days.count { entry ->
-            entry.mood?.lowercase() in listOf("happy", "excited", "grateful", "calm", "loved", "hopeful")
+            entry.mood in listOf(JournalMood.AMAZING, JournalMood.HAPPY)
         }
         val totalWithMood = last7Days.count { it.mood != null }
         val positivityRate = if (totalWithMood > 0) positiveCount.toFloat() / totalWithMood else 0.5f
@@ -120,7 +111,7 @@ class WellbeingViewModel @Inject constructor(
         )
     }
 
-    private fun calculateHabitCompletionRate(habits: List<com.ninety5.habitate.data.local.entity.HabitEntity>): Float {
+    private fun calculateHabitCompletionRate(habits: List<Habit>): Float {
         if (habits.isEmpty()) return 0f
         
         // Filter out archived habits
@@ -132,19 +123,17 @@ class WellbeingViewModel @Inject constructor(
         return 0.5f
     }
 
-    private fun analyzeWorkouts(workouts: List<WorkoutEntity>): WorkoutStats {
+    private fun analyzeWorkouts(workouts: List<Workout>): WorkoutStats {
         val cutoffDate = LocalDate.now().minusWeeks(1)
         val thisWeek = workouts.filter { workout ->
-            val workoutDate = workout.startTs
+            val workoutDate = workout.startTime
                 .atZone(ZoneId.systemDefault()).toLocalDate()
             !workoutDate.isBefore(cutoffDate) // Include boundary date
         }
         
-        val totalDuration = thisWeek.sumOf { workout ->
-            java.time.Duration.between(workout.startTs, workout.endTs).toMinutes()
-        }
+        val totalDuration = thisWeek.sumOf { (it.durationSeconds + 30) / 60 } // Round to nearest minute
         
-        val totalCalories = thisWeek.sumOf { it.calories?.toInt() ?: 0 }
+        val totalCalories = thisWeek.sumOf { it.caloriesBurned ?: 0 }
         
         // Calculate normalized intensity (calories per minute)
         val averageIntensity = if (thisWeek.isNotEmpty() && totalDuration > 0) {
@@ -260,7 +249,7 @@ data class WellbeingUiState(
     val habitCompletionRate: Float = 0f,
     val workoutStats: WorkoutStats = WorkoutStats(),
     val insights: List<WellbeingInsight> = emptyList(),
-    val recentJournalEntries: List<JournalEntryEntity> = emptyList(),
+    val recentJournalEntries: List<JournalEntry> = emptyList(),
     val totalHabits: Int = 0,
     val activeHabits: Int = 0,
     val totalWorkouts: Int = 0,

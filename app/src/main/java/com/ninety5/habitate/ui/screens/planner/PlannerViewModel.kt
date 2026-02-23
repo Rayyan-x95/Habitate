@@ -2,10 +2,14 @@ package com.ninety5.habitate.ui.screens.planner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.repository.HabitRepository
-import com.ninety5.habitate.data.repository.TaskRepository
-import com.ninety5.habitate.data.repository.UserRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.repository.TaskRepository
 import com.ninety5.habitate.domain.ai.AICoachingService
+import com.ninety5.habitate.domain.model.Habit
+import com.ninety5.habitate.domain.model.HabitCategory
+import com.ninety5.habitate.domain.model.HabitFrequency
+import com.ninety5.habitate.domain.repository.HabitRepository
+import com.ninety5.habitate.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,25 +131,45 @@ class PlannerViewModel @Inject constructor(
                 when (suggestion.type) {
                     SuggestionType.NEW_HABIT -> {
                         // Create new habit from suggestion
-                        habitRepository.createHabit(
+                        val now = java.time.Instant.now()
+                        val habit = Habit(
+                            id = java.util.UUID.randomUUID().toString(),
+                            userId = "", // Repository fills this from SecurePreferences
                             title = suggestion.title,
                             description = suggestion.description,
-                            category = com.ninety5.habitate.data.local.entity.HabitCategory.OTHER,
+                            category = HabitCategory.CUSTOM,
                             color = "#6366F1",
                             icon = suggestion.emoji,
-                            frequency = com.ninety5.habitate.data.local.entity.HabitFrequency.DAILY,
-                            customSchedule = null,
+                            frequency = HabitFrequency.DAILY,
+                            customSchedule = emptyList(),
                             reminderTime = null,
-                            reminderEnabled = false
+                            isArchived = false,
+                            createdAt = now,
+                            updatedAt = now
                         )
+                        habitRepository.createHabit(habit)
                     }
                     SuggestionType.NEW_TASK -> {
                         // Create new task from suggestion
-                        taskRepository.createTask(
+                        val now = java.time.Instant.now()
+                        val dueDate = LocalDate.now().plusDays(1)
+                        val task = com.ninety5.habitate.domain.model.Task(
+                            id = java.util.UUID.randomUUID().toString(),
+                            userId = "", // Repository fills from SecurePreferences
                             title = suggestion.title,
                             description = suggestion.description,
-                            dueDate = LocalDate.now().plusDays(1)
+                            priority = com.ninety5.habitate.domain.model.TaskPriority.MEDIUM,
+                            status = com.ninety5.habitate.domain.model.TaskStatus.PENDING,
+                            dueAt = dueDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                            recurrenceRule = null,
+                            categoryId = null,
+                            linkedEntityId = null,
+                            linkedEntityType = null,
+                            isArchived = false,
+                            createdAt = now,
+                            updatedAt = now
                         )
+                        taskRepository.createTask(task)
                     }
                     SuggestionType.SCHEDULE_CHANGE -> {
                         // Just mark as accepted - user acknowledges the advice
@@ -185,19 +209,26 @@ class PlannerViewModel @Inject constructor(
 
     private suspend fun loadTasksForDate(date: LocalDate): List<PlannedTask> {
         return try {
-            taskRepository.getTasksForDate(date).map { task ->
+            val allTasks = taskRepository.observeAllTasks().firstOrNull() ?: emptyList()
+            val zone = java.time.ZoneId.systemDefault()
+            val startOfDay = date.atStartOfDay(zone).toInstant()
+            val endOfDay = date.plusDays(1).atStartOfDay(zone).toInstant()
+            allTasks.filter { task ->
+                task.dueAt != null && !task.dueAt.isBefore(startOfDay) && task.dueAt.isBefore(endOfDay)
+            }.map { task ->
                 PlannedTask(
                     id = task.id,
                     title = task.title,
-                    isCompleted = task.status == com.ninety5.habitate.data.local.entity.TaskStatus.DONE,
+                    isCompleted = task.status == com.ninety5.habitate.domain.model.TaskStatus.COMPLETED,
                     scheduledTime = task.dueAt?.let { 
-                        java.time.LocalDateTime.ofInstant(it, java.time.ZoneId.systemDefault())
+                        java.time.LocalDateTime.ofInstant(it, zone)
                             .toLocalTime().toString() 
                     },
                     priority = when (task.priority) {
-                        com.ninety5.habitate.data.local.entity.TaskPriority.HIGH -> TaskPriority.HIGH
-                        com.ninety5.habitate.data.local.entity.TaskPriority.MEDIUM -> TaskPriority.MEDIUM
-                        com.ninety5.habitate.data.local.entity.TaskPriority.LOW -> TaskPriority.LOW
+                        com.ninety5.habitate.domain.model.TaskPriority.HIGH,
+                        com.ninety5.habitate.domain.model.TaskPriority.URGENT -> TaskPriority.HIGH
+                        com.ninety5.habitate.domain.model.TaskPriority.MEDIUM -> TaskPriority.MEDIUM
+                        com.ninety5.habitate.domain.model.TaskPriority.LOW -> TaskPriority.LOW
                     }
                 )
             }
@@ -208,14 +239,18 @@ class PlannerViewModel @Inject constructor(
 
     private suspend fun loadTodayHabits(): List<PlannedHabit> {
         return try {
-            val habitList = habitRepository.getAllHabits().firstOrNull() ?: emptyList()
-            habitList.map { habit ->
+            val detailsList = habitRepository.observeActiveHabitsWithStreaks().firstOrNull() ?: emptyList()
+            detailsList.map { hwd ->
+                val today = LocalDate.now()
+                val completedToday = hwd.recentLogs.any { log ->
+                    log.completedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate() == today
+                }
                 PlannedHabit(
-                    id = habit.id,
-                    name = habit.title,
-                    emoji = habit.icon,
-                    streak = 0, // Would need to get from HabitStreakEntity
-                    isCompletedToday = false // Would need to check HabitLogEntity
+                    id = hwd.habit.id,
+                    name = hwd.habit.title,
+                    emoji = hwd.habit.icon,
+                    streak = hwd.streak.currentStreak,
+                    isCompletedToday = completedToday
                 )
             }
         } catch (e: Exception) {
@@ -253,11 +288,11 @@ class PlannerViewModel @Inject constructor(
 
         // Check habit completion rate
         try {
-            val habitList = habitRepository.getAllHabits().firstOrNull() ?: emptyList()
+            val habitList = habitRepository.observeAllHabits().firstOrNull() ?: emptyList()
             
             // Suggest new habits based on missing categories
             val categories = habitList.map { it.category }.toSet()
-            if (com.ninety5.habitate.data.local.entity.HabitCategory.FITNESS !in categories) {
+            if (HabitCategory.FITNESS !in categories) {
                 suggestions.add(
                     AISuggestion(
                         id = "suggest_fitness",
@@ -270,7 +305,7 @@ class PlannerViewModel @Inject constructor(
                 )
             }
             
-            if (com.ninety5.habitate.data.local.entity.HabitCategory.MINDFULNESS !in categories) {
+            if (HabitCategory.MINDFULNESS !in categories) {
                 suggestions.add(
                     AISuggestion(
                         id = "suggest_mindfulness",

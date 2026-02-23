@@ -27,7 +27,6 @@ interface ChallengeDao {
     @Query("SELECT * FROM challenge_progress WHERE challengeId = :challengeId AND userId = :userId")
     fun getProgress(challengeId: String, userId: String): Flow<ChallengeProgressEntity?>
 
-    @Transaction
     suspend fun upsertAndMarkSynced(challenge: ChallengeEntity) {
         upsert(challenge.copy(syncState = SyncState.SYNCED))
     }

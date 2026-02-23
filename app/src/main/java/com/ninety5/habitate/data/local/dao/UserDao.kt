@@ -29,4 +29,7 @@ interface UserDao {
 
     @Query("UPDATE users SET isStealthMode = :isStealthMode WHERE id = :userId")
     suspend fun updateStealthMode(userId: String, isStealthMode: Boolean)
+
+    @Query("SELECT * FROM users WHERE username LIKE :query OR displayName LIKE :query ORDER BY displayName ASC LIMIT 50")
+    suspend fun searchUsers(query: String): List<UserEntity>
 }

@@ -3,11 +3,12 @@ package com.ninety5.habitate.ui.screens.habitats
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitatEntity
-import com.ninety5.habitate.data.local.entity.ChallengeEntity
-import com.ninety5.habitate.data.repository.FeedRepository
-import com.ninety5.habitate.data.repository.HabitatRepository
-import com.ninety5.habitate.data.repository.ChallengeRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Challenge
+import com.ninety5.habitate.domain.model.Habitat
+import com.ninety5.habitate.domain.repository.FeedRepository
+import com.ninety5.habitate.domain.repository.HabitatRepository
+import com.ninety5.habitate.domain.repository.ChallengeRepository
 import com.ninety5.habitate.ui.screens.feed.PostUiModel
 import com.ninety5.habitate.ui.screens.feed.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -24,8 +26,7 @@ class HabitatDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val habitatRepository: HabitatRepository,
     private val feedRepository: FeedRepository,
-    private val challengeRepository: ChallengeRepository,
-    private val authRepository: com.ninety5.habitate.data.repository.AuthRepository
+    private val challengeRepository: ChallengeRepository
 ) : ViewModel() {
 
     private val habitatId: String = checkNotNull(savedStateHandle["habitatId"])
@@ -41,7 +42,7 @@ class HabitatDetailViewModel @Inject constructor(
 
     private fun loadHabitat() {
         viewModelScope.launch {
-            habitatRepository.getHabitatById(habitatId).collect { habitat ->
+            habitatRepository.observeHabitat(habitatId).collect { habitat ->
                 _uiState.update { it.copy(habitat = habitat) }
             }
         }
@@ -49,7 +50,7 @@ class HabitatDetailViewModel @Inject constructor(
 
     private fun loadActiveChallenge() {
         viewModelScope.launch {
-            challengeRepository.getAllChallenges().collect { challenges ->
+            challengeRepository.observeActiveChallenges().collect { challenges ->
                 val active = challenges.find { 
                     it.habitatId == habitatId && it.endDate.isAfter(Instant.now()) 
                 }
@@ -60,8 +61,8 @@ class HabitatDetailViewModel @Inject constructor(
 
     private fun loadPosts() {
         viewModelScope.launch {
-            feedRepository.getPostsByHabitat(habitatId).collect { postsWithAuthors ->
-                val postUiModels = postsWithAuthors.map { it.toUiModel() }
+            feedRepository.getPostsByHabitat(habitatId).collect { posts ->
+                val postUiModels = posts.map { it.toUiModel() }
                 _uiState.update { it.copy(posts = postUiModels, isLoading = false) }
             }
         }
@@ -69,15 +70,25 @@ class HabitatDetailViewModel @Inject constructor(
 
     fun toggleLike(postId: String, reactionType: String? = null) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            feedRepository.toggleLike(userId, postId, reactionType)
+            when (val result = feedRepository.toggleLike(postId, reactionType)) {
+                is AppResult.Success -> { /* Optimistic update handled by DB Flow */ }
+                is AppResult.Error -> {
+                    Timber.e("Failed to toggle like: ${result.error.message}")
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }
 
 data class HabitatDetailUiState(
-    val habitat: HabitatEntity? = null,
-    val activeChallenge: ChallengeEntity? = null,
+    val habitat: Habitat? = null,
+    val activeChallenge: Challenge? = null,
     val posts: List<PostUiModel> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null

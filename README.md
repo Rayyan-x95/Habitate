@@ -10,10 +10,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Platform"/>
-  <img src="https://img.shields.io/badge/Kotlin-2.1.0-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin"/>
+  <img src="https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/Jetpack%20Compose-Material3-4285F4?logo=jetpackcompose&logoColor=white" alt="Compose"/>
   <img src="https://img.shields.io/badge/Min%20SDK-29-brightgreen" alt="Min SDK"/>
   <img src="https://img.shields.io/badge/Target%20SDK-36-blue" alt="Target SDK"/>
+  <img src="https://img.shields.io/badge/AGP-9.0.0-green" alt="AGP"/>
   <img src="https://img.shields.io/badge/Version-1.0.0--beta-orange" alt="Version"/>
 </p>
 
@@ -87,63 +88,110 @@ Habitate follows **Clean Architecture** principles with the **MVVM** pattern, en
 ```
 app/src/main/java/com/ninety5/habitate/
 │
-├── 📱 HabitateApplication.kt      # Application class with Hilt
-├── 🚀 MainActivity.kt             # Single-activity entry point
+├── 📱 HabitateApplication.kt          # Application class with Hilt
+├── 🚀 MainActivity.kt                 # Single-activity entry point
 │
-├── 🔧 core/                        # Core infrastructure
-│   ├── analytics/                  # Analytics abstractions
-│   ├── audio/                      # Audio playback utilities
-│   ├── di/                         # Hilt DI modules
-│   ├── export/                     # Data export functionality
-│   ├── focus/                      # Focus session logic
-│   ├── glyph/                      # Nothing Phone Glyph integration
-│   ├── insights/                   # AI insights engine
-│   └── utils/                      # Core utilities
+├── 🔧 core/                            # Core infrastructure
+│   ├── analytics/                      # Analytics abstractions
+│   ├── audio/                          # HabitateAudioManager (unified audio)
+│   ├── di/                             # Hilt DI modules
+│   ├── export/                         # Data export functionality
+│   ├── focus/                          # Focus session logic
+│   ├── glyph/                          # Nothing Phone Glyph integration
+│   ├── insights/                       # AI insights engine
+│   ├── result/                         # AppResult<T> & AppError types
+│   └── utils/                          # Core utilities
 │
-├── 📦 data/                        # Data layer
-│   ├── health/                     # Health Connect integration
-│   ├── local/                      # Room DB, DAOs, Entities
-│   ├── remote/                     # Retrofit APIs, DTOs
-│   └── repository/                 # Repository implementations
+├── 📦 data/                            # Data layer
+│   ├── health/                         # Health Connect integration
+│   ├── local/                          # Room DB (v26, 29 entities, exported schema)
+│   │   ├── dao/                        # 15+ DAOs with Flow return types
+│   │   ├── entity/                     # Room entities
+│   │   ├── relations/                  # Room relations & views
+│   │   └── HabitateDatabase.kt         # Database definition
+│   ├── remote/                         # Retrofit APIs, DTOs (Moshi)
+│   └── repository/                     # Repository implementations
 │
-├── 🎯 domain/                      # Domain layer
-│   ├── model/                      # Domain models
-│   ├── usecase/                    # Business logic use cases
-│   └── mapper/                     # Entity ↔ Domain mappers
+├── 🎯 domain/                          # Domain layer (framework-free)
+│   ├── ai/                             # AI domain abstractions
+│   ├── mapper/                         # Entity ↔ Domain mappers
+│   ├── model/                          # 11 domain models (Post, Habit, Task, etc.)
+│   ├── repository/                     # 13 repository interfaces (AppResult-based)
+│   └── usecase/                        # UseCase<P,R>, NoParamUseCase, FlowUseCase
 │
-├── ⚙️ service/                     # Android Services
-│   ├── FocusService.kt             # Focus session foreground service
-│   ├── WorkoutTrackingService.kt   # Workout tracking service
-│   └── FCMService.kt               # Firebase Cloud Messaging
+├── ⚙️ service/                         # Android Services
+│   ├── PomodoroService.kt              # Focus/Pomodoro foreground service
+│   ├── WorkoutTrackingService.kt       # Workout tracking service
+│   └── MyFirebaseMessagingService.kt   # Firebase Cloud Messaging
 │
-├── 🎨 ui/                          # Presentation layer
-│   ├── common/                     # Shared UI logic
-│   ├── components/                 # Reusable Compose components
-│   ├── navigation/                 # NavHost & Screen routes
-│   ├── screens/                    # 28+ feature screens
-│   ├── theme/                      # Material3 theming
-│   └── viewmodel/                  # Shared ViewModels
+├── 🎨 ui/                              # Presentation layer
+│   ├── common/                         # UiEvent, shared UI logic
+│   ├── components/                     # Reusable Compose components
+│   ├── navigation/                     # NavHost & Screen routes (40+ routes)
+│   ├── screens/                        # 28+ feature screens (stateless composables)
+│   ├── theme/                          # Material3 theming (brand-aligned tokens)
+│   └── viewmodel/                      # Shared ViewModels (AppViewModel)
 │
-├── 🔨 util/                        # Utilities
-│   └── Extensions.kt               # Kotlin extensions
+├── 🔨 util/                            # Utilities
+│   ├── FeatureFlags.kt                 # Feature flag interface & implementation
+│   ├── FormatUtils.kt                  # Formatting extensions
+│   └── audio/                          # Audio utilities (delegates to core)
 │
-└── 👷 worker/                      # Background work
-    ├── SyncWorker.kt               # Offline sync worker
-    ├── SyncScheduler.kt            # Periodic sync scheduling
-    ├── UploadWorker.kt             # Media upload worker
-    ├── ArchivalWorker.kt           # Data archival
-    └── StoryCleanupWorker.kt       # Expired story cleanup
+└── 👷 worker/                          # Background work
+    ├── SyncWorker.kt                   # Offline sync worker
+    ├── SyncScheduler.kt                # Periodic sync scheduling
+    ├── UploadWorker.kt                 # Media upload worker
+    ├── UserSyncWorker.kt               # User data sync
+    ├── ArchivalWorker.kt               # Data archival
+    └── StoryCleanupWorker.kt           # Expired story cleanup
+```
+
+### Core Patterns
+
+#### Result Wrapper (`core/result/`)
+All repository operations return `AppResult<T>` instead of raw exceptions:
+```kotlin
+sealed class AppResult<out T> {
+    data class Success<T>(val data: T) : AppResult<T>()
+    data class Error(val error: AppError, val message: String?) : AppResult<Nothing>()
+    object Loading : AppResult<Nothing>()
+}
+```
+
+`AppError` provides typed error categories: `Network`, `Timeout`, `Unauthorized`, `NotFound`, `Validation`, `Database`, etc.
+
+#### Use Case Pattern (`domain/usecase/`)
+```kotlin
+abstract class UseCase<in P, out R> {
+    abstract suspend fun execute(params: P): AppResult<R>
+    suspend operator fun invoke(params: P): AppResult<R> = execute(params)
+}
+```
+
+#### Navigation Pattern
+Screens receive **lambda callbacks** instead of `NavController` references, keeping composables stateless:
+```kotlin
+@Composable
+fun FeatureScreen(
+    uiState: FeatureUiState,
+    onNavigateBack: () -> Unit,
+    onItemClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+)
 ```
 
 ### Key Architectural Decisions
 
 | Decision | Rationale |
 |----------|-----------|
-| **Offline-First** | All data is cached locally in Room DB, synced when online |
-| **Single Activity** | Jetpack Compose Navigation with type-safe routes |
-| **StateFlow for UI** | Lifecycle-aware, efficient state management |
-| **Repository Pattern** | Abstracts data sources, enables testing |
-| **WorkManager** | Reliable background processing with constraints |
+| **Offline-First** | All data cached in Room DB, synced via SyncWorker when online |
+| **Single Activity** | Jetpack Compose Navigation with 40+ routes and deep link support |
+| **StateFlow for UI** | Lifecycle-aware, efficient state management with Channel for one-off events |
+| **Repository Pattern** | 13 domain interfaces with AppResult return types; implementations in data layer |
+| **WorkManager** | Reliable background processing with constraints (6 specialized workers) |
+| **Lambda Navigation** | Screens receive callbacks, not NavController — enables preview & testing |
+| **Typed Errors** | AppError hierarchy replaces raw exceptions for structured error handling |
+| **Detekt + Lint** | Static analysis enforced with custom rulesets and lint baseline |
 
 ---
 
@@ -152,7 +200,7 @@ app/src/main/java/com/ninety5/habitate/
 ### Core
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **Kotlin** | 2.1.0 | Primary language |
+| **Kotlin** | 2.2.10 | Primary language |
 | **Jetpack Compose** | BOM 2025.01.01 | Declarative UI |
 | **Material3** | Latest | Design system |
 | **Coroutines** | 1.10.1 | Async programming |
@@ -161,10 +209,10 @@ app/src/main/java/com/ninety5/habitate/
 ### Android Jetpack
 | Library | Version | Purpose |
 |---------|---------|---------|
-| **Room** | 2.6.1 | Local database |
+| **Room** | 2.6.1 | Local database (29 entities, exported schema) |
 | **Hilt** | 2.54 | Dependency injection |
-| **Navigation** | 2.8.4 | Screen navigation |
-| **WorkManager** | 2.10.0 | Background tasks |
+| **Navigation** | 2.9.0 | Screen navigation (40+ routes) |
+| **WorkManager** | 2.10.0 | Background tasks (6 workers) |
 | **DataStore** | 1.1.1 | Preferences storage |
 | **Lifecycle** | 2.9.0 | Lifecycle-aware components |
 | **Paging 3** | 3.3.5 | Pagination |
@@ -175,7 +223,7 @@ app/src/main/java/com/ninety5/habitate/
 |---------|---------|---------|
 | **Retrofit** | 2.11.0 | REST API client |
 | **OkHttp** | 4.12.0 | HTTP client |
-| **Moshi** | 1.15.1 | JSON serialization |
+| **Moshi** | 1.15.2 | JSON serialization |
 | **Coil** | 2.7.0 | Image loading |
 
 ### Firebase
@@ -193,7 +241,9 @@ app/src/main/java/com/ninety5/habitate/
 |------|---------|
 | **Timber** | Logging |
 | **KSP** | Annotation processing |
-| **Gradle** | Build system |
+| **Detekt** | Static code analysis (custom ruleset) |
+| **Android Lint** | Code quality with baseline tracking |
+| **Gradle** | Build system (AGP 9.0.0) |
 | **ProGuard/R8** | Code shrinking |
 
 ---

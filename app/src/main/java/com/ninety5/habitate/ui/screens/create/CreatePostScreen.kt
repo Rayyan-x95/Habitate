@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
-import com.ninety5.habitate.data.local.entity.Visibility
+import com.ninety5.habitate.domain.model.PostVisibility
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +120,7 @@ fun CreatePostScreen(
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Visibility.values().forEach { visibility ->
+                PostVisibility.entries.forEach { visibility ->
                     FilterChip(
                         selected = uiState.visibility == visibility,
                         onClick = { viewModel.setVisibility(visibility) },

@@ -45,6 +45,9 @@ interface HabitatDao {
     @Query("UPDATE habitats SET memberCount = memberCount + :delta WHERE id = :id")
     suspend fun updateMemberCount(id: String, delta: Int)
 
+    @Query("SELECT * FROM habitat_memberships WHERE habitatId = :habitatId")
+    suspend fun getMemberships(habitatId: String): List<HabitatMembershipEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(habitat: HabitatEntity)
 

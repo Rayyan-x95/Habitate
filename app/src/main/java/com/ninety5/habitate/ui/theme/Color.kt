@@ -2,19 +2,32 @@ package com.ninety5.habitate.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Palette
-val SoftIndigo = Color(0xFF6366F1)
-val LightIndigo = Color(0xFF818CF8)
+// ═══════════════════════════════════════════════════════════════════════════
+// LEGACY COLOR ALIASES — Scheduled for removal
+// ═══════════════════════════════════════════════════════════════════════════
+// New code should use HabitateTheme.colors.* from the CompositionLocal.
+// These aliases exist only for backward compatibility during migration.
+// ═══════════════════════════════════════════════════════════════════════════
 
-val MutedLilac = Color(0xFFA78BFA)
-val PaleLilac = Color(0xFFC4B5FD)
+@Deprecated("Use HabitateTheme.colors.success", ReplaceWith("SemanticSuccess", "com.ninety5.habitate.ui.theme.SemanticSuccess"))
+val SageGreen = SemanticSuccess
 
-val SageGreen = Color(0xFF84CC16)
-val LightSage = Color(0xFFA3E635)
+// ═══════════════════════════════════════════════════════════════════════════
+// BRAND CONSTANTS — Use HabitateTheme.colors.primary / .onPrimary instead
+// ═══════════════════════════════════════════════════════════════════════════
 
-val SoftRed = Color(0xFFEF4444)
-val PaleRed = Color(0xFFF87171)
-
+@Deprecated("Use HabitateTheme.colors.primary (= Primary500)", ReplaceWith("Primary500", "com.ninety5.habitate.ui.theme.Primary500"))
 val HabitateDarkGreenStart = Color(0xFF1F3D32)
+
+@Deprecated("Use Primary800 / BrandDeepForest", ReplaceWith("Primary800", "com.ninety5.habitate.ui.theme.Primary800"))
 val HabitateDarkGreenEnd = Color(0xFF0F1C18)
+
+@Deprecated("Use HabitateTheme.colors.textInverse or BrandCream", ReplaceWith("BrandCream", "com.ninety5.habitate.ui.theme.BrandCream"))
 val HabitateOffWhite = Color(0xFFF2EFEA)
+
+@Deprecated("Use MaterialTheme.colorScheme.primary or a token color", ReplaceWith("MaterialTheme.colorScheme.primary"))
+val SoftIndigo = Color(0xFF5C6BC0)
+
+val SoftRed = Color(0xFFEF5350)
+
+val MutedLilac = Color(0xFF9575CD)

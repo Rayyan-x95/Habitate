@@ -2,8 +2,10 @@ package com.ninety5.habitate.ui.screens.journal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.JournalEntryEntity
-import com.ninety5.habitate.data.repository.JournalRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.JournalEntry
+import com.ninety5.habitate.domain.model.JournalMood
+import com.ninety5.habitate.domain.repository.JournalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,8 +19,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,7 +37,6 @@ class JournalViewModel @Inject constructor(
     private val _events = MutableSharedFlow<JournalEvent>()
     val events: SharedFlow<JournalEvent> = _events.asSharedFlow()
 
-    // Job management to prevent collector leaks
     private var entriesJob: Job? = null
     private var dateCollectionJob: Job? = null
     private var searchJob: Job? = null
@@ -44,7 +48,7 @@ class JournalViewModel @Inject constructor(
     private fun loadEntries() {
         entriesJob?.cancel()
         entriesJob = viewModelScope.launch {
-            journalRepository.getAllEntries()
+            journalRepository.observeAllEntries()
                 .onStart { _uiState.update { it.copy(isLoading = true) } }
                 .catch { e -> 
                     _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -55,8 +59,8 @@ class JournalViewModel @Inject constructor(
                             isLoading = false,
                             entries = entries,
                             entriesGroupedByDate = entries.groupBy { entry ->
-                                java.time.Instant.ofEpochMilli(entry.date)
-                                    .atZone(java.time.ZoneId.systemDefault())
+                                entry.createdAt
+                                    .atZone(ZoneId.systemDefault())
                                     .toLocalDate()
                             }
                         )
@@ -69,7 +73,7 @@ class JournalViewModel @Inject constructor(
         _uiState.update { it.copy(selectedDate = date) }
         dateCollectionJob?.cancel()
         dateCollectionJob = viewModelScope.launch {
-            journalRepository.getEntriesForDate(date).collect { entries ->
+            journalRepository.observeEntriesForDate(date).collect { entries ->
                 _uiState.update { it.copy(selectedDateEntries = entries) }
             }
         }
@@ -88,44 +92,67 @@ class JournalViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            try {
-                journalRepository.createEntry(
-                    title = title,
-                    content = content,
-                    mood = mood,
-                    tags = tags,
-                    mediaUrls = mediaUrls
-                )
-                _uiState.update { it.copy(isSaving = false) }
-                _events.emit(JournalEvent.EntrySaved)
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, error = e.message) }
-                _events.emit(JournalEvent.Error(e.message ?: "Failed to save entry"))
+
+            val moodEnum = mood?.let {
+                try { JournalMood.valueOf(it.uppercase()) } catch (_: Exception) { null }
+            }
+
+            val entry = JournalEntry(
+                id = UUID.randomUUID().toString(),
+                userId = "",  // Repository will set from SecurePreferences
+                title = title,
+                content = content,
+                mood = moodEnum,
+                tags = tags,
+                mediaUrls = mediaUrls,
+                isPrivate = true,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now()
+            )
+
+            when (val result = journalRepository.createEntry(entry)) {
+                is AppResult.Success -> {
+                    _uiState.update { it.copy(isSaving = false) }
+                    _events.emit(JournalEvent.EntrySaved)
+                }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(isSaving = false, error = result.error.message) }
+                    _events.emit(JournalEvent.Error(result.error.message))
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
 
-    fun updateEntry(entry: JournalEntryEntity) {
+    fun updateEntry(entry: JournalEntry) {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            try {
-                journalRepository.updateEntry(entry)
-                _uiState.update { it.copy(isSaving = false) }
-                _events.emit(JournalEvent.EntrySaved)
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, error = e.message) }
-                _events.emit(JournalEvent.Error(e.message ?: "Failed to update entry"))
+
+            val entryWithTimestamp = entry.copy(updatedAt = Instant.now())
+            when (val result = journalRepository.updateEntry(entryWithTimestamp)) {
+                is AppResult.Success -> {
+                    _uiState.update { it.copy(isSaving = false) }
+                    _events.emit(JournalEvent.EntrySaved)
+                }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(isSaving = false, error = result.error.message) }
+                    _events.emit(JournalEvent.Error(result.error.message))
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
 
     fun deleteEntry(entryId: String) {
         viewModelScope.launch {
-            try {
-                journalRepository.deleteEntry(entryId)
-                _events.emit(JournalEvent.EntryDeleted)
-            } catch (e: Exception) {
-                _events.emit(JournalEvent.Error(e.message ?: "Failed to delete entry"))
+            when (val result = journalRepository.deleteEntry(entryId)) {
+                is AppResult.Success -> {
+                    _events.emit(JournalEvent.EntryDeleted)
+                }
+                is AppResult.Error -> {
+                    _events.emit(JournalEvent.Error(result.error.message))
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
@@ -146,11 +173,14 @@ class JournalViewModel @Inject constructor(
 
     fun exportToJson() {
         viewModelScope.launch {
-            try {
-                val json = journalRepository.exportToJson()
-                _events.emit(JournalEvent.ExportReady(json))
-            } catch (e: Exception) {
-                _events.emit(JournalEvent.Error(e.message ?: "Export failed"))
+            when (val result = journalRepository.exportToJson()) {
+                is AppResult.Success -> {
+                    _events.emit(JournalEvent.ExportReady(result.data))
+                }
+                is AppResult.Error -> {
+                    _events.emit(JournalEvent.Error(result.error.message))
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
@@ -159,7 +189,7 @@ class JournalViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 
-    fun setEditingEntry(entry: JournalEntryEntity?) {
+    fun setEditingEntry(entry: JournalEntry?) {
         _uiState.update { it.copy(editingEntry = entry) }
     }
 }
@@ -168,14 +198,14 @@ data class JournalUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,
-    val entries: List<JournalEntryEntity> = emptyList(),
-    val entriesGroupedByDate: Map<LocalDate, List<JournalEntryEntity>> = emptyMap(),
+    val entries: List<JournalEntry> = emptyList(),
+    val entriesGroupedByDate: Map<LocalDate, List<JournalEntry>> = emptyMap(),
     val selectedDate: LocalDate = LocalDate.now(),
     val selectedMonth: YearMonth = YearMonth.now(),
-    val selectedDateEntries: List<JournalEntryEntity> = emptyList(),
+    val selectedDateEntries: List<JournalEntry> = emptyList(),
     val searchQuery: String = "",
-    val searchResults: List<JournalEntryEntity> = emptyList(),
-    val editingEntry: JournalEntryEntity? = null
+    val searchResults: List<JournalEntry> = emptyList(),
+    val editingEntry: JournalEntry? = null
 )
 
 sealed class JournalEvent {

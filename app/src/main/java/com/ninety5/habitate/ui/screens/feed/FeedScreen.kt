@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
-import com.ninety5.habitate.data.local.relation.StoryWithUser
+import com.ninety5.habitate.domain.model.Story
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Notifications
@@ -118,10 +118,10 @@ fun FeedScreen(
                             Box(
                                 modifier = Modifier
                                     .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.error)
                                     .align(Alignment.TopEnd)
                                     .padding(top = RefSpacingXS.dp, end = RefSpacingXS.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error)
                             )
                         }
                     }
@@ -347,7 +347,7 @@ fun FeedSkeletonLoader() {
 
 @Composable
 fun StoriesBar(
-    stories: List<StoryWithUser>,
+    stories: List<Story>,
     onStoryClick: (String) -> Unit,
     onAddStoryClick: () -> Unit
 ) {
@@ -385,10 +385,10 @@ fun StoriesBar(
             }
         }
 
-        items(stories, key = { it.story.id }) { story ->
+        items(stories, key = { it.id }) { story ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onStoryClick(story.story.userId) }
+                modifier = Modifier.clickable { onStoryClick(story.userId) }
             ) {
                 Box(
                     modifier = Modifier
@@ -406,7 +406,7 @@ fun StoriesBar(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = story.user?.username ?: "User",
+                    text = story.authorName.ifBlank { "User" },
                     style = MaterialTheme.typography.labelSmall
                 )
             }

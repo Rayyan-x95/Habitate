@@ -31,8 +31,8 @@ interface WorkoutDao {
     suspend fun updateSyncState(id: String, state: com.ninety5.habitate.data.local.entity.SyncState)
 
     @Query("UPDATE workouts SET isArchived = 1, syncState = 'PENDING', updatedAt = :now WHERE startTs < :cutoff")
-    suspend fun archiveOldWorkouts(cutoff: java.time.Instant, now: java.time.Instant = java.time.Instant.now())
+    suspend fun archiveOldWorkouts(cutoff: java.time.Instant, now: java.time.Instant)
 
     @Query("UPDATE workouts SET isArchived = 0, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
-    suspend fun restoreWorkout(id: String, now: java.time.Instant = java.time.Instant.now())
+    suspend fun restoreWorkout(id: String, now: java.time.Instant)
 }

@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.ninety5.habitate.data.local.view.TimelineItem
-import com.ninety5.habitate.data.repository.TimelineRepository
+import com.ninety5.habitate.domain.model.TimelineItem
+import com.ninety5.habitate.domain.repository.TimelineRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch

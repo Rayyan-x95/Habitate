@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.TaskPriority
+import com.ninety5.habitate.domain.model.TaskPriority
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime

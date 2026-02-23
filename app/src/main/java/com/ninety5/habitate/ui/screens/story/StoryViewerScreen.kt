@@ -55,7 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.ninety5.habitate.data.local.relation.StoryWithUser
+import com.ninety5.habitate.domain.model.Story
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
@@ -73,7 +73,7 @@ fun StoryViewerScreen(
     viewModel: StoryViewModel = hiltViewModel()
 ) {
     val stories by viewModel.activeStories.collectAsState()
-    val userStories = stories.filter { it.story.userId == userId }
+    val userStories = stories.filter { it.userId == userId }
     var currentIndex by remember { mutableIntStateOf(0) }
     var isPaused by remember { mutableStateOf(false) }
     val progress = remember { Animatable(0f) }
@@ -82,7 +82,7 @@ fun StoryViewerScreen(
     // Mark story as seen when viewed
     LaunchedEffect(currentIndex, userStories) {
         if (userStories.isNotEmpty() && currentIndex < userStories.size) {
-            viewModel.markAsSeen(userStories[currentIndex].story.id)
+            viewModel.markAsSeen(userStories[currentIndex].id)
         }
     }
 
@@ -183,7 +183,7 @@ fun StoryViewerScreen(
             if (currentStory != null) {
                 // Story content - Image
                 StoryContent(
-                    storyWithUser = currentStory,
+                    story = currentStory,
                     modifier = Modifier.fillMaxSize()
                 )
                 
@@ -236,7 +236,7 @@ fun StoryViewerScreen(
                 ) {
                     // Avatar
                     AsyncImage(
-                        model = currentStory.user?.avatarUrl,
+                        model = currentStory.authorAvatarUrl,
                         contentDescription = "Avatar",
                         modifier = Modifier
                             .size(40.dp)
@@ -249,13 +249,13 @@ fun StoryViewerScreen(
                     
                     Column {
                         Text(
-                            text = currentStory.user?.displayName ?: "User",
+                            text = currentStory.authorName.ifBlank { "User" },
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp
                         )
                         Text(
-                            text = formatTimeAgo(currentStory.story.createdAt),
+                            text = formatTimeAgo(currentStory.createdAt.toEpochMilli()),
                             color = Color.White.copy(alpha = 0.7f),
                             fontSize = 12.sp
                         )
@@ -275,7 +275,7 @@ fun StoryViewerScreen(
                 }
                 
                 // Caption (if present)
-                currentStory.story.caption?.let { caption ->
+                currentStory.caption?.let { caption ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -320,11 +320,11 @@ fun StoryViewerScreen(
 
 @Composable
 private fun StoryContent(
-    storyWithUser: StoryWithUser,
+    story: Story,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val mediaUrl = storyWithUser.story.mediaUrl
+    val mediaUrl = story.mediaUrl
     
     // Determine if media is video by file extension, handling URLs with query strings
     val isVideo = remember(mediaUrl) {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -14,16 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.relation.MessageWithReactions
+import com.ninety5.habitate.domain.model.Message
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
 import com.ninety5.habitate.ui.screens.chat.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    navController: NavController,
     roomId: String,
+    onBackClick: () -> Unit = {},
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val messages by viewModel.messages.collectAsState()
@@ -56,6 +56,11 @@ fun ChatScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -146,9 +151,9 @@ fun ChatScreen(
                         MessageItem(
                             message = message,
                             currentUserId = currentUserId,
-                            onReact = { /* emoji -> viewModel.addReaction(message.message.id, emoji) */ },
-                            onDelete = { /* viewModel.deleteMessage(message.message.id) */ },
-                            onSeen = { /* viewModel.markAsRead(message.message.id) */ }
+                            onReact = { emoji -> viewModel.addReaction(message.id, emoji) },
+                            onDelete = { viewModel.deleteMessage(message.id) },
+                            onSeen = { /* Handled by LaunchedEffect in MessageItem */ }
                         )
                     }
                 }
@@ -160,17 +165,17 @@ fun ChatScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MessageItem(
-    message: MessageWithReactions,
+    message: Message,
     currentUserId: String?,
     onReact: (String) -> Unit,
     onDelete: () -> Unit,
     onSeen: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val isMe = message.message.senderId == currentUserId
+    val isMe = message.senderId == currentUserId
 
     LaunchedEffect(Unit) {
-        if (!isMe && message.message.status != com.ninety5.habitate.data.local.entity.MessageStatus.READ) {
+        if (!isMe && !message.isRead) {
             onSeen()
         }
     }
@@ -192,7 +197,7 @@ fun MessageItem(
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    text = message.message.content ?: "",
+                    text = message.content ?: "",
                     color = if (isMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (message.reactions.isNotEmpty()) {
@@ -212,7 +217,7 @@ fun MessageItem(
         
         if (isMe) {
             Text(
-                text = if (message.message.status == com.ninety5.habitate.data.local.entity.MessageStatus.READ) "Read" else "Sent",
+                text = if (message.isRead) "Read" else "Sent",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)

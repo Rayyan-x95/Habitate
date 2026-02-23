@@ -3,13 +3,14 @@ package com.ninety5.habitate.ui.screens.profile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.UserEntity
-import com.ninety5.habitate.data.repository.AuthRepository
-import com.ninety5.habitate.data.repository.FeedRepository
-import com.ninety5.habitate.data.repository.UserRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.User
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.FeedRepository
+import com.ninety5.habitate.domain.repository.UserRepository
 import com.ninety5.habitate.ui.screens.feed.PostUiModel
-import com.ninety5.habitate.data.repository.MediaRepository
-import com.ninety5.habitate.data.repository.UploadState
+import com.ninety5.habitate.domain.repository.MediaRepository
+import com.ninety5.habitate.domain.model.UploadState
 import android.net.Uri
 import com.ninety5.habitate.ui.screens.feed.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +43,7 @@ class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
     
     private var profileJob: Job? = null
+    private var followObserverJob: Job? = null
 
     init {
         loadProfile()
@@ -57,20 +59,22 @@ class ProfileViewModel @Inject constructor(
             return
         }
         
-        val isCurrentUser = targetUserId == authRepository.getCurrentUserId()
+        val currentUserId = authRepository.getCurrentUserId()
+        val isCurrentUser = targetUserId == currentUserId
 
         profileJob = viewModelScope.launch {
-            // Combine user and posts flows for atomic state updates
+            // Combine user, posts, and counts for atomic state updates
             combine(
-                userRepository.getUser(targetUserId),
-                feedRepository.getPostsByUser(targetUserId)
-            ) { user, postsWithAuthors ->
+                userRepository.observeUser(targetUserId),
+                feedRepository.getPostsByUser(targetUserId),
+                userRepository.observeFollowerCount(targetUserId),
+                userRepository.observeFollowingCount(targetUserId)
+            ) { user, postsWithAuthors, followerCount, followingCount ->
                 val postUiModels = postsWithAuthors.map { it.toUiModel() }
-                ProfileData(user, postUiModels)
+                ProfileData(user, postUiModels, followerCount, followingCount)
             }
                 .onStart { _uiState.update { it.copy(isLoading = true, error = null) } }
                 .retryWhen { cause, attempt ->
-                    // Retry up to 3 times with increasing delay for transient errors
                     if (attempt < 3 && cause !is kotlinx.coroutines.CancellationException) {
                         Timber.w(cause, "Profile load failed, retrying (attempt $attempt)")
                         kotlinx.coroutines.delay(1000L * (attempt + 1))
@@ -88,6 +92,8 @@ class ProfileViewModel @Inject constructor(
                         it.copy(
                             user = data.user, 
                             posts = data.posts,
+                            followerCount = data.followerCount,
+                            followingCount = data.followingCount,
                             isCurrentUser = isCurrentUser,
                             isLoading = false,
                             error = null
@@ -95,33 +101,77 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
         }
+
+        // Observe follow state for other users
+        if (!isCurrentUser && currentUserId != null) {
+            followObserverJob?.cancel()
+            followObserverJob = viewModelScope.launch {
+                userRepository.isFollowing(currentUserId, targetUserId)
+                    .catch { Timber.e(it, "Failed to observe follow state") }
+                    .collect { following ->
+                        _uiState.update { it.copy(isFollowing = following) }
+                    }
+            }
+        }
     }
     
     private data class ProfileData(
-        val user: UserEntity?,
-        val posts: List<PostUiModel>
+        val user: User?,
+        val posts: List<PostUiModel>,
+        val followerCount: Int,
+        val followingCount: Int
     )
 
     fun updateProfile(displayName: String, bio: String) {
-        val currentUser = _uiState.value.user ?: return
-        
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, saveError = null) }
-            try {
-                val updatedUser = currentUser.copy(
-                    displayName = displayName,
-                    bio = bio
-                )
-                userRepository.updateProfile(updatedUser)
-                _uiState.update { it.copy(isSaving = false, saveSuccess = true) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, saveError = e.message ?: "Failed to update profile") }
+            when (val result = userRepository.updateProfile(displayName, bio, null)) {
+                is AppResult.Success -> {
+                    _uiState.update { it.copy(isSaving = false, saveSuccess = true) }
+                }
+                is AppResult.Error -> {
+                    Timber.e("Failed to update profile: ${result.error.message}")
+                    _uiState.update { it.copy(isSaving = false, saveError = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
+        }
+    }
+
+    fun followUser() {
+        val targetUserId = argUserId ?: return
+        viewModelScope.launch {
+            when (val result = userRepository.followUser(targetUserId)) {
+                is AppResult.Success -> { /* Optimistic update handled by Flow */ }
+                is AppResult.Error -> {
+                    Timber.e("Failed to follow user: ${result.error.message}")
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
+        }
+    }
+
+    fun unfollowUser() {
+        val targetUserId = argUserId ?: return
+        viewModelScope.launch {
+            when (val result = userRepository.unfollowUser(targetUserId)) {
+                is AppResult.Success -> { /* Optimistic update handled by Flow */ }
+                is AppResult.Error -> {
+                    Timber.e("Failed to unfollow user: ${result.error.message}")
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
 
     fun resetSaveState() {
         _uiState.update { it.copy(saveSuccess = false, saveError = null) }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 
     fun uploadProfilePicture(uri: Uri) {
@@ -135,17 +185,23 @@ class ProfileViewModel @Inject constructor(
                     }
                     is UploadState.Success -> {
                         // Update user profile with new avatar URL
-                        val currentUser = _uiState.value.user
-                        if (currentUser != null) {
-                            val updatedUser = currentUser.copy(avatarUrl = state.url)
-                            userRepository.updateProfile(updatedUser)
+                        when (val result = userRepository.updateProfile(null, null, state.url)) {
+                            is AppResult.Success -> {
+                                _uiState.update { it.copy(isUploading = false, uploadProgress = 0f) }
+                            }
+                            is AppResult.Error -> {
+                                _uiState.update {
+                                    it.copy(isUploading = false, saveError = "Upload succeeded but failed to save: ${result.error.message}")
+                                }
+                            }
+                            is AppResult.Loading -> { /* no-op */ }
                         }
-                        _uiState.update { it.copy(isUploading = false, uploadProgress = 0f) }
                     }
                     is UploadState.Error -> {
                         _uiState.update { 
                             it.copy(
-                                isUploading = false, 
+                                isUploading = false,
+                                uploadProgress = 0f,
                                 saveError = "Upload failed: ${state.exception.message}"
                             ) 
                         }
@@ -157,15 +213,24 @@ class ProfileViewModel @Inject constructor(
 
     fun toggleLike(postId: String, reactionType: String? = null) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            feedRepository.toggleLike(userId, postId, reactionType)
+            when (val result = feedRepository.toggleLike(postId, reactionType)) {
+                is AppResult.Success -> { /* Optimistic update handled by DB Flow */ }
+                is AppResult.Error -> {
+                    Timber.e("Failed to toggle like: ${result.error.message}")
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }
 
 data class ProfileUiState(
-    val user: UserEntity? = null,
+    val user: User? = null,
     val isCurrentUser: Boolean = false,
+    val isFollowing: Boolean = false,
+    val followerCount: Int = 0,
+    val followingCount: Int = 0,
     val posts: List<PostUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,

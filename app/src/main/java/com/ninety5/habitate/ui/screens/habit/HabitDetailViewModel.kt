@@ -3,16 +3,18 @@ package com.ninety5.habitate.ui.screens.habit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitLogEntity
-import com.ninety5.habitate.data.local.entity.HabitMood
-import com.ninety5.habitate.data.local.entity.HabitStreakEntity
-import com.ninety5.habitate.data.local.relation.HabitWithLogs
-import com.ninety5.habitate.data.repository.HabitRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.HabitLog
+import com.ninety5.habitate.domain.model.HabitMood
+import com.ninety5.habitate.domain.model.HabitStreak
+import com.ninety5.habitate.domain.model.HabitWithDetails
+import com.ninety5.habitate.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 
 /**
@@ -38,7 +40,6 @@ class HabitDetailViewModel @Inject constructor(
 
     init {
         loadHabitDetails()
-        loadStreak()
     }
 
     /**
@@ -47,12 +48,11 @@ class HabitDetailViewModel @Inject constructor(
     fun retry() {
         _uiState.update { it.copy(isLoading = true, error = null) }
         loadHabitDetails()
-        loadStreak()
     }
 
     private fun loadHabitDetails() {
         viewModelScope.launch {
-            habitRepository.getHabitWithLogs(habitId)
+            habitRepository.observeHabitWithDetails(habitId)
                 .catch { e ->
                     Timber.e(e, "Error loading habit details")
                     _uiState.update {
@@ -63,11 +63,12 @@ class HabitDetailViewModel @Inject constructor(
                     }
                 }
                 .filterNotNull()
-                .collect { habitWithLogs ->
+                .collect { habitWithDetails ->
                     _uiState.update {
                         it.copy(
-                            habitWithLogs = habitWithLogs,
-                            heatmapData = generateHeatmapData(habitWithLogs.logs),
+                            habitWithDetails = habitWithDetails,
+                            streak = habitWithDetails.streak,
+                            heatmapData = generateHeatmapData(habitWithDetails.recentLogs),
                             isLoading = false,
                             error = null
                         )
@@ -76,35 +77,23 @@ class HabitDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadStreak() {
-        viewModelScope.launch {
-            habitRepository.getStreak(habitId)
-                .catch { e ->
-                    Timber.e(e, "Error loading streak")
-                }
-                .collect { streak ->
-                    _uiState.update { it.copy(streak = streak) }
-                }
-        }
-    }
-
     /**
      * Generate heatmap data for last 365 days.
      */
-    private fun generateHeatmapData(logs: List<HabitLogEntity>): Map<LocalDate, Int> {
+    private fun generateHeatmapData(logs: List<HabitLog>): Map<LocalDate, Int> {
         val today = LocalDate.now()
         val startDate = today.minusDays(364)
         
         return logs
             .filter { log ->
-                val logDate = java.time.Instant.ofEpochMilli(log.completedAt.toEpochMilli())
-                    .atZone(java.time.ZoneId.systemDefault())
+                val logDate = log.completedAt
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                 !logDate.isBefore(startDate)
             }
             .groupBy { log ->
-                java.time.Instant.ofEpochMilli(log.completedAt.toEpochMilli())
-                    .atZone(java.time.ZoneId.systemDefault())
+                log.completedAt
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
             }
             .mapValues { it.value.size }
@@ -115,17 +104,19 @@ class HabitDetailViewModel @Inject constructor(
      */
     fun completeHabit(mood: HabitMood?, note: String?) {
         viewModelScope.launch {
-            habitRepository.completeHabit(habitId, mood, note)
-                .onSuccess {
+            when (val result = habitRepository.logCompletion(habitId, mood, note)) {
+                is AppResult.Success -> {
                     Timber.d("Habit completed: $habitId")
                     _uiState.update { it.copy(showCompletionSuccess = true) }
                 }
-                .onFailure { e ->
+                is AppResult.Error -> {
                     _uiState.update {
-                        it.copy(error = e.message ?: "Failed to complete habit")
+                        it.copy(error = result.error.message)
                     }
-                    Timber.e(e, "Failed to complete habit")
+                    Timber.e("Failed to complete habit: ${result.error.message}")
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -134,16 +125,16 @@ class HabitDetailViewModel @Inject constructor(
      */
     fun uncompleteHabit(date: String) {
         viewModelScope.launch {
-            habitRepository.uncompleteHabit(habitId, date)
-                .onSuccess {
-                    Timber.d("Habit uncompleted: $habitId")
-                }
-                .onFailure { e ->
+            when (val result = habitRepository.undoCompletion(habitId, date)) {
+                is AppResult.Success -> Timber.d("Habit uncompleted: $habitId")
+                is AppResult.Error -> {
                     _uiState.update {
-                        it.copy(error = e.message ?: "Failed to undo completion")
+                        it.copy(error = result.error.message)
                     }
-                    Timber.e(e, "Failed to undo completion")
+                    Timber.e("Failed to undo completion: ${result.error.message}")
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -152,17 +143,19 @@ class HabitDetailViewModel @Inject constructor(
      */
     fun deleteHabit() {
         viewModelScope.launch {
-            habitRepository.deleteHabit(habitId)
-                .onSuccess {
+            when (val result = habitRepository.deleteHabit(habitId)) {
+                is AppResult.Success -> {
                     Timber.d("Habit deleted: $habitId")
                     _uiState.update { it.copy(habitDeleted = true) }
                 }
-                .onFailure { e ->
+                is AppResult.Error -> {
                     _uiState.update {
-                        it.copy(error = e.message ?: "Failed to delete habit")
+                        it.copy(error = result.error.message)
                     }
-                    Timber.e(e, "Failed to delete habit")
+                    Timber.e("Failed to delete habit: ${result.error.message}")
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -183,8 +176,8 @@ class HabitDetailViewModel @Inject constructor(
  * UI state for Habit Detail screen.
  */
 data class HabitDetailUiState(
-    val habitWithLogs: HabitWithLogs? = null,
-    val streak: HabitStreakEntity? = null,
+    val habitWithDetails: HabitWithDetails? = null,
+    val streak: HabitStreak? = null,
     val heatmapData: Map<LocalDate, Int> = emptyMap(),
     val isLoading: Boolean = true,
     val error: String? = null,

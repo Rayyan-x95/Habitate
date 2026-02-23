@@ -2,10 +2,10 @@ package com.ninety5.habitate.ui.screens.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.SyncState
-import com.ninety5.habitate.data.local.entity.WorkoutEntity
-import com.ninety5.habitate.data.local.entity.WorkoutSource
-import com.ninety5.habitate.data.repository.WorkoutRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Workout
+import com.ninety5.habitate.domain.model.WorkoutSource
+import com.ninety5.habitate.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,21 +86,31 @@ class CreateWorkoutViewModel @Inject constructor(
                 val duration = currentState.durationMinutes.toLongOrNull() ?: 0L
                 val endTs = startTs.plus(duration, ChronoUnit.MINUTES)
 
-                val workout = WorkoutEntity(
+                val workout = Workout(
                     id = UUID.randomUUID().toString(),
+                    userId = "", // Repository fills from SecurePreferences
+                    type = com.ninety5.habitate.domain.model.WorkoutType.valueOf(
+                        currentState.type.uppercase().replace(" ", "_")
+                            .let { if (com.ninety5.habitate.domain.model.WorkoutType.entries.any { e -> e.name == it }) it else "OTHER" }
+                    ),
                     source = WorkoutSource.MANUAL,
                     externalId = null,
-                    type = currentState.type,
-                    startTs = startTs,
-                    endTs = endTs,
+                    startTime = startTs,
+                    endTime = endTs,
+                    durationSeconds = duration * 60,
                     distanceMeters = currentState.distanceMeters.toDoubleOrNull(),
-                    calories = currentState.calories.toDoubleOrNull(),
-                    syncState = SyncState.PENDING,
-                    updatedAt = Instant.now()
+                    caloriesBurned = currentState.calories.toDoubleOrNull()?.toInt(),
+                    heartRateAvg = null,
+                    notes = null,
+                    isArchived = false,
+                    createdAt = Instant.now()
                 )
 
-                workoutRepository.saveWorkout(workout)
-                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                when (val result = workoutRepository.createWorkout(workout)) {
+                    is AppResult.Success -> _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                    is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                    is AppResult.Loading -> { /* no-op */ }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

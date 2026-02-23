@@ -1,6 +1,7 @@
 package com.ninety5.habitate.data.remote
 
-import com.ninety5.habitate.data.repository.AuthRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.repository.AuthRepository
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Authenticator
@@ -37,7 +38,10 @@ class TokenAuthenticator @Inject constructor(
         val newToken = try {
             runBlocking {
                 withTimeoutOrNull(REFRESH_TIMEOUT_MS) {
-                    authRepository.refreshAccessToken().getOrNull()
+                    when (val result = authRepository.refreshToken()) {
+                        is AppResult.Success -> result.data
+                        else -> null
+                    }
                 }
             }
         } catch (e: Exception) {

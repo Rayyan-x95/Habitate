@@ -72,16 +72,14 @@ object NetworkModule {
         authInterceptor: AuthInterceptor,
         tokenAuthenticator: com.ninety5.habitate.data.remote.TokenAuthenticator
     ): OkHttpClient {
-        // Certificate Pinning Configuration
-        // Note: Pins are currently placeholders. Update with real SHA-256 hashes for production.
+        // Certificate Pinning — SHA-256 SPKI pin for api.habitate.app
         val certificatePinner = CertificatePinner.Builder()
-            .add("api.habitate.app", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-            .add("api.habitate.app", "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=")
+            .add("api.habitate.app", "sha256/qHOLDIzg42cAv9FgKcyzJIg8cUGm6CnR0zIlKCXuLC0=")
             .build()
 
         val builder = OkHttpClient.Builder()
             .authenticator(tokenAuthenticator)
-            // .certificatePinner(certificatePinner) // TODO: Uncomment when real pins are available
+            .certificatePinner(certificatePinner)
             .addInterceptor(authInterceptor) // Inject Auth Token
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
@@ -112,7 +110,8 @@ object NetworkModule {
         // Certificate Pinning
         // Enabled only for release builds via FeatureFlags
         // SECURITY: Pinning is MANDATORY for Release builds.
-        if (com.ninety5.habitate.core.FeatureFlags.CERTIFICATE_PINNING_ENABLED) {
+        @Suppress("DEPRECATION")
+        if (com.ninety5.habitate.core.CoreFeatureFlags.CERTIFICATE_PINNING_ENABLED) {
             val certificatePinner = CertificatePinner.Builder()
                 .add("api.habitate.app", "sha256/31Xtgr5nwvA7AUsjrvyvDyf+euY7XRdXPRUHgYGmpbY=") // Primary (Leaf)
                 .add("api.habitate.app", "sha256/Ipu894p0lradoHNrOb/HVc67Vo3l2RIbVm2j+AfTyKI=") // Backup (Persisted)
@@ -124,7 +123,8 @@ object NetworkModule {
         }
 
         // GUARDRAIL: Fail fast if pinning is disabled in Release
-        if (!BuildConfig.DEBUG && !com.ninety5.habitate.core.FeatureFlags.CERTIFICATE_PINNING_ENABLED) {
+        @Suppress("DEPRECATION")
+        if (!BuildConfig.DEBUG && !com.ninety5.habitate.core.CoreFeatureFlags.CERTIFICATE_PINNING_ENABLED) {
             throw IllegalStateException("Security Critical: Certificate Pinning MUST be enabled in Release builds!")
         }
 

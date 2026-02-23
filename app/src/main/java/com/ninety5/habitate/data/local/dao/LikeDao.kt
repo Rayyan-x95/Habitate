@@ -81,9 +81,8 @@ interface LikeDao {
     /**
      * Atomic toggle like operation.
      * Returns true if like was created, false if removed.
-     * Uses @Transaction to ensure atomicity of read-check-write operation.
+     * Note: Removed @Transaction due to Room KSP bug with suspend functions.
      */
-    @Transaction
     suspend fun toggleLikeAtomic(
         userId: String,
         postId: String,
@@ -111,8 +110,8 @@ interface LikeDao {
      * Atomic upsert reaction (for explicit reaction changes).
      * Always inserts/updates, never removes.
      * Returns pair of (isNew, previousReactionType) for post count updates.
+     * Note: Removed @Transaction due to Room KSP bug with suspend functions.
      */
-    @Transaction
     suspend fun upsertReactionAtomic(
         userId: String,
         postId: String,

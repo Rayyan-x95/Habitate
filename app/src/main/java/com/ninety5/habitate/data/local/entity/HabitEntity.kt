@@ -127,13 +127,15 @@ enum class HabitMood {
     GREAT,
     GOOD,
     OKAY,
-    HARD;
+    HARD,
+    TERRIBLE;
     
     fun getEmoji(): String = when (this) {
         GREAT -> "😊"
         GOOD -> "🙂"
         OKAY -> "😐"
         HARD -> "😓"
+        TERRIBLE -> "😞"
     }
     
     fun getDisplayName(): String = when (this) {
@@ -141,5 +143,6 @@ enum class HabitMood {
         GOOD -> "Good"
         OKAY -> "Okay"
         HARD -> "Hard"
+        TERRIBLE -> "Terrible"
     }
 }

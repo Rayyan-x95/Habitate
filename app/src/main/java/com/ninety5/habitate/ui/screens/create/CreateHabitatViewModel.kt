@@ -2,18 +2,16 @@ package com.ninety5.habitate.ui.screens.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitatEntity
-import com.ninety5.habitate.data.local.entity.HabitatPrivacy
-import com.ninety5.habitate.data.local.entity.SyncState
-import com.ninety5.habitate.data.repository.AuthRepository
-import com.ninety5.habitate.data.repository.HabitatRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.HabitatPrivacy
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.HabitatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 data class CreateHabitatUiState(
@@ -53,30 +51,26 @@ class CreateHabitatViewModel @Inject constructor(
             return
         }
 
-        val userId = authRepository.getCurrentUserId()
-        if (userId == null) {
+        if (authRepository.getCurrentUserId() == null) {
             _uiState.update { it.copy(error = "User not authenticated") }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                val habitat = HabitatEntity(
-                    id = UUID.randomUUID().toString(),
-                    name = currentState.name,
-                    description = currentState.description.ifBlank { null },
-                    coverImageUrl = null,
-                    memberCount = 1,
-                    privacy = currentState.privacy,
-                    syncState = SyncState.PENDING,
-                    updatedAt = System.currentTimeMillis()
-                )
 
-                habitatRepository.createHabitat(habitat, userId)
-                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            when (val result = habitatRepository.createHabitat(
+                name = currentState.name,
+                description = currentState.description.ifBlank { null },
+                privacy = currentState.privacy.name
+            )) {
+                is AppResult.Success -> {
+                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                }
+                is AppResult.Error -> {
+                    _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }

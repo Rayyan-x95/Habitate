@@ -2,7 +2,7 @@ package com.ninety5.habitate.data.remote
 
 import com.ninety5.habitate.BuildConfig
 import com.ninety5.habitate.domain.model.Message
-import com.ninety5.habitate.data.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.AuthRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

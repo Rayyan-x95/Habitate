@@ -62,9 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.JournalEntryEntity
+import com.ninety5.habitate.domain.model.JournalEntry
 import com.ninety5.habitate.ui.theme.LocalHabitateColors
-import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -499,12 +498,12 @@ private fun ActivitySummaryCard(workoutStats: WorkoutStats) {
 
 @Composable
 private fun JournalEntryPreviewCard(
-    entry: JournalEntryEntity,
+    entry: JournalEntry,
     onClick: () -> Unit
 ) {
     val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d") }
-    val date = remember(entry.date) {
-        Instant.ofEpochMilli(entry.date)
+    val date = remember(entry.createdAt) {
+        entry.createdAt
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
     }
@@ -524,7 +523,7 @@ private fun JournalEntryPreviewCard(
         ) {
             // Mood emoji
             Text(
-                text = getMoodEmoji(entry.mood ?: "neutral"),
+                text = getMoodEmoji(entry.mood?.name?.lowercase() ?: "neutral"),
                 style = MaterialTheme.typography.titleMedium
             )
             

@@ -17,12 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.entity.HabitCategory
+import com.ninety5.habitate.domain.model.HabitCategory
 import com.ninety5.habitate.ui.components.*
 import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
 import com.ninety5.habitate.ui.components.designsystem.HabitateLoadingScreen
-import com.ninety5.habitate.ui.navigation.Screen
 
 /**
  * Habit List Screen - Main hub for viewing and managing habits.
@@ -37,7 +35,8 @@ import com.ninety5.habitate.ui.navigation.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen(
-    navController: NavController,
+    onCreateHabitClick: () -> Unit,
+    onHabitClick: (String) -> Unit,
     viewModel: HabitListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -81,7 +80,7 @@ fun HabitListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(Screen.HabitCreate.route) },
+                onClick = onCreateHabitClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -102,7 +101,7 @@ fun HabitListScreen(
                         description = "Create your first habit to start building better routines",
                         icon = Icons.Rounded.SelfImprovement,
                         actionText = "Create Habit",
-                        onAction = { navController.navigate(Screen.HabitCreate.route) }
+                        onAction = onCreateHabitClick
                     )
                 }
                 
@@ -143,9 +142,7 @@ fun HabitListScreen(
                                         viewModel.completeHabit(habitWithStreak.habit.id)
                                     },
                                     onClick = {
-                                        navController.navigate(
-                                            Screen.HabitDetail.createRoute(habitWithStreak.habit.id)
-                                        )
+                                        onHabitClick(habitWithStreak.habit.id)
                                     }
                                 )
                             }

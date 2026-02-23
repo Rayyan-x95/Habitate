@@ -17,4 +17,7 @@ interface MessageReactionDao {
 
     @Query("DELETE FROM message_reactions WHERE messageId = :messageId AND userId = :userId")
     suspend fun removeReaction(messageId: String, userId: String)
+
+    @Query("DELETE FROM message_reactions WHERE messageId = :messageId AND userId = :userId AND emoji = :emoji")
+    suspend fun removeReactionByEmoji(messageId: String, userId: String, emoji: String)
 }

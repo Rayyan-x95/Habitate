@@ -2,8 +2,9 @@ package com.ninety5.habitate.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ninety5.habitate.core.result.AppResult
 import com.ninety5.habitate.data.health.HealthConnectAdapter
-import com.ninety5.habitate.data.repository.WorkoutRepository
+import com.ninety5.habitate.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,13 +52,11 @@ class HealthConnectViewModel @Inject constructor(
     fun importWorkouts() {
         viewModelScope.launch {
             _importStatus.value = "Importing..."
-            workoutRepository.importHealthConnectWorkouts()
-                .onSuccess { count ->
-                    _importStatus.value = "Imported $count workouts"
-                }
-                .onFailure { e ->
-                    _importStatus.value = "Error: ${e.message}"
-                }
+            when (val result = workoutRepository.syncFromHealthConnect()) {
+                is AppResult.Success -> _importStatus.value = "Imported ${result.data} workouts"
+                is AppResult.Error -> _importStatus.value = "Error: ${result.error.message}"
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - TOKENS                       ║
- * ║                         Version 2.0 - Minimal Redesign                   ║
+ * ║                         Version 3.0 - 2026 Spatial UI                   ║
  * ║                                                                          ║
  * ║  Philosophy:                                                              ║
  * ║  • Breathable layouts with generous whitespace                           ║
@@ -30,22 +30,22 @@ object Spacing {
     val xxs: Dp = 2.dp
     
     /** 4dp - Tiny spacing */
-    val xs: Dp = 4.dp
+    val xs: Dp = 8.dp
     
     /** 8dp - Small spacing */
-    val sm: Dp = 8.dp
+    val sm: Dp = 12.dp
     
     /** 12dp - Small-medium spacing */
-    val md: Dp = 12.dp
+    val md: Dp = 16.dp
     
     /** 16dp - Base spacing (component padding) */
-    val lg: Dp = 16.dp
+    val lg: Dp = 20.dp
     
     /** 20dp - Medium-large spacing */
-    val xl: Dp = 20.dp
+    val xl: Dp = 24.dp
     
     /** 24dp - Large spacing (section gaps) */
-    val xxl: Dp = 24.dp
+    val xxl: Dp = 32.dp
     
     /** 32dp - Extra large spacing */
     val xxxl: Dp = 32.dp
@@ -81,22 +81,22 @@ object Spacing {
 
 object Radius {
     /** 4dp - Micro (tiny chips, progress indicators) */
-    val xs: Dp = 4.dp
+    val xs: Dp = 8.dp
     
     /** 8dp - Small (standard buttons, inputs) */
-    val sm: Dp = 8.dp
+    val sm: Dp = 12.dp
     
     /** 12dp - Medium (cards, dialogs) */
-    val md: Dp = 12.dp
+    val md: Dp = 16.dp
     
     /** 16dp - Large (featured cards, modals) */
-    val lg: Dp = 16.dp
+    val lg: Dp = 20.dp
     
     /** 20dp - Extra large (hero cards) */
-    val xl: Dp = 20.dp
+    val xl: Dp = 24.dp
     
     /** 24dp - Huge (bottom sheets top corners) */
-    val xxl: Dp = 24.dp
+    val xxl: Dp = 32.dp
     
     /** 28dp - Maximum (full-screen overlays) */
     val xxxl: Dp = 28.dp

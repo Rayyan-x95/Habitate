@@ -1,6 +1,6 @@
 package com.ninety5.habitate.ui.screens.profile
 
-import com.ninety5.habitate.data.local.entity.Visibility
+import com.ninety5.habitate.domain.model.PostVisibility
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -79,7 +79,7 @@ fun ProfileScreen(
 
     val displayedPosts = remember(uiState.posts, isViewAsMode) {
         if (isViewAsMode) {
-            uiState.posts.filter { it.visibility == Visibility.PUBLIC }
+            uiState.posts.filter { it.visibility == PostVisibility.PUBLIC }
         } else {
             uiState.posts
         }

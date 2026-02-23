@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-import com.ninety5.habitate.data.repository.HabitatRepository
-import com.ninety5.habitate.data.repository.AuthRepository
-import com.ninety5.habitate.data.repository.ChallengeRepository
-import com.ninety5.habitate.data.local.entity.HabitatEntity
-import com.ninety5.habitate.data.local.entity.ChallengeEntity
+import com.ninety5.habitate.domain.model.Challenge
+import com.ninety5.habitate.domain.model.Habitat
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.ChallengeRepository
+import com.ninety5.habitate.domain.repository.HabitatRepository
 import kotlinx.coroutines.flow.combine
 import java.time.Instant
 
@@ -34,25 +34,30 @@ class HabitatsViewModel @Inject constructor(
 
     private fun observeHabitats() {
         viewModelScope.launch {
-            combine(
-                habitatRepository.getJoinedHabitats(),
-                habitatRepository.getDiscoverHabitats(),
-                challengeRepository.getAllChallenges()
-            ) { joined, discover, challenges ->
-                Triple(joined, discover, challenges)
-            }.collect { (joined, discover, challenges) ->
-                _uiState.update {
-                    it.copy(
-                        myHabitats = joined.map { h -> h.toUiModel(true, challenges) },
-                        discoverHabitats = discover.map { h -> h.toUiModel(false, challenges) },
-                        isLoading = false
-                    )
+            try {
+                combine(
+                    habitatRepository.observeMyHabitats(),
+                    habitatRepository.discoverHabitats(),
+                    challengeRepository.observeActiveChallenges()
+                ) { joined, discover, challenges ->
+                    Triple(joined, discover, challenges)
+                }.collect { (joined, discover, challenges) ->
+                    _uiState.update {
+                        it.copy(
+                            myHabitats = joined.map { h -> h.toUiModel(true, challenges) },
+                            discoverHabitats = discover.map { h -> h.toUiModel(false, challenges) },
+                            isLoading = false,
+                            error = null
+                        )
+                    }
                 }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Failed to load habitats") }
             }
         }
     }
 
-    private fun HabitatEntity.toUiModel(joined: Boolean, challenges: List<ChallengeEntity>): HabitatUiModel {
+    private fun Habitat.toUiModel(joined: Boolean, challenges: List<Challenge>): HabitatUiModel {
         val activeChallenge = challenges.find { 
             it.habitatId == id && it.endDate.isAfter(Instant.now()) 
         }
@@ -61,7 +66,7 @@ class HabitatsViewModel @Inject constructor(
             id = id,
             name = name,
             description = description ?: "",
-            imageUrl = coverImageUrl,
+            imageUrl = coverUrl,
             memberCount = memberCount,
             privacy = privacy,
             activeChallenge = activeChallenge?.title,
@@ -71,15 +76,13 @@ class HabitatsViewModel @Inject constructor(
 
     fun joinHabitat(habitatId: String) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            habitatRepository.joinHabitat(habitatId, userId)
+            habitatRepository.joinHabitat(habitatId)
         }
     }
 
     fun leaveHabitat(habitatId: String) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            habitatRepository.leaveHabitat(habitatId, userId)
+            habitatRepository.leaveHabitat(habitatId)
         }
     }
 }

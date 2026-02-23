@@ -5,8 +5,10 @@ import timber.log.Timber
 
 class GlyphInterfaceManager(private val context: Context) {
 
-    // TODO: Fix Nothing Glyph SDK integration
-    // Currently disabled for public beta readiness
+    // Nothing Glyph SDK integration is disabled for public beta.
+    // The Nothing Glyph SDK dependency must be added to build.gradle.kts and the
+    // GlyphManager API initialised here once the SDK is stable and available.
+    // See: https://github.com/nickmalleson/nothing-glyph-developer-kit
     
     fun init() {
         Timber.d("GlyphInterfaceManager initialized (disabled)")

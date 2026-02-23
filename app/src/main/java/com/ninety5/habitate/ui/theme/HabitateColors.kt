@@ -451,47 +451,48 @@ val DarkHabitateColors = HabitateColorScheme(
 val LocalHabitateColors = staticCompositionLocalOf { LightHabitateColors }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LEGACY ALIASES (For backward compatibility)
+// LEGACY ALIASES — Deprecated, use HabitateTheme.colors.* or named tokens
 // ═══════════════════════════════════════════════════════════════════════════
 
-val Primary = Primary500
-val PrimarySoft = Primary400
-val PrimaryLight = BrandCream
-val PrimaryDark = Primary800
-val Cream = BrandCream
-val ForestGreen = Primary500
-val DeepForest = Primary800
+@Deprecated("Use Primary500", ReplaceWith("Primary500")) val Primary = Primary500
+@Deprecated("Use Primary400", ReplaceWith("Primary400")) val PrimarySoft = Primary400
+@Deprecated("Use BrandCream", ReplaceWith("BrandCream")) val PrimaryLight = BrandCream
+@Deprecated("Use Primary800", ReplaceWith("Primary800")) val PrimaryDark = Primary800
+@Deprecated("Use BrandCream", ReplaceWith("BrandCream")) val Cream = BrandCream
+@Deprecated("Use Primary500", ReplaceWith("Primary500")) val ForestGreen = Primary500
+@Deprecated("Use Primary800", ReplaceWith("Primary800")) val DeepForest = Primary800
 
-val BackgroundLight = Neutral100
-val SurfaceLight = Neutral50
-val SurfaceSoftLight = Neutral150
-val DividerLight = Neutral300
-val BorderLight = Neutral400
+@Deprecated("Use Neutral100", ReplaceWith("Neutral100")) val BackgroundLight = Neutral100
+@Deprecated("Use Neutral50", ReplaceWith("Neutral50")) val SurfaceLight = Neutral50
+@Deprecated("Use Neutral150", ReplaceWith("Neutral150")) val SurfaceSoftLight = Neutral150
+@Deprecated("Use Neutral300", ReplaceWith("Neutral300")) val DividerLight = Neutral300
+@Deprecated("Use Neutral400", ReplaceWith("Neutral400")) val BorderLight = Neutral400
 
-val BackgroundDark = NeutralDark100
-val SurfaceDark = NeutralDark200
-val SurfaceSoftDark = NeutralDark300
-val DividerDark = NeutralDark400
-val BorderDark = NeutralDark500
+@Deprecated("Use NeutralDark100", ReplaceWith("NeutralDark100")) val BackgroundDark = NeutralDark100
+@Deprecated("Use NeutralDark200", ReplaceWith("NeutralDark200")) val SurfaceDark = NeutralDark200
+@Deprecated("Use NeutralDark300", ReplaceWith("NeutralDark300")) val SurfaceSoftDark = NeutralDark300
+@Deprecated("Use NeutralDark400", ReplaceWith("NeutralDark400")) val DividerDark = NeutralDark400
+@Deprecated("Use NeutralDark500", ReplaceWith("NeutralDark500")) val BorderDark = NeutralDark500
 
-val TextPrimaryLight = Neutral800
-val TextSecondaryLight = Neutral600
-val TextMutedLight = Neutral500
-val TextDisabledLight = Neutral400
+@Deprecated("Use Neutral800", ReplaceWith("Neutral800")) val TextPrimaryLight = Neutral800
+@Deprecated("Use Neutral600", ReplaceWith("Neutral600")) val TextSecondaryLight = Neutral600
+@Deprecated("Use Neutral500", ReplaceWith("Neutral500")) val TextMutedLight = Neutral500
+@Deprecated("Use Neutral400", ReplaceWith("Neutral400")) val TextDisabledLight = Neutral400
 
-val TextPrimaryDark = NeutralDark900
-val TextSecondaryDark = NeutralDark700
-val TextMutedDark = NeutralDark600
-val TextDisabledDark = NeutralDark500
+@Deprecated("Use NeutralDark900", ReplaceWith("NeutralDark900")) val TextPrimaryDark = NeutralDark900
+@Deprecated("Use NeutralDark700", ReplaceWith("NeutralDark700")) val TextSecondaryDark = NeutralDark700
+@Deprecated("Use NeutralDark600", ReplaceWith("NeutralDark600")) val TextMutedDark = NeutralDark600
+@Deprecated("Use NeutralDark500", ReplaceWith("NeutralDark500")) val TextDisabledDark = NeutralDark500
 
-val Success = SemanticSuccess
-val Warning = SemanticWarning
-val Error = SemanticError
-val Info = SemanticInfo
+@Deprecated("Use SemanticSuccess", ReplaceWith("SemanticSuccess")) val Success = SemanticSuccess
+@Deprecated("Use SemanticWarning", ReplaceWith("SemanticWarning")) val Warning = SemanticWarning
+@Deprecated("Use SemanticError", ReplaceWith("SemanticError")) val Error = SemanticError
+@Deprecated("Use SemanticInfo", ReplaceWith("SemanticInfo")) val Info = SemanticInfo
 
-val PrimaryGradient = GradientBrand
-val BrandGradient = GradientBrand
-val SunriseGradient = GradientAccent
+@Deprecated("Use GradientBrand", ReplaceWith("GradientBrand")) val PrimaryGradient = GradientBrand
+@Deprecated("Use GradientBrand", ReplaceWith("GradientBrand")) val BrandGradient = GradientBrand
+@Deprecated("Use GradientAccent", ReplaceWith("GradientAccent")) val SunriseGradient = GradientAccent
+@Deprecated("Use a custom gradient", level = DeprecationLevel.WARNING)
 val FocusGradient = Brush.horizontalGradient(
     colors = listOf(Primary600, Primary400, Primary300)
 )

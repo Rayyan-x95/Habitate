@@ -2,10 +2,11 @@ package com.ninety5.habitate.ui.screens.habit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.HabitCategory
-import com.ninety5.habitate.data.local.entity.HabitMood
-import com.ninety5.habitate.data.local.relation.HabitWithStreak
-import com.ninety5.habitate.data.repository.HabitRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.HabitCategory
+import com.ninety5.habitate.domain.model.HabitMood
+import com.ninety5.habitate.domain.model.HabitWithDetails
+import com.ninety5.habitate.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ class HabitListViewModel @Inject constructor(
     private fun loadHabits() {
         viewModelScope.launch {
             combine(
-                habitRepository.getActiveHabitsWithStreaks(),
+                habitRepository.observeActiveHabitsWithStreaks(),
                 _searchQuery,
                 _selectedCategory
             ) { habits, query, category ->
@@ -97,17 +98,19 @@ class HabitListViewModel @Inject constructor(
      */
     fun completeHabit(habitId: String, mood: HabitMood? = null) {
         viewModelScope.launch {
-            habitRepository.completeHabit(habitId, mood, null)
-                .onSuccess {
+            when (val result = habitRepository.logCompletion(habitId, mood, null)) {
+                is AppResult.Success -> {
                     _uiState.update { it.copy(lastCompletedHabitId = habitId) }
                     Timber.d("Habit completed: $habitId")
                 }
-                .onFailure { e ->
+                is AppResult.Error -> {
                     _uiState.update {
-                        it.copy(error = e.message ?: "Failed to complete habit")
+                        it.copy(error = result.error.message)
                     }
-                    Timber.e(e, "Failed to complete habit")
+                    Timber.e("Failed to complete habit: ${result.error.message}")
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -116,16 +119,16 @@ class HabitListViewModel @Inject constructor(
      */
     fun archiveHabit(habitId: String) {
         viewModelScope.launch {
-            habitRepository.archiveHabit(habitId)
-                .onSuccess {
-                    Timber.d("Habit archived: $habitId")
-                }
-                .onFailure { e ->
+            when (val result = habitRepository.archiveHabit(habitId)) {
+                is AppResult.Success -> Timber.d("Habit archived: $habitId")
+                is AppResult.Error -> {
                     _uiState.update {
-                        it.copy(error = e.message ?: "Failed to archive habit")
+                        it.copy(error = result.error.message)
                     }
-                    Timber.e(e, "Failed to archive habit")
+                    Timber.e("Failed to archive habit: ${result.error.message}")
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -163,7 +166,7 @@ class HabitListViewModel @Inject constructor(
  * UI state for Habit List screen.
  */
 data class HabitListUiState(
-    val habits: List<HabitWithStreak> = emptyList(),
+    val habits: List<HabitWithDetails> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
     val lastCompletedHabitId: String? = null

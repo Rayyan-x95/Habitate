@@ -163,22 +163,3 @@ fun Modifier.glassFloating(
     borderAlpha = GlassTokens.borderAlphaStrong,
     isDark = isDark
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-// LEGACY SUPPORT
-// ═══════════════════════════════════════════════════════════════════════════
-
-// Keep old signature for backward compatibility
-@Deprecated("Use new glassEffect with explicit parameters", ReplaceWith("glassEffect()"))
-fun Modifier.glassEffect(
-    shape: Shape = RoundedCornerShape(16.dp),
-    tint: Color = PrimarySoft.copy(alpha = 0.12f),
-    blur: Dp = 20.dp
-): Modifier = glassEffect(
-    shape = shape,
-    blur = blur,
-    tintColor = Primary500,
-    backgroundAlpha = 0.12f,
-    borderAlpha = 0.12f,
-    isDark = false
-)

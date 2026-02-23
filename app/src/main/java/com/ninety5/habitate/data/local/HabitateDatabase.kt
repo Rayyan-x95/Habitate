@@ -103,7 +103,7 @@ import com.ninety5.habitate.data.local.entity.StoryMuteEntity
     ],
     views = [com.ninety5.habitate.data.local.view.TimelineItem::class],
     version = 26, // Updated to include index optimization migration (25->26)
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class HabitateDatabase : RoomDatabase() {

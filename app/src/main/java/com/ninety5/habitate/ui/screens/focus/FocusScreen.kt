@@ -6,8 +6,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
@@ -23,7 +45,6 @@ import androidx.compose.ui.res.painterResource
 
 @Composable
 fun FocusScreen(
-    navController: NavController,
     viewModel: FocusViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

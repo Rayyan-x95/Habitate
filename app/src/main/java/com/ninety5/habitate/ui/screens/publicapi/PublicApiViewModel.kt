@@ -2,10 +2,10 @@ package com.ninety5.habitate.ui.screens.publicapi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.remote.publicapis.BookDto
-import com.ninety5.habitate.data.remote.publicapis.MealDto
-import com.ninety5.habitate.data.remote.publicapis.QuoteDto
-import com.ninety5.habitate.data.remote.publicapis.WeatherResponse
+import com.ninety5.habitate.domain.model.Book
+import com.ninety5.habitate.domain.model.Meal
+import com.ninety5.habitate.domain.model.Quote
+import com.ninety5.habitate.domain.model.Weather
 import com.ninety5.habitate.domain.repository.PublicApiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +16,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PublicApiUiState(
-    val weather: WeatherResponse? = null,
-    val quote: QuoteDto? = null,
-    val meal: MealDto? = null,
-    val books: List<BookDto> = emptyList(),
+    val weather: Weather? = null,
+    val quote: Quote? = null,
+    val meal: Meal? = null,
+    val books: List<Book> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )

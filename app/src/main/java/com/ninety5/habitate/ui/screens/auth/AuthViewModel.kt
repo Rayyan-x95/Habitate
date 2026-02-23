@@ -2,7 +2,8 @@ package com.ninety5.habitate.ui.screens.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.repository.AuthRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -78,13 +79,11 @@ class AuthViewModel @Inject constructor(
     fun handleGoogleSignIn(idToken: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            authRepository.signInWithGoogle(idToken)
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
-                }
+            when (val result = authRepository.loginWithGoogle(idToken)) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false) }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -105,13 +104,11 @@ class AuthViewModel @Inject constructor(
         
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            authRepository.login(email, password)
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
-                }
+            when (val result = authRepository.login(email, password)) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false) }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -155,27 +152,32 @@ class AuthViewModel @Inject constructor(
                 ) 
             }
             
-            authRepository.register(email, password, displayName, username)
-                .onSuccess { userId ->
-                    val hasPendingSync = authRepository.hasPendingBackendSync()
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            registrationStatus = RegistrationStatus.Success(
-                                backendSynced = !hasPendingSync
-                            )
-                        ) 
-                    }
-                }
-                .onFailure { e ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false, 
-                            error = e.message,
-                            registrationStatus = RegistrationStatus.Failed(
-                                e.message ?: "Registration failed"
-                            )
-                        ) 
+            authRepository.register(email, password, username, displayName)
+                .let { result ->
+                    when (result) {
+                        is AppResult.Success -> {
+                            val hasPendingSync = authRepository.hasPendingBackendSync()
+                            _uiState.update { 
+                                it.copy(
+                                    isLoading = false,
+                                    registrationStatus = RegistrationStatus.Success(
+                                        backendSynced = !hasPendingSync
+                                    )
+                                ) 
+                            }
+                        }
+                        is AppResult.Error -> {
+                            _uiState.update { 
+                                it.copy(
+                                    isLoading = false, 
+                                    error = result.error.message,
+                                    registrationStatus = RegistrationStatus.Failed(
+                                        result.error.message
+                                    )
+                                ) 
+                            }
+                        }
+                        is AppResult.Loading -> { /* no-op */ }
                     }
                 }
         }
@@ -201,16 +203,16 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, emailLinkSent = false) }
             authRepository.sendSignInLinkToEmail(email)
-                .onSuccess {
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false, 
-                            emailLinkSent = true
-                        ) 
+                .let { result ->
+                    when (result) {
+                        is AppResult.Success -> _uiState.update { 
+                            it.copy(isLoading = false, emailLinkSent = true) 
+                        }
+                        is AppResult.Error -> _uiState.update { 
+                            it.copy(isLoading = false, error = result.error.message) 
+                        }
+                        is AppResult.Loading -> { /* no-op */ }
                     }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
     }
@@ -227,16 +229,16 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, passwordResetSent = false) }
             authRepository.sendPasswordResetEmail(email)
-                .onSuccess {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            passwordResetSent = true
-                        )
+                .let { result ->
+                    when (result) {
+                        is AppResult.Success -> _uiState.update {
+                            it.copy(isLoading = false, passwordResetSent = true)
+                        }
+                        is AppResult.Error -> _uiState.update { 
+                            it.copy(isLoading = false, error = result.error.message) 
+                        }
+                        is AppResult.Loading -> { /* no-op */ }
                     }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
     }
@@ -250,12 +252,12 @@ class AuthViewModel @Inject constructor(
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, error = null) }
                 authRepository.signInWithEmailLink("", link)
-                    .onSuccess {
-                        _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
-                    }
-                    .onFailure { e ->
-                        // AuthRepository already provides user-friendly messages
-                        _uiState.update { it.copy(isLoading = false, error = e.message) }
+                    .let { result ->
+                        when (result) {
+                            is AppResult.Success -> _uiState.update { it.copy(isLoading = false) }
+                            is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                            is AppResult.Loading -> { /* no-op */ }
+                        }
                     }
             }
         }
@@ -264,13 +266,13 @@ class AuthViewModel @Inject constructor(
     fun checkEmailVerification() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            runCatching {
-                authRepository.reloadUser()
-                authRepository.isEmailVerified()
-            }.onSuccess { isVerified ->
-                _uiState.update { it.copy(isLoading = false, isEmailVerified = isVerified) }
-            }.onFailure { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            when (val result = authRepository.reloadUser()) {
+                is AppResult.Success -> {
+                    val isVerified = authRepository.isEmailVerified()
+                    _uiState.update { it.copy(isLoading = false, isEmailVerified = isVerified) }
+                }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
@@ -278,13 +280,11 @@ class AuthViewModel @Inject constructor(
     fun sendVerificationEmail() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, verificationEmailSent = false) }
-            authRepository.sendEmailVerification()
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, verificationEmailSent = true) }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
-                }
+            when (val result = authRepository.sendEmailVerification()) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false, verificationEmailSent = true) }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 
@@ -298,13 +298,11 @@ class AuthViewModel @Inject constructor(
     fun deleteAccount() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            authRepository.deleteAccount()
-                .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, isLoggedIn = false) }
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
-                }
+            when (val result = authRepository.deleteAccount()) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false) }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 }

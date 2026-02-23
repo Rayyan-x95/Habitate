@@ -2,11 +2,8 @@ package com.ninety5.habitate.ui.screens.focus
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.dao.FocusDao
-import com.ninety5.habitate.data.local.entity.FocusSessionEntity
-import com.ninety5.habitate.data.local.entity.FocusSessionStatus
-import com.ninety5.habitate.data.local.entity.SyncState
-import com.ninety5.habitate.data.repository.AuthRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.repository.FocusRepository
 import com.ninety5.habitate.util.audio.AmbientSoundPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -16,15 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.util.UUID
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class FocusViewModel @Inject constructor(
-    private val focusDao: FocusDao,
-    private val soundPlayer: AmbientSoundPlayer,
-    private val authRepository: AuthRepository
+    private val focusRepository: FocusRepository,
+    private val soundPlayer: AmbientSoundPlayer
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FocusUiState())
@@ -79,20 +74,12 @@ class FocusViewModel @Inject constructor(
 
     private fun saveSession() {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId() ?: return@launch
-            val session = FocusSessionEntity(
-                id = UUID.randomUUID().toString(),
-                userId = userId,
-                startTime = Instant.now().minusSeconds(_uiState.value.initialDuration - _uiState.value.timeLeftSeconds),
-                endTime = Instant.now(),
-                durationSeconds = _uiState.value.initialDuration - _uiState.value.timeLeftSeconds,
-                status = FocusSessionStatus.COMPLETED,
-                soundTrack = _uiState.value.selectedSound,
-                rating = null,
-                syncState = SyncState.PENDING,
-                updatedAt = Instant.now()
-            )
-            focusDao.upsert(session)
+            val elapsed = _uiState.value.initialDuration - _uiState.value.timeLeftSeconds
+            when (val result = focusRepository.saveCompletedSession(elapsed, _uiState.value.selectedSound)) {
+                is AppResult.Success -> Timber.d("Focus session saved: ${result.data.id}")
+                is AppResult.Error -> Timber.e("Failed to save session: ${result.error.message}")
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
 

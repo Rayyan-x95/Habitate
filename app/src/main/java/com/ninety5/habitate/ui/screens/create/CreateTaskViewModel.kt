@@ -2,10 +2,11 @@ package com.ninety5.habitate.ui.screens.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.SyncState
-import com.ninety5.habitate.data.local.entity.TaskEntity
-import com.ninety5.habitate.data.local.entity.TaskStatus
-import com.ninety5.habitate.data.repository.TaskRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Task
+import com.ninety5.habitate.domain.model.TaskPriority
+import com.ninety5.habitate.domain.model.TaskStatus
+import com.ninety5.habitate.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,8 +16,6 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
-
-import com.ninety5.habitate.data.local.entity.TaskPriority
 
 data class CreateTaskUiState(
     val isLoading: Boolean = false,
@@ -33,27 +32,35 @@ class CreateTaskViewModel @Inject constructor(
     val uiState: StateFlow<CreateTaskUiState> = _uiState.asStateFlow()
 
     fun createTask(title: String, description: String, dueAt: Instant?, priority: TaskPriority, recurrenceRule: String?) {
-        if (title.isBlank()) return
+        if (title.isBlank()) {
+            _uiState.update { it.copy(error = "Title cannot be empty") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                val task = TaskEntity(
-                    id = UUID.randomUUID().toString(),
-                    title = title,
-                    description = description.ifBlank { null },
-                    dueAt = dueAt,
-                    recurrenceRule = recurrenceRule,
-                    priority = priority,
-                    status = TaskStatus.OPEN,
-                    syncState = SyncState.PENDING,
-                    updatedAt = Instant.now()
-                )
-                
-                taskRepository.createTask(task)
-                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            val now = Instant.now()
+            val task = Task(
+                id = UUID.randomUUID().toString(),
+                userId = "", // Repository fills from SecurePreferences
+                title = title,
+                description = description.ifBlank { null },
+                dueAt = dueAt,
+                recurrenceRule = recurrenceRule,
+                priority = priority,
+                status = TaskStatus.PENDING,
+                categoryId = null,
+                linkedEntityId = null,
+                linkedEntityType = null,
+                isArchived = false,
+                createdAt = now,
+                updatedAt = now
+            )
+            
+            when (val result = taskRepository.createTask(task)) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                is AppResult.Error -> _uiState.update { it.copy(isLoading = false, error = result.error.message) }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }

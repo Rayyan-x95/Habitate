@@ -2,8 +2,9 @@ package com.ninety5.habitate.ui.screens.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ninety5.habitate.data.local.entity.WorkoutEntity
-import com.ninety5.habitate.data.repository.WorkoutRepository
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Workout
+import com.ninety5.habitate.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,45 +28,37 @@ class WorkoutViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(WorkoutUiState())
     val uiState: StateFlow<WorkoutUiState> = _uiState.asStateFlow()
 
-    val workouts: StateFlow<List<WorkoutEntity>> = workoutRepository.getAllWorkouts()
+    val workouts: StateFlow<List<Workout>> = workoutRepository.observeAllWorkouts()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    init {
-        refreshWorkouts()
-    }
-
-    fun refreshWorkouts() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            workoutRepository.refreshWorkouts()
-                .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(error = e.message)
-                }
-            _uiState.value = _uiState.value.copy(isLoading = false)
-        }
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
     fun importHealthConnectWorkouts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, importStatus = "Importing...")
-            workoutRepository.importHealthConnectWorkouts()
-                .onSuccess { count ->
+            when (val result = workoutRepository.syncFromHealthConnect()) {
+                is AppResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        importStatus = "Imported $count workouts"
+                        error = null,
+                        importStatus = "Imported ${result.data} workouts"
                     )
                 }
-                .onFailure { e ->
+                is AppResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = e.message,
+                        error = result.error.message,
                         importStatus = "Import failed"
                     )
                 }
+                is AppResult.Loading -> { /* no-op */ }
+            }
         }
     }
     

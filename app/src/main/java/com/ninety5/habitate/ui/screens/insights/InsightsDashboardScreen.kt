@@ -37,17 +37,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.entity.InsightEntity
-import com.ninety5.habitate.data.local.entity.InsightPriority
-import com.ninety5.habitate.data.local.entity.InsightType
+import com.ninety5.habitate.domain.model.Insight
+import com.ninety5.habitate.domain.model.InsightPriority
+import com.ninety5.habitate.domain.model.InsightType
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
 import com.ninety5.habitate.ui.screens.insights.InsightsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsDashboardScreen(
-    navController: NavController,
+    onNavigateBack: () -> Unit = {},
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     val insights by viewModel.insights.collectAsState()
@@ -86,7 +85,7 @@ fun InsightsDashboardScreen(
                         InsightCard(
                             insight = insight,
                             onDismiss = { viewModel.dismissInsight(insight) },
-                            onAction = { viewModel.markAsActioned(insight) }
+                            onAction = { viewModel.actOnInsight(insight) }
                         )
                     }
                 }
@@ -97,26 +96,28 @@ fun InsightsDashboardScreen(
 
 @Composable
 fun InsightCard(
-    insight: InsightEntity,
+    insight: Insight,
     onDismiss: () -> Unit,
     onAction: () -> Unit
 ) {
     val containerColor = when (insight.priority) {
-        InsightPriority.HIGH -> MaterialTheme.colorScheme.errorContainer
+        InsightPriority.HIGH, InsightPriority.CRITICAL -> MaterialTheme.colorScheme.errorContainer
         InsightPriority.MEDIUM -> MaterialTheme.colorScheme.secondaryContainer
         InsightPriority.LOW -> MaterialTheme.colorScheme.surfaceVariant
     }
 
     val icon = when (insight.type) {
         InsightType.STREAK_RISK -> Icons.Default.Warning
-        InsightType.MILESTONE_APPROACHING -> Icons.AutoMirrored.Filled.TrendingUp
+        InsightType.MILESTONE -> Icons.AutoMirrored.Filled.TrendingUp
         InsightType.PATTERN_DETECTED -> Icons.Default.Lightbulb
-        InsightType.SUGGESTION -> Icons.Default.Lightbulb
+        InsightType.HABIT_SUGGESTION -> Icons.Default.Lightbulb
         InsightType.MOOD_CORRELATION -> Icons.Default.Lightbulb
         InsightType.WEEKLY_SUMMARY -> Icons.AutoMirrored.Filled.TrendingUp
         InsightType.TASK_FAILURE -> Icons.Default.Warning
         InsightType.HABIT_FRICTION -> Icons.Default.Warning
         InsightType.ENERGY_TREND -> Icons.Default.Lightbulb
+        InsightType.INACTIVITY_ALERT -> Icons.Default.Warning
+        InsightType.PRODUCTIVITY_TIP -> Icons.Default.Lightbulb
     }
 
     Card(

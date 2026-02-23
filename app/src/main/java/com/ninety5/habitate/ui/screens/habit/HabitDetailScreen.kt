@@ -27,14 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.ninety5.habitate.data.local.entity.HabitMood
-import com.ninety5.habitate.data.local.entity.HabitWithLogs
+import com.ninety5.habitate.domain.model.HabitMood
 import com.ninety5.habitate.ui.components.*
 import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
 import com.ninety5.habitate.ui.components.designsystem.HabitateErrorState
 import com.ninety5.habitate.ui.components.designsystem.HabitateLoadingScreen
-import com.ninety5.habitate.ui.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -53,7 +50,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HabitDetailScreen(
     habitId: String,
-    navController: NavController,
+    onNavigateBack: () -> Unit,
+    onEditHabit: (String) -> Unit,
     viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -64,7 +62,7 @@ fun HabitDetailScreen(
     // Handle habit deleted
     LaunchedEffect(uiState.habitDeleted) {
         if (uiState.habitDeleted) {
-            navController.popBackStack()
+            onNavigateBack()
         }
     }
 
@@ -78,7 +76,7 @@ fun HabitDetailScreen(
         )
     }
 
-    if (showMoodDialog && uiState.habitWithLogs != null) {
+    if (showMoodDialog && uiState.habitWithDetails != null) {
         MoodSelectionDialog(
             onMoodSelected = { mood, note ->
                 viewModel.completeHabit(mood, note)
@@ -92,20 +90,20 @@ fun HabitDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(uiState.habitWithLogs?.habit?.title ?: "Habit", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text(uiState.habitWithDetails?.habit?.title ?: "Habit", color = MaterialTheme.colorScheme.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
                     actionIconContentColor = MaterialTheme.colorScheme.onBackground
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back")
                     }
                 },
                 actions = {
                     IconButton(onClick = { 
-                        navController.navigate("habit/create/$habitId")
+                        onEditHabit(habitId)
                     }) {
                         Icon(Icons.Rounded.Edit, "Edit")
                     }
@@ -125,9 +123,9 @@ fun HabitDetailScreen(
                 onRetry = { viewModel.retry() }
             )
             
-            uiState.habitWithLogs != null -> uiState.habitWithLogs?.let { habitWithLogs ->
-                val habit = habitWithLogs.habit
-                val logs = habitWithLogs.logs
+            uiState.habitWithDetails != null -> uiState.habitWithDetails?.let { habitWithDetails ->
+                val habit = habitWithDetails.habit
+                val logs = habitWithDetails.recentLogs
                 val streak = uiState.streak
                 
                 // Calculate if completed today
@@ -236,8 +234,8 @@ fun HabitDetailScreen(
 
 @Composable
 private fun HabitHeaderCard(
-    habit: com.ninety5.habitate.data.local.entity.HabitEntity,
-    streak: com.ninety5.habitate.data.local.entity.HabitStreakEntity?,
+    habit: com.ninety5.habitate.domain.model.Habit,
+    streak: com.ninety5.habitate.domain.model.HabitStreak?,
     isCompletedToday: Boolean,
     onCompleteClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -413,7 +411,7 @@ private fun HeatmapCalendar(
 
 @Composable
 private fun CompletionLogCard(
-    log: com.ninety5.habitate.data.local.entity.HabitLogEntity,
+    log: com.ninety5.habitate.domain.model.HabitLog,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -507,7 +505,7 @@ private fun MoodSelectionDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onMoodSelected(HabitMood.OKAY, notes.takeIf { it.isNotBlank() }) },
+                onClick = { onMoodSelected(HabitMood.NEUTRAL, notes.takeIf { it.isNotBlank() }) },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Skip")

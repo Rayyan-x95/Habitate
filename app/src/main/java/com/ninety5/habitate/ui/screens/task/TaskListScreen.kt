@@ -19,8 +19,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.data.local.entity.TaskEntity
-import com.ninety5.habitate.data.local.entity.TaskStatus
+import com.ninety5.habitate.domain.model.Task
+import com.ninety5.habitate.domain.model.TaskStatus
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,8 +76,8 @@ fun TaskListScreen(
                         TaskItem(
                             task = task,
                             onTaskClick = { onTaskClick(task.id) },
-                            onStatusChange = { status ->
-                                viewModel.updateTaskStatus(task.id, status)
+                            onToggleComplete = {
+                                viewModel.toggleTaskCompletion(task)
                             }
                         )
                     }
@@ -95,9 +95,9 @@ fun TaskListScreen(
 
 @Composable
 fun TaskItem(
-    task: TaskEntity,
+    task: Task,
     onTaskClick: () -> Unit,
-    onStatusChange: (TaskStatus) -> Unit
+    onToggleComplete: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -114,15 +114,12 @@ fun TaskItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = {
-                    val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.OPEN else TaskStatus.DONE
-                    onStatusChange(newStatus)
-                }
+                onClick = onToggleComplete
             ) {
                 Icon(
-                    imageVector = if (task.status == TaskStatus.DONE) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked,
-                    contentDescription = if (task.status == TaskStatus.DONE) "Mark as incomplete" else "Mark as complete",
-                    tint = if (task.status == TaskStatus.DONE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    imageVector = if (task.status == TaskStatus.COMPLETED) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked,
+                    contentDescription = if (task.status == TaskStatus.COMPLETED) "Mark as incomplete" else "Mark as complete",
+                    tint = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -134,8 +131,8 @@ fun TaskItem(
                 Text(
                     text = task.title,
                     style = MaterialTheme.typography.titleMedium,
-                    textDecoration = if (task.status == TaskStatus.DONE) TextDecoration.LineThrough else null,
-                    color = if (task.status == TaskStatus.DONE) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                    textDecoration = if (task.status == TaskStatus.COMPLETED) TextDecoration.LineThrough else null,
+                    color = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                 )
                 if (!task.description.isNullOrBlank()) {
                     Text(

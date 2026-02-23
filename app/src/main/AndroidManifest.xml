@@ -63,8 +63,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/post" />
-                <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/profile" />
+                <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/user" />
                 <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/habitat" />
+                <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/story" />
+                <data android:scheme="https" android:host="habitate.app" android:pathPrefix="/challenge" />
             </intent-filter>
 
             <!-- Custom scheme -->

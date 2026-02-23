@@ -69,14 +69,13 @@ interface HabitDao {
     suspend fun upsertAll(habits: List<HabitEntity>)
     
     @Query("UPDATE habits SET isArchived = 1, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
-    suspend fun archiveHabit(id: String, now: Long = System.currentTimeMillis())
-    
+    suspend fun archiveHabit(id: String, now: Long)
+
     @Query("UPDATE habits SET syncState = :state, updatedAt = :now WHERE id = :id")
-    suspend fun updateSyncState(id: String, state: SyncState, now: Long = System.currentTimeMillis())
-    
+    suspend fun updateSyncState(id: String, state: SyncState, now: Long)
+
     @Query("UPDATE habits SET title = :title, description = :description, syncState = 'PENDING', updatedAt = :now WHERE id = :id")
-    suspend fun updateHabit(id: String, title: String, description: String?, now: Long = System.currentTimeMillis())
-    
+    suspend fun updateHabit(id: String, title: String, description: String?, now: Long)
     // ====================
     // DELETE
     // ====================
@@ -84,7 +83,6 @@ interface HabitDao {
     @Query("DELETE FROM habits WHERE id = :id")
     suspend fun deleteById(id: String)
     
-    @Transaction
     suspend fun upsertAndMarkSynced(habit: HabitEntity) {
         upsert(habit.copy(syncState = SyncState.SYNCED))
     }
@@ -98,6 +96,9 @@ interface HabitLogDao {
     
     @Query("SELECT * FROM habit_logs WHERE habitId = :habitId ORDER BY completedAt DESC LIMIT 100")
     fun getLogsForHabit(habitId: String): Flow<List<HabitLogEntity>>
+
+    @Query("SELECT * FROM habit_logs WHERE habitId = :habitId ORDER BY completedAt DESC LIMIT :limit")
+    suspend fun getLogsForHabitLimited(habitId: String, limit: Int): List<HabitLogEntity>
     
     @Query("""
         SELECT * FROM habit_logs 
@@ -142,11 +143,13 @@ interface HabitLogDao {
     
     @Query("DELETE FROM habit_logs WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM habit_logs WHERE habitId = :habitId")
+    suspend fun deleteByHabitId(habitId: String)
     
     @Query("UPDATE habit_logs SET syncState = :state WHERE id = :id")
     suspend fun updateSyncState(id: String, state: SyncState)
     
-    @Transaction
     suspend fun insertAndMarkSynced(log: HabitLogEntity) {
         insert(log.copy(syncState = SyncState.SYNCED))
     }
@@ -172,9 +175,8 @@ interface HabitStreakDao {
     
     @Query("DELETE FROM habit_streaks WHERE habitId = :habitId")
     suspend fun deleteByHabitId(habitId: String)
-    
-    @Transaction
-    suspend fun incrementStreak(habitId: String, userId: String, date: String) {
+
+    suspend fun incrementStreak(habitId: String, userId: String, date: String): Boolean {
         val existing = getStreakOnce(habitId)
         val now = System.currentTimeMillis()
         
@@ -206,5 +208,6 @@ interface HabitStreakDao {
                 updatedAt = java.time.Instant.ofEpochMilli(now)
             ))
         }
+        return true
     }
 }

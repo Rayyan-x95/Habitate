@@ -57,7 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.ninety5.habitate.data.local.entity.HabitatPrivacy
+import com.ninety5.habitate.domain.model.HabitatPrivacy
 import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
 import com.ninety5.habitate.ui.theme.HabitateOffWhite
 import com.ninety5.habitate.ui.theme.HabitateTheme

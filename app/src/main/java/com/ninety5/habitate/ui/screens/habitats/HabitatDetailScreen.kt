@@ -103,9 +103,9 @@ fun HabitatDetailScreen(
                     item {
                         if (habitat != null) {
                             Column {
-                                if (habitat.coverImageUrl != null) {
+                                if (habitat.coverUrl != null) {
                                     AsyncImage(
-                                        model = habitat.coverImageUrl,
+                                        model = habitat.coverUrl,
                                         contentDescription = "Cover Image",
                                         modifier = Modifier
                                             .fillMaxWidth()

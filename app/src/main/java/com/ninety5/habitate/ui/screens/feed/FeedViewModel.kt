@@ -5,6 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.ninety5.habitate.core.result.AppResult
+import com.ninety5.habitate.domain.model.Post
+import com.ninety5.habitate.domain.model.PostVisibility
+import com.ninety5.habitate.domain.repository.AuthRepository
+import com.ninety5.habitate.domain.repository.FeedRepository
+import com.ninety5.habitate.domain.repository.StoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,15 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-import com.ninety5.habitate.data.repository.FeedRepository
-import com.ninety5.habitate.data.repository.StoryRepository
-import com.ninety5.habitate.data.repository.PostWithAuthor
-import com.ninety5.habitate.data.local.entity.PostEntity
-import com.ninety5.habitate.data.local.entity.Visibility
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-
 /**
  * ViewModel for the Feed screen.
  * Manages feed state including posts, stories, and user interactions.
@@ -34,13 +31,13 @@ import java.time.format.DateTimeFormatter
 class FeedViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val storyRepository: StoryRepository,
-    private val authRepository: com.ninety5.habitate.data.repository.AuthRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FeedUiState())
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
-    val pagingDataFlow: Flow<PagingData<PostUiModel>> = feedRepository.getFeedPostsPaging()
+    val pagingDataFlow: Flow<PagingData<PostUiModel>> = feedRepository.getFeedPagingData()
         .map { pagingData ->
             pagingData.map { it.toUiModel() }
         }
@@ -75,14 +72,14 @@ class FeedViewModel @Inject constructor(
 
     private fun loadStories() {
         viewModelScope.launch {
-            storyRepository.getActiveStories().collect { stories ->
-                val storyUiModels = stories.map { storyWithUser ->
+            storyRepository.observeActiveStories().collect { stories ->
+                val storyUiModels = stories.map { story ->
                     StoryUiModel(
-                        id = storyWithUser.story.id,
-                        userId = storyWithUser.story.userId,
-                        userName = storyWithUser.user?.displayName ?: "Unknown",
-                        userAvatarUrl = storyWithUser.user?.avatarUrl,
-                        hasUnwatched = true // Logic for watched state can be added later
+                        id = story.id,
+                        userId = story.userId,
+                        userName = story.authorName.ifBlank { "Unknown" },
+                        userAvatarUrl = story.authorAvatarUrl,
+                        hasUnwatched = story.viewCount == 0
                     )
                 }
                 _uiState.update { it.copy(stories = storyUiModels) }
@@ -92,16 +89,13 @@ class FeedViewModel @Inject constructor(
 
     fun toggleLike(postId: String, reactionType: String? = null) {
         viewModelScope.launch {
-            val userId = authRepository.getCurrentUserId()
-            if (userId == null) {
-                _uiState.update { it.copy(error = "Please log in to like posts") }
-                return@launch
-            }
-            try {
-                feedRepository.toggleLike(userId, postId, reactionType)
-            } catch (e: Exception) {
-                timber.log.Timber.e(e, "Failed to toggle like")
-                _uiState.update { it.copy(error = "Failed to update like") }
+            when (val result = feedRepository.toggleLike(postId, reactionType)) {
+                is AppResult.Success -> { /* Optimistic update handled by DB Flow */ }
+                is AppResult.Error -> {
+                    timber.log.Timber.e("Failed to toggle like: ${result.error.message}")
+                    _uiState.update { it.copy(error = result.error.message) }
+                }
+                is AppResult.Loading -> { /* no-op */ }
             }
         }
     }
@@ -138,7 +132,7 @@ data class PostUiModel(
     val shares: Int,
     val isLiked: Boolean,
     val reactionType: String?,
-    val visibility: Visibility,
+    val visibility: PostVisibility,
     val createdAt: String,
     val workoutSummary: WorkoutSummaryUi?
 )
@@ -161,30 +155,25 @@ data class StoryUiModel(
     val hasUnwatched: Boolean
 )
 
-
-fun PostWithAuthor.toUiModel(): PostUiModel {
+/**
+ * Map domain [Post] to [PostUiModel].
+ */
+fun Post.toUiModel(): PostUiModel {
     return PostUiModel(
-        id = post.id,
-        authorId = post.authorId,
-        authorName = author?.displayName ?: "Unknown User",
-        authorAvatarUrl = author?.avatarUrl,
-        contentText = post.contentText ?: "",
-        mediaUrls = post.mediaUrls,
-        likes = post.likesCount,
-        comments = post.commentsCount,
-        shares = post.sharesCount,
-        isLiked = post.isLiked,
-        reactionType = post.reactionType,
-        visibility = post.visibility,
-        createdAt = formatTimeAgo(post.createdAt),
-        workoutSummary = workout?.let {
-            WorkoutSummaryUi(
-                type = it.type,
-                distance = it.distanceMeters?.let { m -> "${(m / 1000.0)} km" },
-                duration = formatDuration(it.endTs.toEpochMilli() - it.startTs.toEpochMilli()),
-                calories = it.calories?.let { c -> "${c.toInt()} kcal" } ?: ""
-            )
-        }
+        id = id,
+        authorId = authorId,
+        authorName = authorName.ifBlank { "Unknown User" },
+        authorAvatarUrl = authorAvatarUrl,
+        contentText = contentText,
+        mediaUrls = mediaUrls,
+        likes = likesCount,
+        comments = commentsCount,
+        shares = sharesCount,
+        isLiked = isLiked,
+        reactionType = null, // Domain Post doesn't track individual reaction type for current user
+        visibility = visibility,
+        createdAt = formatTimeAgo(createdAt.toEpochMilli()),
+        workoutSummary = null // Workout info handled separately if needed
     )
 }
 
@@ -194,7 +183,6 @@ fun formatDuration(millis: Long): String {
 }
 
 fun formatTimeAgo(instant: Long): String {
-    // Simple implementation, can be improved
     val now = System.currentTimeMillis()
     val diff = now - instant
     return when {

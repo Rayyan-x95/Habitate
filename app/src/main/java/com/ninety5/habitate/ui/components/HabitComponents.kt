@@ -19,9 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ninety5.habitate.data.local.entity.HabitEntity
-import com.ninety5.habitate.data.local.entity.HabitStreakEntity
-import com.ninety5.habitate.data.local.relation.HabitWithStreak
+import com.ninety5.habitate.domain.model.Habit
+import com.ninety5.habitate.domain.model.HabitStreak
 
 /**
  * Habit card component for list display.
@@ -29,8 +28,8 @@ import com.ninety5.habitate.data.local.relation.HabitWithStreak
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitCard(
-    habit: HabitEntity,
-    streak: HabitStreakEntity?,
+    habit: Habit,
+    streak: HabitStreak?,
     isCompletedToday: Boolean,
     onComplete: () -> Unit,
     onClick: () -> Unit,
