@@ -36,7 +36,7 @@ interface SyncQueueDao {
     @Query("UPDATE sync_queue SET retryCount = :retryCount, status = :status, lastAttemptAt = :attemptedAt WHERE id = :id")
     suspend fun updateRetryAt(id: Long, retryCount: Int, status: SyncStatus, attemptedAt: Instant)
 
-    @Query("DELETE FROM sync_queue WHERE entityType = :entityType AND entityId = :entityId AND operation = :operation")
+    @Query("DELETE FROM sync_queue WHERE entityType = :entityType AND entityId = :entityId AND operation = :operation AND status != 'IN_PROGRESS'")
     suspend fun deleteByEntity(entityType: String, entityId: String, operation: String)
 
     suspend fun updateStatus(id: Long, status: SyncStatus) {

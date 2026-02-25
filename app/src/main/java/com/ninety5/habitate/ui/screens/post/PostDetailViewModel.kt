@@ -64,7 +64,9 @@ class PostDetailViewModel @Inject constructor(
                             commentCount = post.commentsCount
                         )
                     }
-                    loadAuthor(post.authorId)
+                    userRepository.observeUser(post.authorId).collectLatest { user ->
+                        _uiState.update { it.copy(author = user) }
+                    }
                 } else {
                     _uiState.update { it.copy(error = "Post not found", isLoading = false) }
                 }
@@ -87,17 +89,6 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadAuthor(authorId: String) {
-        viewModelScope.launch {
-            try {
-                userRepository.observeUser(authorId).collect { user ->
-                    _uiState.update { it.copy(author = user) }
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to load author")
-            }
-        }
-    }
 
     fun toggleLike(reactionType: String? = null) {
         viewModelScope.launch {

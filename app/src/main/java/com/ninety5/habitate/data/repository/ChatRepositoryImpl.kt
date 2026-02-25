@@ -158,7 +158,7 @@ class ChatRepositoryImpl @Inject constructor(
         return try {
             // Verify ownership before deleting
             val message = messageDao.getMessageById(messageId)
-            if (message != null && message.senderId != userId) {
+            if (message == null || message.senderId != userId) {
                 return AppResult.Error(AppError.Unauthorized("Cannot delete another user's message"))
             }
 
@@ -329,7 +329,7 @@ class ChatRepositoryImpl @Inject constructor(
     suspend fun deleteMessageLegacy(messageId: String) {
         val userId = securePreferences.userId ?: return
         val message = messageDao.getMessageById(messageId)
-        if (message != null && message.senderId != userId) return
+        if (message == null || message.senderId != userId) return
         messageDao.deleteMessage(messageId)
         queueSync("chat_message", messageId, "DELETE", "{}")
     }

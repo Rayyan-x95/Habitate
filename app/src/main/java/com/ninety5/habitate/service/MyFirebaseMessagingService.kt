@@ -82,7 +82,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             deepLink?.let {
                 val uri = Uri.parse(it)
-                val scheme = uri.scheme
+                val scheme = uri.scheme?.lowercase()
                 if (scheme == null) {
                     Timber.w("Rejected deep link with missing scheme")
                 } else if (scheme == "habitate" || isValidHttpScheme(scheme, uri.host)) {
@@ -120,9 +120,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun isValidHttpScheme(scheme: String, host: String?): Boolean {
-        if (scheme != "http" && scheme != "https") return false
-        if (host == null) return false
-        return host == "habitate.com" || host.endsWith(".habitate.com")
+        val lowerScheme = scheme.lowercase()
+        val lowerHost = host?.lowercase()
+        if (lowerScheme != "http" && lowerScheme != "https") return false
+        if (lowerHost == null) return false
+        return lowerHost == "habitate.com" || lowerHost.endsWith(".habitate.com")
     }
 
     companion object {

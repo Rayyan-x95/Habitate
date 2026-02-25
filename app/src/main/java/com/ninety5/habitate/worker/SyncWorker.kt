@@ -208,10 +208,11 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun syncFollowOperation(op: SyncOperationEntity) {
-        val targetUserId = op.entityId.substringAfter("_", "")
-        require(targetUserId.isNotBlank() && op.entityId.contains("_")) {
+        val ids = op.entityId.split("_")
+        require(ids.size == 2 && ids[0].isNotBlank() && ids[1].isNotBlank()) {
             "Invalid follow entityId: ${op.entityId}"
         }
+        val targetUserId = ids[1]
 
         when (op.operation) {
             "CREATE" -> {

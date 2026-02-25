@@ -279,10 +279,10 @@ class AuthRepositoryImpl @Inject constructor(
                 AppResult.Error(AppError.Unknown("Unable to sign in. Please try again."))
             }
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Timber.e(e, "Login failed: Invalid credentials")
+            Timber.w("Login failed: %s", e.errorCode)
             AppResult.Error(AppError.Unauthorized("Invalid email or password", e))
         } catch (e: FirebaseAuthInvalidUserException) {
-            Timber.e(e, "Login failed: Invalid user")
+            Timber.w("Login failed: %s", e.errorCode)
             AppResult.Error(AppError.NotFound("No account found with this email", e))
         } catch (e: Exception) {
             Timber.e(e, "Login failed")
@@ -342,13 +342,13 @@ class AuthRepositoryImpl @Inject constructor(
                 AppResult.Error(AppError.Unknown("Registration failed. Please try again."))
             }
         } catch (e: com.google.firebase.auth.FirebaseAuthUserCollisionException) {
-            Timber.e(e, "Registration failed: User collision")
+            Timber.w("Registration failed: User collision")
             AppResult.Error(AppError.Conflict("An account already exists with this email", e))
         } catch (e: com.google.firebase.auth.FirebaseAuthWeakPasswordException) {
-            Timber.e(e, "Registration failed: Weak password")
+            Timber.w("Registration failed: Weak password")
             AppResult.Error(AppError.Validation("Password is too weak. Use at least 8 characters", "password"))
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Timber.e(e, "Registration failed: Invalid credentials")
+            Timber.w("Registration failed: Invalid credentials")
             AppResult.Error(AppError.Validation("Please enter a valid email address", "email"))
         } catch (e: Exception) {
             Timber.e(e, "Registration failed")
@@ -547,7 +547,7 @@ class AuthRepositoryImpl @Inject constructor(
             AppResult.Success(Unit)
         } catch (e: FirebaseAuthInvalidUserException) {
             // Don't reveal if email exists for security
-            Timber.w(e, "Password reset requested for non-existing user")
+            Timber.w("Password reset requested for non-existing user: %s", e.errorCode)
             AppResult.Success(Unit) // Pretend success for security
         } catch (e: Exception) {
             Timber.e(e, "Password reset failed")

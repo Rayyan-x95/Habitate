@@ -290,7 +290,7 @@ viewModelScope.launch {
             _uiState.update { it.copy(isLoading = false, data = data) }
         }
         .onError { e ->
-            Timber.e(e.cause, "Failed to load data")
+            Timber.e(e, "Failed to load data")
             _uiState.update { it.copy(isLoading = false, error = e.message) }
         }
 }
@@ -358,6 +358,8 @@ suspend fun updateData(data: T): AppResult<Unit> {
             apiService.update("entity_name", data.id, requestBody)
             localDao.updateSyncState(data.id, SyncState.SYNCED)
             syncQueueDao.deleteByEntity("entity_name", data.id, "UPDATE")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Timber.w(e, "Immediate sync failed, will retry later")
         }

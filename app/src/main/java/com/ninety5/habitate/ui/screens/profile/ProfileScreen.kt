@@ -68,6 +68,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onWorkoutClick: (String) -> Unit,
     onTimelineClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -101,8 +102,21 @@ fun ProfileScreen(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )
-                )
-            }
+                )            } else {
+                TopAppBar(
+                    title = { Text("Public Profile Preview") },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                )            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->

@@ -1,6 +1,8 @@
 package com.ninety5.habitate.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.DayOfWeek
 import java.time.Instant
@@ -10,7 +12,22 @@ import java.time.LocalTime
  * Core habit entity representing a user's habit.
  * Supports daily, weekly, and custom frequency patterns.
  */
-@Entity(tableName = "habits")
+@Entity(
+    tableName = "habits",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["userId"], name = "index_habits_userId"),
+        Index(value = ["syncState"], name = "index_habits_syncState"),
+        Index(value = ["createdAt"], name = "index_habits_createdAt")
+    ]
+)
 data class HabitEntity(
     @PrimaryKey val id: String,
     val userId: String,

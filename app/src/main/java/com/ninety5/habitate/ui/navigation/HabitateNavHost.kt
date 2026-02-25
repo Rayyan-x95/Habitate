@@ -423,7 +423,10 @@ fun HabitateNavHost(
 
         composable(Screen.WorkoutList.route) {
             WorkoutListScreen(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onWorkoutClick = { workoutId ->
+                    navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
+                }
             )
         }
 
@@ -487,7 +490,12 @@ fun HabitateNavHost(
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onViewProfileAs = { navController.navigate(Screen.Profile.route) }
+                onViewProfileAs = { 
+                    val userId = authViewModel.uiState.value.userId
+                    if (userId != null) {
+                        navController.navigate(Screen.UserProfile.createRoute(userId))
+                    }
+                }
             )
         }
 

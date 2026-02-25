@@ -600,8 +600,17 @@ abstract class HabitateDatabase : RoomDatabase() {
 
         val MIGRATION_26_27 = object : Migration(26, 27) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // UPDATE is not used for messages, only CREATE and DELETE are enqueued
-                db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message' AND operation IN ('CREATE','DELETE')")
+                db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message'")
+                
+                // Sanity check
+                val cursor = db.query("SELECT COUNT(*) FROM sync_queue WHERE entity_type = 'message'")
+                if (cursor.moveToFirst()) {
+                    val count = cursor.getInt(0)
+                    if (count > 0) {
+                        timber.log.Timber.e("Migration 26->27 failed: $count 'message' rows remain in sync_queue")
+                    }
+                }
+                cursor.close()
             }
         }
     }

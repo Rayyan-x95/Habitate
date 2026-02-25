@@ -48,12 +48,14 @@ class HabitatDetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _habitatId.flatMapLatest { id ->
+            kotlinx.coroutines.flow.combine(
+                _habitatId,
                 challengeRepository.observeActiveChallenges()
-            }.collectLatest { challenges ->
-                val active = challenges.find {
-                    it.habitatId == _habitatId.value && it.endDate.isAfter(Instant.now())
+            ) { id, challenges ->
+                challenges.find {
+                    it.habitatId == id && it.endDate.isAfter(Instant.now())
                 }
+            }.collectLatest { active ->
                 _uiState.update { it.copy(activeChallenge = active) }
             }
         }
@@ -63,7 +65,12 @@ class HabitatDetailViewModel @Inject constructor(
                 feedRepository.getPostsByHabitat(id)
             }.collectLatest { posts ->
                 val postUiModels = posts.map { it.toUiModel() }
-                _uiState.update { it.copy(posts = postUiModels, isLoading = false) }
+                _uiState.update { 
+                    it.copy(
+                        posts = postUiModels, 
+                        isLoading = if (it.habitat != null) false else it.isLoading
+                    ) 
+                }
             }
         }
     }

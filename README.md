@@ -128,7 +128,7 @@ app/src/main/java/com/ninety5/habitate/
 │   ├── common/                         # UiEvent, shared UI logic
 │   ├── components/                     # Reusable Compose components
 │   ├── navigation/                     # NavHost & Screen routes (40+ routes)
-│   ├── screens/                        # 24+ feature screens (stateless composables)
+│   ├── screens/                        # 24+ feature screens (28+ total including auth settings)
 │   ├── theme/                          # Material3 theming (brand-aligned tokens)
 │   └── viewmodel/                      # Shared ViewModels (AppViewModel)
 │
@@ -187,7 +187,7 @@ fun FeatureScreen(
 | **Offline-First** | All data cached in Room DB, synced via SyncWorker when online |
 | **Single Activity** | Jetpack Compose Navigation with 40+ routes and deep link support |
 | **StateFlow for UI** | Lifecycle-aware, efficient state management with Channel for one-off events |
-| **Repository Pattern** | 13 domain interfaces with AppResult return types; implementations in data layer |
+| **Repository Pattern** | 20 domain interfaces with AppResult return types; implementations in data layer |
 | **WorkManager** | Reliable background processing with constraints (6 specialized workers) |
 | **Lambda Navigation** | Screens receive callbacks, not NavController — enables preview & testing |
 | **Typed Errors** | AppError hierarchy replaces raw exceptions for structured error handling |
