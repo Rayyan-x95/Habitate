@@ -216,7 +216,8 @@ lint-report*
 *.idsig
 
 # Room schema exports (optional - might want to track these)
-# schemas/
+schemas/
+app/schemas/
 
 # Baseline profiles (binary files)
 # app/src/main/baseline-prof.txt
