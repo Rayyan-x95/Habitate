@@ -83,7 +83,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             deepLink?.let {
                 val uri = Uri.parse(it)
                 val scheme = uri.scheme
-                if (scheme == "habitate" || scheme == "http" || scheme == "https") {
+                if (scheme == null) {
+                    Timber.w("Rejected deep link with missing scheme")
+                } else if (scheme == "habitate" || isValidHttpScheme(scheme, uri.host)) {
+                    // MainActivity handles ACTION_VIEW and delegates to external browser or internal WebView
                     action = Intent.ACTION_VIEW
                     data = uri
                 } else {
@@ -114,6 +117,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     private fun scheduleJob() {
         val work = OneTimeWorkRequestBuilder<SyncWorker>().build()
         WorkManager.getInstance(this).enqueue(work)
+    }
+
+    private fun isValidHttpScheme(scheme: String, host: String?): Boolean {
+        if (scheme != "http" && scheme != "https") return false
+        if (host == null) return false
+        return host == "habitate.com" || host.endsWith(".habitate.com")
     }
 
     companion object {

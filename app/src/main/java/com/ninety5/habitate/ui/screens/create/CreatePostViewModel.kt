@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ninety5.habitate.core.result.AppResult
 import com.ninety5.habitate.domain.model.PostVisibility
-import com.ninety5.habitate.domain.repository.AuthRepository
 import com.ninety5.habitate.domain.repository.FeedRepository
-import com.ninety5.habitate.domain.repository.MediaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,9 +28,7 @@ data class CreatePostUiState(
 
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
-    private val feedRepository: FeedRepository,
-    private val authRepository: AuthRepository,
-    private val mediaRepository: MediaRepository
+    private val feedRepository: FeedRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreatePostUiState())

@@ -12,10 +12,13 @@ import com.ninety5.habitate.domain.repository.CommentRepository
 import com.ninety5.habitate.domain.repository.FeedRepository
 import com.ninety5.habitate.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -31,6 +34,7 @@ data class PostDetailUiState(
     val commentCount: Int = 0
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PostDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -40,49 +44,46 @@ class PostDetailViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private var postId: String = checkNotNull(savedStateHandle["postId"])
+    private val _postId = MutableStateFlow<String>(checkNotNull(savedStateHandle["postId"]))
 
     private val _uiState = MutableStateFlow(PostDetailUiState())
     val uiState: StateFlow<PostDetailUiState> = _uiState.asStateFlow()
 
     init {
-        loadPost()
-        loadComments()
-    }
+        viewModelScope.launch {
+            _postId.flatMapLatest { id ->
+                feedRepository.observePost(id)
+            }.collectLatest { post ->
+                if (post != null) {
+                    _uiState.update {
+                        it.copy(
+                            post = post,
+                            isLoading = false,
+                            isLiked = post.isLiked,
+                            likeCount = post.likesCount,
+                            commentCount = post.commentsCount
+                        )
+                    }
+                    loadAuthor(post.authorId)
+                } else {
+                    _uiState.update { it.copy(error = "Post not found", isLoading = false) }
+                }
+            }
+        }
 
-    fun loadPost(id: String) {
-        if (postId != id) {
-            postId = id
-            loadPost()
-            loadComments()
+        viewModelScope.launch {
+            _postId.flatMapLatest { id ->
+                commentRepository.getCommentsForPost(id)
+            }.collectLatest { comments ->
+                _uiState.update { it.copy(comments = comments) }
+            }
         }
     }
 
-    private fun loadPost() {
-        viewModelScope.launch {
-            try {
-                feedRepository.observePost(postId).collect { post ->
-                    if (post != null) {
-                        _uiState.update {
-                            it.copy(
-                                post = post,
-                                isLoading = false,
-                                isLiked = post.isLiked,
-                                likeCount = post.likesCount,
-                                commentCount = post.commentsCount
-                            )
-                        }
-                        // Author info is available directly from Post domain model,
-                        // but we also observe full User for profile nav etc.
-                        loadAuthor(post.authorId)
-                    } else {
-                        _uiState.update { it.copy(error = "Post not found", isLoading = false) }
-                    }
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to load post")
-                _uiState.update { it.copy(error = "Failed to load post: ${e.message}", isLoading = false) }
-            }
+    fun loadPost(id: String) {
+        if (_postId.value != id) {
+            _uiState.value = PostDetailUiState(isLoading = true)
+            _postId.value = id
         }
     }
 
@@ -98,18 +99,6 @@ class PostDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadComments() {
-        viewModelScope.launch {
-            try {
-                commentRepository.getCommentsForPost(postId).collect { comments ->
-                    _uiState.update { it.copy(comments = comments) }
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to load comments")
-            }
-        }
-    }
-
     fun toggleLike(reactionType: String? = null) {
         viewModelScope.launch {
             val currentlyLiked = _uiState.value.isLiked
@@ -121,7 +110,7 @@ class PostDetailViewModel @Inject constructor(
                     likeCount = if (currentlyLiked) it.likeCount - 1 else it.likeCount + 1
                 )
             }
-            when (val result = feedRepository.toggleLike(postId, reactionType)) {
+            when (val result = feedRepository.toggleLike(_postId.value, reactionType)) {
                 is AppResult.Success -> { /* DB Flow will confirm */ }
                 is AppResult.Error -> {
                     Timber.e("Failed to toggle like: ${result.error.message}")
@@ -142,7 +131,7 @@ class PostDetailViewModel @Inject constructor(
         if (content.isBlank()) return
         viewModelScope.launch {
             try {
-                commentRepository.createComment(postId, content)
+                commentRepository.createComment(_postId.value, content)
                 _uiState.update { it.copy(commentCount = it.commentCount + 1) }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to add comment")

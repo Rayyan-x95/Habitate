@@ -35,7 +35,6 @@ import com.ninety5.habitate.ui.theme.SageGreen
 @Composable
 fun PostItem(
     post: PostUiModel,
-    currentUserId: String? = null,
     onLikeClick: () -> Unit,
     onReactionClick: (String) -> Unit,
     onCommentClick: () -> Unit,

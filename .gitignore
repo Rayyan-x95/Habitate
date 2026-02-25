@@ -26,6 +26,7 @@ output/
 build/
 app/build/
 **/build/
+.kotlin/
 
 # Gradle wrapper (optional - uncomment if you want to include it)
 # !gradle/wrapper/gradle-wrapper.jar

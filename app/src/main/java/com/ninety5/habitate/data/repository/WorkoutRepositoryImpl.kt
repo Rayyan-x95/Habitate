@@ -16,6 +16,8 @@ import com.ninety5.habitate.domain.mapper.toEntity
 import com.ninety5.habitate.domain.model.Workout
 import com.ninety5.habitate.domain.repository.WorkoutRepository
 import com.squareup.moshi.Moshi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -79,10 +81,14 @@ class WorkoutRepositoryImpl @Inject constructor(
             // Attempt immediate sync
             try {
                 val payload = moshi.adapter(WorkoutEntity::class.java).toJson(entity)
-                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                val requestBody = payload.toRequestBody("application/json".toMediaTypeOrNull())
                 apiService.create("workouts", requestBody)
-                workoutDao.updateSyncState(id, SyncState.SYNCED)
-                syncQueueDao.deleteByEntity("workout", id, "CREATE")
+                database.withTransaction {
+                    workoutDao.updateSyncState(id, SyncState.SYNCED)
+                    syncQueueDao.deleteByEntity("workout", id, "CREATE")
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for workout $id, will retry later")
             }
@@ -116,10 +122,14 @@ class WorkoutRepositoryImpl @Inject constructor(
             
             // Attempt immediate sync
             try {
-                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                val requestBody = payload.toRequestBody("application/json".toMediaTypeOrNull())
                 apiService.update("workouts", workout.id, requestBody)
-                workoutDao.updateSyncState(workout.id, SyncState.SYNCED)
-                syncQueueDao.deleteByEntity("workout", workout.id, "UPDATE")
+                database.withTransaction {
+                    workoutDao.updateSyncState(workout.id, SyncState.SYNCED)
+                    syncQueueDao.deleteByEntity("workout", workout.id, "UPDATE")
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for workout ${workout.id}, will retry later")
             }
@@ -161,8 +171,12 @@ class WorkoutRepositoryImpl @Inject constructor(
             // Attempt immediate sync
             try {
                 apiService.delete("workouts", workoutId)
-                workoutDao.updateSyncState(workoutId, SyncState.SYNCED)
-                syncQueueDao.deleteByEntity("workout", workoutId, "DELETE")
+                database.withTransaction {
+                    workoutDao.updateSyncState(workoutId, SyncState.SYNCED)
+                    syncQueueDao.deleteByEntity("workout", workoutId, "DELETE")
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for workout $workoutId, will retry later")
             }

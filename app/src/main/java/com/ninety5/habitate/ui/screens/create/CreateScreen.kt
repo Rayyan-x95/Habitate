@@ -27,7 +27,6 @@ import com.ninety5.habitate.ui.theme.SageGreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
-    onNavigateBack: () -> Unit,
     onCreatePost: () -> Unit,
     onCreateTask: () -> Unit,
     onCreateHabit: () -> Unit,

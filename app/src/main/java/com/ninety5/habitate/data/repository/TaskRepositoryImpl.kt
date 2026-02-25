@@ -18,6 +18,8 @@ import com.ninety5.habitate.domain.model.TaskPriority
 import com.ninety5.habitate.domain.model.TaskStatus
 import com.ninety5.habitate.domain.repository.TaskRepository
 import com.squareup.moshi.Moshi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -92,10 +94,12 @@ class TaskRepositoryImpl @Inject constructor(
             // Attempt immediate sync
             try {
                 val payload = moshi.adapter(TaskEntity::class.java).toJson(entity)
-                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                val requestBody = payload.toRequestBody("application/json".toMediaTypeOrNull())
                 apiService.create("tasks", requestBody)
                 taskDao.updateSyncState(id, SyncState.SYNCED)
                 syncQueueDao.deleteByEntity("task", id, "CREATE")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for task $id, will retry later")
             }
@@ -133,10 +137,12 @@ class TaskRepositoryImpl @Inject constructor(
             // Attempt immediate sync
             try {
                 val payload = moshi.adapter(TaskEntity::class.java).toJson(entity)
-                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                val requestBody = payload.toRequestBody("application/json".toMediaTypeOrNull())
                 apiService.update("tasks", task.id, requestBody)
                 taskDao.updateSyncState(task.id, SyncState.SYNCED)
                 syncQueueDao.deleteByEntity("task", task.id, "UPDATE")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for task ${task.id}, will retry later")
             }
@@ -173,10 +179,12 @@ class TaskRepositoryImpl @Inject constructor(
             
             // Attempt immediate sync
             try {
-                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), """{"status": "ARCHIVED"}""")
+                val requestBody = """{"status": "ARCHIVED"}""".toRequestBody("application/json".toMediaTypeOrNull())
                 apiService.update("tasks", taskId, requestBody)
                 taskDao.updateSyncState(taskId, SyncState.SYNCED)
                 syncQueueDao.deleteByEntity("task", taskId, "UPDATE")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Immediate sync failed for task $taskId, will retry later")
             }

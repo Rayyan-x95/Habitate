@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <exclude domain="database" path="*" />
+    <exclude domain="database" />
     <exclude domain="sharedpref" path="auth_prefs.xml" />
+    <exclude domain="sharedpref" path="session_prefs.xml" />
+    <exclude domain="sharedpref" path="oauth_prefs.xml" />
+    <exclude domain="sharedpref" path="user_prefs.xml" />
+    <exclude domain="file" path="sensitive_data" />
+    <exclude domain="external" path="sensitive_data" />
 </full-backup-content>
 

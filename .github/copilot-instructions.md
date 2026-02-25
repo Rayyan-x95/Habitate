@@ -57,6 +57,10 @@ Items: Pagination mainly via cursor or offset
 - Use `Moshi` for JSON parsing.
 - Annotated DTOs in `data/remote/dto`.
 
+### OkHttp
+- Use OkHttp 4.x/5.x extension functions instead of deprecated static methods.
+  - `payload.toRequestBody("application/json".toMediaTypeOrNull())` instead of `RequestBody.create(...)`
+
 ---
 
 ## Compose Navigation
@@ -278,15 +282,15 @@ fun clearError() {
     _uiState.update { it.copy(error = null) }
 }
 
-// Use Result<T> for repository calls
+// Use AppResult<T> for repository calls
 viewModelScope.launch {
     _uiState.update { it.copy(isLoading = true, error = null) }
     repository.getData()
         .onSuccess { data ->
             _uiState.update { it.copy(isLoading = false, data = data) }
         }
-        .onFailure { e ->
-            Timber.e(e, "Failed to load data")
+        .onError { e ->
+            Timber.e(e.cause, "Failed to load data")
             _uiState.update { it.copy(isLoading = false, error = e.message) }
         }
 }
@@ -308,12 +312,12 @@ sealed class UiEvent {
 
 **All repositories MUST follow offline-first:**
 ```kotlin
-// REQUIRED: Return Result<T> for error handling
-suspend fun getData(): Result<T> {
+// REQUIRED: Return AppResult<T> for error handling
+suspend fun getData(): AppResult<T> {
     return try {
         // 1. Return cached data immediately
         val cached = localDao.getData()
-        if (cached != null) return Result.success(cached)
+        if (cached != null) return AppResult.Success(cached)
         
         // 2. Fetch from network
         val remote = apiService.getData()
@@ -321,30 +325,48 @@ suspend fun getData(): Result<T> {
         // 3. Cache to local DB
         localDao.insert(remote.toEntity())
         
-        Result.success(remote.toDomain())
+        AppResult.Success(remote.toDomain())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Failed to get data")
-        Result.failure(e)
+        AppResult.Error(AppError.from(e))
     }
 }
 
 // For mutations, queue to SyncQueue
-suspend fun updateData(data: T): Result<Unit> {
+suspend fun updateData(data: T): AppResult<Unit> {
     return try {
         // 1. Update local DB immediately (optimistic)
         localDao.update(data.toEntity())
         
         // 2. Queue for sync
+        val payload = moshi.adapter(DataDto::class.java).toJson(data.toDto())
         syncQueueDao.insert(SyncOperationEntity(
             entityType = "entity_name",
             entityId = data.id,
             operation = "UPDATE",
-            payload = moshi.adapter(DataDto::class.java).toJson(data.toDto())
+            payload = payload,
+            status = SyncStatus.PENDING,
+            createdAt = Instant.now(),
+            lastAttemptAt = null
         ))
         
-        Result.success(Unit)
+        // 3. Attempt immediate sync (optional but recommended)
+        try {
+            val requestBody = payload.toRequestBody("application/json".toMediaTypeOrNull())
+            apiService.update("entity_name", data.id, requestBody)
+            localDao.updateSyncState(data.id, SyncState.SYNCED)
+            syncQueueDao.deleteByEntity("entity_name", data.id, "UPDATE")
+        } catch (e: Exception) {
+            Timber.w(e, "Immediate sync failed, will retry later")
+        }
+        
+        AppResult.Success(Unit)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
-        Result.failure(e)
+        AppResult.Error(AppError.from(e))
     }
 }
 ```
@@ -452,7 +474,7 @@ fun `loading state is shown while fetching data`() = runTest {
 **API Security:**
 - Never hardcode API keys in source code
 - Use BuildConfig for secrets from local.properties
-- Implement certificate pinning when ready (see NetworkModule TODO)
+- Implement certificate pinning for production
 
 **Data Protection:**
 - Encrypt sensitive data with EncryptedSharedPreferences

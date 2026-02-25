@@ -329,10 +329,9 @@ class ChatRepositoryImpl @Inject constructor(
     suspend fun deleteMessageLegacy(messageId: String) {
         val userId = securePreferences.userId ?: return
         val message = messageDao.getMessageById(messageId)
-        if (message?.senderId == userId) {
-            messageDao.deleteMessage(messageId)
-            queueSync("chat_message", messageId, "DELETE", "{}")
-        }
+        if (message != null && message.senderId != userId) return
+        messageDao.deleteMessage(messageId)
+        queueSync("chat_message", messageId, "DELETE", "{}")
     }
 
     suspend fun addReaction(messageId: String, userId: String, emoji: String) {

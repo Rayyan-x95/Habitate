@@ -12,15 +12,19 @@ import com.ninety5.habitate.domain.repository.ChallengeRepository
 import com.ninety5.habitate.ui.screens.feed.PostUiModel
 import com.ninety5.habitate.ui.screens.feed.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HabitatDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -29,51 +33,45 @@ class HabitatDetailViewModel @Inject constructor(
     private val challengeRepository: ChallengeRepository
 ) : ViewModel() {
 
-    private var habitatId: String = checkNotNull(savedStateHandle["habitatId"])
+    private val _habitatId = MutableStateFlow<String>(checkNotNull(savedStateHandle["habitatId"]))
 
     private val _uiState = MutableStateFlow(HabitatDetailUiState())
     val uiState: StateFlow<HabitatDetailUiState> = _uiState.asStateFlow()
 
     init {
-        loadHabitat()
-        loadActiveChallenge()
-        loadPosts()
-    }
-
-    fun loadHabitat(id: String) {
-        if (habitatId != id) {
-            habitatId = id
-            loadHabitat()
-            loadActiveChallenge()
-            loadPosts()
-        }
-    }
-
-    private fun loadHabitat() {
         viewModelScope.launch {
-            habitatRepository.observeHabitat(habitatId).collect { habitat ->
+            _habitatId.flatMapLatest { id ->
+                habitatRepository.observeHabitat(id)
+            }.collectLatest { habitat ->
                 _uiState.update { it.copy(habitat = habitat) }
             }
         }
-    }
 
-    private fun loadActiveChallenge() {
         viewModelScope.launch {
-            challengeRepository.observeActiveChallenges().collect { challenges ->
-                val active = challenges.find { 
-                    it.habitatId == habitatId && it.endDate.isAfter(Instant.now()) 
+            _habitatId.flatMapLatest { id ->
+                challengeRepository.observeActiveChallenges()
+            }.collectLatest { challenges ->
+                val active = challenges.find {
+                    it.habitatId == _habitatId.value && it.endDate.isAfter(Instant.now())
                 }
                 _uiState.update { it.copy(activeChallenge = active) }
             }
         }
-    }
 
-    private fun loadPosts() {
         viewModelScope.launch {
-            feedRepository.getPostsByHabitat(habitatId).collect { posts ->
+            _habitatId.flatMapLatest { id ->
+                feedRepository.getPostsByHabitat(id)
+            }.collectLatest { posts ->
                 val postUiModels = posts.map { it.toUiModel() }
                 _uiState.update { it.copy(posts = postUiModels, isLoading = false) }
             }
+        }
+    }
+
+    fun loadHabitat(id: String) {
+        if (_habitatId.value != id) {
+            _uiState.update { it.copy(isLoading = true) }
+            _habitatId.value = id
         }
     }
 

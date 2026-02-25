@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import timber.log.Timber
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -92,8 +93,10 @@ class SecurePreferences @Inject constructor(
                 sharedPreferences.getString("pending_sync_status", SyncStatus.NONE.name) ?: SyncStatus.NONE.name
             )
         } catch (e: IllegalArgumentException) {
+            Timber.e(e, "SecurePreferences get pendingSyncStatus failed")
             SyncStatus.NONE
         } catch (e: Exception) {
+            Timber.e(e, "SecurePreferences get pendingSyncStatus failed")
             SyncStatus.NONE
         }
         private set(value) = sharedPreferences.edit()
@@ -155,7 +158,8 @@ class SecurePreferences @Inject constructor(
     
     fun clearAuth() {
         sharedPreferences.edit()
-            .remove("auth_token")
+            .remove("access_token")
+            .remove("token_expiry")
             .remove("refresh_token")
             .remove("user_id")
             .remove("user_email")

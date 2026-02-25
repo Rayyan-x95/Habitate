@@ -86,6 +86,24 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        topBar = {
+            if (!isViewAsMode) {
+                TopAppBar(
+                    title = { Text("Profile") },
+                    actions = {
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
+                                contentDescription = "Settings"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                )
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(

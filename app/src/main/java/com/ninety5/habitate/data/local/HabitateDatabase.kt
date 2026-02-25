@@ -600,6 +600,7 @@ abstract class HabitateDatabase : RoomDatabase() {
 
         val MIGRATION_26_27 = object : Migration(26, 27) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                // UPDATE is not used for messages, only CREATE and DELETE are enqueued
                 db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message' AND operation IN ('CREATE','DELETE')")
             }
         }

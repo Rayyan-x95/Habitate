@@ -105,13 +105,23 @@ fun FeedScreen(
                 },
                 actions = {
                     Box(modifier = Modifier.padding(end = RefSpacingMD.dp)) {
-                        IconButton(onClick = onNotificationClick) {
-                            Icon(
-                                imageVector = Icons.Rounded.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Row {
+                            IconButton(onClick = onChatClick) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Chat,
+                                    contentDescription = "Chat",
+                                    tint = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            IconButton(onClick = onNotificationClick) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                         // Notification dot
                         if (hasNotifications) {

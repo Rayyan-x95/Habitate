@@ -208,13 +208,16 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun syncFollowOperation(op: SyncOperationEntity) {
+        val targetUserId = op.entityId.substringAfter("_", "")
+        require(targetUserId.isNotBlank() && op.entityId.contains("_")) {
+            "Invalid follow entityId: ${op.entityId}"
+        }
+
         when (op.operation) {
             "CREATE" -> {
-                val targetUserId = op.entityId.substringAfter("_", op.entityId)
                 apiService.followUser(targetUserId)
             }
             "DELETE" -> {
-                val targetUserId = op.entityId.substringAfter("_", op.entityId)
                 apiService.unfollowUser(targetUserId)
             }
             else -> throw IllegalArgumentException("Unsupported follow operation: ${op.operation}")
@@ -387,6 +390,8 @@ class SyncWorker @AssistedInject constructor(
     private suspend fun rollbackOptimisticUpdate(op: SyncOperationEntity) {
         try {
             when (op.entityType) {
+                // Note: Some entity types (e.g., habit, habit_log, habit_streak, focus_session, journal, story, notification, habitat, user_profile, message_reaction, story_save, story_mute, habitat_join, habitat_leave, habitat_member, challenge_join, challenge_leave, challenge_progress)
+                // intentionally rely on server-refresh instead of local rollback to avoid complex compensation logic.
                 "follow" -> {
                     val ids = op.entityId.split("_")
                     if (ids.size == 2) {

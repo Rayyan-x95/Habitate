@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 @Singleton
 class HealthConnectAdapter @Inject constructor(
@@ -78,7 +79,7 @@ class HealthConnectAdapter @Inject constructor(
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e, "Failed to read workouts")
             emptyList()
         }
     }

@@ -14,8 +14,8 @@
   <img src="https://img.shields.io/badge/Jetpack%20Compose-Material3-4285F4?logo=jetpackcompose&logoColor=white" alt="Compose"/>
   <img src="https://img.shields.io/badge/Min%20SDK-29-brightgreen" alt="Min SDK"/>
   <img src="https://img.shields.io/badge/Target%20SDK-36-blue" alt="Target SDK"/>
-  <img src="https://img.shields.io/badge/AGP-9.0.0-green" alt="AGP"/>
-  <img src="https://img.shields.io/badge/Version-1.0.0--beta-orange" alt="Version"/>
+  <img src="https://img.shields.io/badge/AGP-9.0.1-green" alt="AGP"/>
+  <img src="https://img.shields.io/badge/Version-1.0.0--public--beta-orange" alt="Version"/>
 </p>
 
 <p align="center">
@@ -104,8 +104,8 @@ app/src/main/java/com/ninety5/habitate/
 │
 ├── 📦 data/                            # Data layer
 │   ├── health/                         # Health Connect integration
-│   ├── local/                          # Room DB (v26, 29 entities, exported schema)
-│   │   ├── dao/                        # 15+ DAOs with Flow return types
+│   ├── local/                          # Room DB (v27, 29 entities, exported schema)
+│   │   ├── dao/                        # 25 DAOs with Flow return types
 │   │   ├── entity/                     # Room entities
 │   │   ├── relations/                  # Room relations & views
 │   │   └── HabitateDatabase.kt         # Database definition
@@ -115,8 +115,8 @@ app/src/main/java/com/ninety5/habitate/
 ├── 🎯 domain/                          # Domain layer (framework-free)
 │   ├── ai/                             # AI domain abstractions
 │   ├── mapper/                         # Entity ↔ Domain mappers
-│   ├── model/                          # 11 domain models (Post, Habit, Task, etc.)
-│   ├── repository/                     # 13 repository interfaces (AppResult-based)
+│   ├── model/                          # 22 domain models (Post, Habit, Task, etc.)
+│   ├── repository/                     # 20 repository interfaces (AppResult-based)
 │   └── usecase/                        # UseCase<P,R>, NoParamUseCase, FlowUseCase
 │
 ├── ⚙️ service/                         # Android Services
@@ -128,7 +128,7 @@ app/src/main/java/com/ninety5/habitate/
 │   ├── common/                         # UiEvent, shared UI logic
 │   ├── components/                     # Reusable Compose components
 │   ├── navigation/                     # NavHost & Screen routes (40+ routes)
-│   ├── screens/                        # 28+ feature screens (stateless composables)
+│   ├── screens/                        # 24+ feature screens (stateless composables)
 │   ├── theme/                          # Material3 theming (brand-aligned tokens)
 │   └── viewmodel/                      # Shared ViewModels (AppViewModel)
 │
@@ -153,8 +153,8 @@ All repository operations return `AppResult<T>` instead of raw exceptions:
 ```kotlin
 sealed class AppResult<out T> {
     data class Success<T>(val data: T) : AppResult<T>()
-    data class Error(val error: AppError, val message: String?) : AppResult<Nothing>()
-    object Loading : AppResult<Nothing>()
+    data class Error(val error: AppError) : AppResult<Nothing>()
+    data object Loading : AppResult<Nothing>()
 }
 ```
 
@@ -163,8 +163,8 @@ sealed class AppResult<out T> {
 #### Use Case Pattern (`domain/usecase/`)
 ```kotlin
 abstract class UseCase<in P, out R> {
-    abstract suspend fun execute(params: P): AppResult<R>
     suspend operator fun invoke(params: P): AppResult<R> = execute(params)
+    protected abstract suspend fun execute(params: P): AppResult<R>
 }
 ```
 
@@ -209,11 +209,11 @@ fun FeatureScreen(
 ### Android Jetpack
 | Library | Version | Purpose |
 |---------|---------|---------|
-| **Room** | 2.6.1 | Local database (29 entities, exported schema) |
-| **Hilt** | 2.54 | Dependency injection |
+| **Room** | 2.7.1 | Local database (29 entities, exported schema) |
+| **Hilt** | 2.56.2 | Dependency injection |
 | **Navigation** | 2.9.0 | Screen navigation (40+ routes) |
 | **WorkManager** | 2.10.0 | Background tasks (6 workers) |
-| **DataStore** | 1.1.1 | Preferences storage |
+| **DataStore** | 1.1.4 | Preferences storage |
 | **Lifecycle** | 2.9.0 | Lifecycle-aware components |
 | **Paging 3** | 3.3.5 | Pagination |
 | **Health Connect** | 1.1.0-alpha10 | Fitness data |
@@ -243,7 +243,7 @@ fun FeatureScreen(
 | **KSP** | Annotation processing |
 | **Detekt** | Static code analysis (custom ruleset) |
 | **Android Lint** | Code quality with baseline tracking |
-| **Gradle** | Build system (AGP 9.0.0) |
+| **Gradle** | Build system (Gradle 9.2.1, AGP 9.0.1) |
 | **ProGuard/R8** | Code shrinking |
 
 ---

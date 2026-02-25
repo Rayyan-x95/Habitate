@@ -64,8 +64,7 @@ fun WorkoutDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutListScreen(
-    onBackClick: () -> Unit,
-    onWorkoutClick: (String) -> Unit
+    onBackClick: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

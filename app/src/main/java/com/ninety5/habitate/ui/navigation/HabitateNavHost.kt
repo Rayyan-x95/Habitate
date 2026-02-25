@@ -142,7 +142,6 @@ fun HabitateNavHost(
 
         composable(Screen.Create.route) {
             CreateScreen(
-                onNavigateBack = { navController.popBackStack() },
                 onCreatePost = { navController.navigate(Screen.CreatePost.route) },
                 onCreateTask = { navController.navigate(Screen.CreateTask.route) },
                 onCreateHabit = { navController.navigate(Screen.HabitCreate.route) },
@@ -424,10 +423,7 @@ fun HabitateNavHost(
 
         composable(Screen.WorkoutList.route) {
             WorkoutListScreen(
-                onBackClick = { navController.popBackStack() },
-                onWorkoutClick = { workoutId ->
-                    navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
-                }
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -484,7 +480,6 @@ fun HabitateNavHost(
 
         // Privacy Dashboard
         composable(Screen.PrivacySettings.route) {
-            val currentUserId = authState.user?.id ?: ""
             com.ninety5.habitate.ui.screens.settings.PrivacyDashboardScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onDeleteAllData = {
@@ -492,7 +487,7 @@ fun HabitateNavHost(
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onViewProfileAs = { navController.navigate(Screen.UserProfile.createRoute(currentUserId)) }
+                onViewProfileAs = { navController.navigate(Screen.Profile.route) }
             )
         }
 
