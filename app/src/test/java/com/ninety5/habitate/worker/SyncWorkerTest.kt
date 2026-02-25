@@ -3,12 +3,22 @@ package com.ninety5.habitate.worker
 import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.ninety5.habitate.data.local.dao.*
+import com.ninety5.habitate.data.local.dao.CommentDao
+import com.ninety5.habitate.data.local.dao.FollowDao
+import com.ninety5.habitate.data.local.dao.LikeDao
+import com.ninety5.habitate.data.local.dao.MessageDao
+import com.ninety5.habitate.data.local.dao.PostDao
+import com.ninety5.habitate.data.local.dao.SyncQueueDao
+import com.ninety5.habitate.data.local.dao.TaskDao
+import com.ninety5.habitate.data.local.dao.WorkoutDao
 import com.ninety5.habitate.data.local.entity.SyncOperationEntity
 import com.ninety5.habitate.data.local.entity.SyncStatus
 import com.ninety5.habitate.data.remote.ApiService
 import com.squareup.moshi.Moshi
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -27,11 +37,6 @@ class SyncWorkerTest {
     private lateinit var postDao: PostDao
     private lateinit var taskDao: TaskDao
     private lateinit var workoutDao: WorkoutDao
-    private lateinit var habitDao: HabitDao
-    private lateinit var challengeDao: ChallengeDao
-    private lateinit var habitatDao: HabitatDao
-    private lateinit var storyDao: StoryDao
-    private lateinit var chatDao: ChatDao
     private lateinit var messageDao: MessageDao
     private lateinit var apiService: ApiService
     private lateinit var moshi: Moshi
@@ -54,11 +59,6 @@ class SyncWorkerTest {
         postDao = mockk(relaxed = true)
         taskDao = mockk(relaxed = true)
         workoutDao = mockk(relaxed = true)
-        habitDao = mockk(relaxed = true)
-        challengeDao = mockk(relaxed = true)
-        habitatDao = mockk(relaxed = true)
-        storyDao = mockk(relaxed = true)
-        chatDao = mockk(relaxed = true)
         messageDao = mockk(relaxed = true)
         apiService = mockk(relaxed = true)
         moshi = mockk(relaxed = true)
@@ -73,11 +73,6 @@ class SyncWorkerTest {
             postDao,
             taskDao,
             workoutDao,
-            habitDao,
-            challengeDao,
-            habitatDao,
-            storyDao,
-            chatDao,
             messageDao,
             apiService,
             moshi

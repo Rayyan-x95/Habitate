@@ -88,6 +88,18 @@ class TaskRepositoryImpl @Inject constructor(
                     )
                 )
             }
+            
+            // Attempt immediate sync
+            try {
+                val payload = moshi.adapter(TaskEntity::class.java).toJson(entity)
+                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                apiService.create("tasks", requestBody)
+                taskDao.updateSyncState(id, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("task", id, "CREATE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for task $id, will retry later")
+            }
+            
             AppResult.Success(entity.toDomain())
         } catch (e: CancellationException) {
             throw e
@@ -117,6 +129,18 @@ class TaskRepositoryImpl @Inject constructor(
                     )
                 )
             }
+            
+            // Attempt immediate sync
+            try {
+                val payload = moshi.adapter(TaskEntity::class.java).toJson(entity)
+                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                apiService.update("tasks", task.id, requestBody)
+                taskDao.updateSyncState(task.id, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("task", task.id, "UPDATE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for task ${task.id}, will retry later")
+            }
+            
             AppResult.Success(Unit)
         } catch (e: CancellationException) {
             throw e
@@ -146,6 +170,17 @@ class TaskRepositoryImpl @Inject constructor(
                     )
                 )
             }
+            
+            // Attempt immediate sync
+            try {
+                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), """{"status": "ARCHIVED"}""")
+                apiService.update("tasks", taskId, requestBody)
+                taskDao.updateSyncState(taskId, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("task", taskId, "UPDATE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for task $taskId, will retry later")
+            }
+            
             AppResult.Success(Unit)
         } catch (e: CancellationException) {
             throw e

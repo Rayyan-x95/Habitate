@@ -102,7 +102,7 @@ import com.ninety5.habitate.data.local.entity.StoryMuteEntity
         com.ninety5.habitate.data.local.entity.InsightEntity::class
     ],
     views = [com.ninety5.habitate.data.local.view.TimelineItem::class],
-    version = 26, // Updated to include index optimization migration (25->26)
+    version = 27, // Updated to include sync_queue migration for chat_message (26->27)
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -595,6 +595,12 @@ abstract class HabitateDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_isRead ON notifications(isRead)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_createdAt ON notifications(createdAt)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_type ON notifications(type)")
+            }
+        }
+
+        val MIGRATION_26_27 = object : Migration(26, 27) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message' AND operation IN ('CREATE','DELETE')")
             }
         }
     }

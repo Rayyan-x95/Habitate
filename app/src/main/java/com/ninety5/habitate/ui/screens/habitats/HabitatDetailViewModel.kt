@@ -29,7 +29,7 @@ class HabitatDetailViewModel @Inject constructor(
     private val challengeRepository: ChallengeRepository
 ) : ViewModel() {
 
-    private val habitatId: String = checkNotNull(savedStateHandle["habitatId"])
+    private var habitatId: String = checkNotNull(savedStateHandle["habitatId"])
 
     private val _uiState = MutableStateFlow(HabitatDetailUiState())
     val uiState: StateFlow<HabitatDetailUiState> = _uiState.asStateFlow()
@@ -38,6 +38,15 @@ class HabitatDetailViewModel @Inject constructor(
         loadHabitat()
         loadActiveChallenge()
         loadPosts()
+    }
+
+    fun loadHabitat(id: String) {
+        if (habitatId != id) {
+            habitatId = id
+            loadHabitat()
+            loadActiveChallenge()
+            loadPosts()
+        }
     }
 
     private fun loadHabitat() {

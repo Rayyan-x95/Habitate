@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Backup rules -->
-</PreferenceScreen>
+<full-backup-content>
+    <exclude domain="database" path="*" />
+    <exclude domain="sharedpref" path="auth_prefs.xml" />
+</full-backup-content>
 

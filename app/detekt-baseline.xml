@@ -1,0 +1,367 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ComplexCondition:JournalScreen.kt$(week == 0 &amp;&amp; dayOfWeek &gt;= startDayOfWeek) || (week &gt; 0 &amp;&amp; dayCounter &lt;= daysInMonth)</ID>
+    <ID>CyclomaticComplexMethod:CreateTaskScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateTaskScreen( onNavigateBack: () -&gt; Unit, onTaskCreated: () -&gt; Unit, viewModel: CreateTaskViewModel = hiltViewModel() )</ID>
+    <ID>CyclomaticComplexMethod:RegisterScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun RegisterScreen( onNavigateBack: () -&gt; Unit, onNavigateToLogin: () -&gt; Unit, onRegisterSuccess: () -&gt; Unit, viewModel: AuthViewModel = hiltViewModel() )</ID>
+    <ID>CyclomaticComplexMethod:StoryViewerScreen.kt$@Composable fun StoryViewerScreen( userId: String, onClose: () -&gt; Unit, viewModel: StoryViewModel = hiltViewModel() )</ID>
+    <ID>CyclomaticComplexMethod:SyncWorker.kt$SyncWorker$private suspend fun executeOperation(op: SyncOperationEntity)</ID>
+    <ID>CyclomaticComplexMethod:SyncWorker.kt$SyncWorker$private suspend fun rollbackOptimisticUpdate(op: SyncOperationEntity)</ID>
+    <ID>ImplicitDefaultLocale:LiveNotificationManager.kt$LiveNotificationManager$String.format("%02d:%02d", minutes, seconds)</ID>
+    <ID>ImplicitDefaultLocale:LiveNotificationManager.kt$LiveNotificationManager$String.format("%d:%02d:%02d", hours, minutes, seconds)</ID>
+    <ID>ImplicitDefaultLocale:LiveNotificationManager.kt$LiveNotificationManager$String.format("%dh %02dm %02ds", hours, minutes, seconds)</ID>
+    <ID>ImplicitDefaultLocale:WorkoutListScreen.kt$String.format("%.2f km", workout.distanceMeters / 1000.0)</ID>
+    <ID>ImplicitDefaultLocale:WorkoutTrackingService.kt$WorkoutTrackingService$String.format("%02d:%02d", minutes, seconds)</ID>
+    <ID>ImplicitDefaultLocale:WorkoutTrackingService.kt$WorkoutTrackingService$String.format("%dh %02dm %02ds", hours, minutes, seconds)</ID>
+    <ID>InstanceOfCheckForException:PublicApiRepositoryImpl.kt$PublicApiRepositoryImpl$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:SyncWorker.kt$SyncWorker$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:SyncWorker.kt$SyncWorker$e is IllegalArgumentException</ID>
+    <ID>LongMethod:ChatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ChatScreen( roomId: String, onBackClick: () -&gt; Unit = {}, viewModel: ChatViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:ConversationsListScreen.kt$@Composable fun ConversationItem( conversation: Conversation, onClick: () -&gt; Unit )</ID>
+    <ID>LongMethod:CreateHabitatScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateHabitatScreen( onNavigateBack: () -&gt; Unit, onHabitatCreated: () -&gt; Unit, viewModel: CreateHabitatViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:CreatePostScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreatePostScreen( onNavigateBack: () -&gt; Unit, onPostCreated: () -&gt; Unit, viewModel: CreatePostViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:CreateTaskScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateTaskScreen( onNavigateBack: () -&gt; Unit, onTaskCreated: () -&gt; Unit, viewModel: CreateTaskViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:CreateWorkoutScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun CreateWorkoutScreen( onNavigateBack: () -&gt; Unit, onWorkoutCreated: () -&gt; Unit, viewModel: CreateWorkoutViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:EditProfileScreen.kt$@Composable fun EditProfileForm( initialUser: com.ninety5.habitate.domain.model.User, saveError: String?, isUploading: Boolean, uploadProgress: Float, onSave: (String, String) -&gt; Unit, onUpload: (android.net.Uri) -&gt; Unit )</ID>
+    <ID>LongMethod:FeedScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun FeedScreen( onPostClick: (String) -&gt; Unit, onUserClick: (String) -&gt; Unit, onCreatePostClick: () -&gt; Unit, onNotificationClick: () -&gt; Unit, onChatClick: () -&gt; Unit, onStoryClick: (String) -&gt; Unit, onAddStoryClick: () -&gt; Unit = {}, hasNotifications: Boolean = false, // Added parameter viewModel: FeedViewModel = hiltViewModel(), storyViewModel: StoryViewModel = hiltViewModel(), featureFlagsViewModel: FeatureFlagsViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:FocusScreen.kt$@Composable fun FocusTimerScreen( uiState: FocusUiState, onToggleTimer: () -&gt; Unit, onStopSession: () -&gt; Unit, onSetDuration: (Int) -&gt; Unit, onPlaySound: (String, Int) -&gt; Unit )</ID>
+    <ID>LongMethod:ForgotPasswordScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ForgotPasswordScreen( onNavigateBack: () -&gt; Unit, viewModel: AuthViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:HabitCreateScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HabitCreateScreen( habitId: String? = null, onNavigateBack: () -&gt; Unit, viewModel: HabitCreateViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:HabitDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HabitDetailScreen( habitId: String, onNavigateBack: () -&gt; Unit, onEditHabit: (String) -&gt; Unit, viewModel: HabitDetailViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:HabitListScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HabitListScreen( onCreateHabitClick: () -&gt; Unit, onHabitClick: (String) -&gt; Unit, viewModel: HabitListViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:HabitatDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HabitatDetailScreen( habitatId: String, onNavigateBack: () -&gt; Unit, onNavigateToPost: (String) -&gt; Unit, onNavigateToUser: (String) -&gt; Unit, onNavigateToChallenge: (String) -&gt; Unit, viewModel: HabitatDetailViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:HabitateNavHost.kt$@Composable fun HabitateNavHost( navController: NavHostController, modifier: Modifier = Modifier, startDestination: String = Screen.Feed.route )</ID>
+    <ID>LongMethod:HabitatsScreen.kt$@Composable fun HabitatCard( habitat: HabitatUiModel, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:HealthConnectPermissionScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HealthConnectPermissionScreen( onBackClick: () -&gt; Unit, viewModel: HealthConnectViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:JournalScreen.kt$@Composable private fun CalendarView( selectedMonth: YearMonth, selectedDate: LocalDate, entriesGroupedByDate: Map&lt;LocalDate, List&lt;JournalEntry&gt;&gt;, onDateSelected: (LocalDate) -&gt; Unit, onMonthChange: (YearMonth) -&gt; Unit )</ID>
+    <ID>LongMethod:JournalScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun JournalEntryCard( entry: JournalEntry, onEdit: () -&gt; Unit, onDelete: () -&gt; Unit )</ID>
+    <ID>LongMethod:JournalScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun JournalEntryEditor( editingEntry: JournalEntry?, isSaving: Boolean, onSave: (String?, String, String?, List&lt;String&gt;) -&gt; Unit, onCancel: () -&gt; Unit )</ID>
+    <ID>LongMethod:JournalScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun JournalScreen( onNavigateBack: () -&gt; Unit, viewModel: JournalViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:LoginScreen.kt$@Composable fun LoginScreen( onNavigateToRegister: () -&gt; Unit, onNavigateToForgotPassword: () -&gt; Unit, onLoginSuccess: () -&gt; Unit, onNavigateToOnboarding: () -&gt; Unit, onNavigateToVerifyEmail: () -&gt; Unit, viewModel: AuthViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:NotificationSettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun NotificationSettingsScreen( onNavigateBack: () -&gt; Unit, viewModel: SettingsViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:OnboardingScreen.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun OnboardingScreen( onOnboardingComplete: () -&gt; Unit )</ID>
+    <ID>LongMethod:PlannerScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PlannerScreen( onBackClick: () -&gt; Unit, viewModel: PlannerViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:PostDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PostDetailScreen( postId: String, onBackClick: () -&gt; Unit, onUserClick: (String) -&gt; Unit, viewModel: PostDetailViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:PostItem.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun PostItem( post: PostUiModel, currentUserId: String? = null, onLikeClick: () -&gt; Unit, onReactionClick: (String) -&gt; Unit, onCommentClick: () -&gt; Unit, onShareClick: () -&gt; Unit, onUserClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:PrivacyDashboardScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PrivacyDashboardScreen( onNavigateBack: () -&gt; Unit, onDeleteAllData: () -&gt; Unit, onViewProfileAs: () -&gt; Unit, viewModel: SettingsViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:ProfileScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ProfileScreen( userId: String? = null, isViewAsMode: Boolean = false, onSettingsClick: () -&gt; Unit, onEditProfileClick: () -&gt; Unit, onPostClick: (String) -&gt; Unit, onWorkoutClick: (String) -&gt; Unit, onTimelineClick: () -&gt; Unit = {}, viewModel: ProfileViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:PublicApiScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PublicApiScreen( viewModel: PublicApiViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:RegisterScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun RegisterScreen( onNavigateBack: () -&gt; Unit, onNavigateToLogin: () -&gt; Unit, onRegisterSuccess: () -&gt; Unit, viewModel: AuthViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:SettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SettingsScreen( onNavigateToEditProfile: () -&gt; Unit, onLogout: () -&gt; Unit, onNavigateBack: () -&gt; Unit = {}, onNavigateToHealthConnect: () -&gt; Unit, onNavigateToNotifications: () -&gt; Unit, onNavigateToArchive: () -&gt; Unit, onNavigateToPrivacyDashboard: () -&gt; Unit, onNavigateToPublicApi: () -&gt; Unit, viewModel: SettingsViewModel = hiltViewModel(), authViewModel: AuthViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:StoryViewerScreen.kt$@Composable fun StoryViewerScreen( userId: String, onClose: () -&gt; Unit, viewModel: StoryViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:StudiesScreen.kt$@Composable private fun StatsOverviewCard( streak: Int, todayMinutes: Int, weeklyProgress: Float, weeklyGoal: Int )</ID>
+    <ID>LongMethod:StudiesScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun StudiesScreen( onNavigateBack: () -&gt; Unit, onNavigateToFocus: () -&gt; Unit, viewModel: StudiesViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:SyncWorker.kt$SyncWorker$private suspend fun rollbackOptimisticUpdate(op: SyncOperationEntity)</ID>
+    <ID>LongMethod:WelcomeScreen.kt$@Composable fun WelcomeScreen( onNavigateToLogin: () -&gt; Unit, onNavigateToRegister: () -&gt; Unit )</ID>
+    <ID>LongMethod:WellbeingScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun WellbeingScreen( onNavigateBack: () -&gt; Unit, onNavigateToJournal: () -&gt; Unit, viewModel: WellbeingViewModel = hiltViewModel() )</ID>
+    <ID>LongMethod:WorkoutListScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun WorkoutListScreen( onWorkoutClick: (String) -&gt; Unit, onCreateWorkoutClick: () -&gt; Unit, onNavigateToHealthConnect: () -&gt; Unit, viewModel: WorkoutViewModel = hiltViewModel() )</ID>
+    <ID>LongParameterList:ChatRepositoryImpl.kt$ChatRepositoryImpl$( private val chatDao: ChatDao, private val messageDao: MessageDao, private val messageReactionDao: MessageReactionDao, private val userDao: UserDao, private val apiService: ApiService, private val realtimeClient: RealtimeClient, private val syncQueueDao: SyncQueueDao, private val securePreferences: SecurePreferences, private val moshi: Moshi )</ID>
+    <ID>LongParameterList:CommentListItem.kt$( commentId: String, authorName: String, authorAvatarUrl: String?, commentText: String, createdAt: Long, isOwnComment: Boolean, onAuthorClick: () -&gt; Unit, onDeleteClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongParameterList:FeedRepositoryImpl.kt$FeedRepositoryImpl$( private val postDao: PostDao, private val userDao: UserDao, private val syncQueueDao: SyncQueueDao, private val likeDao: LikeDao, private val moshi: Moshi, private val apiService: ApiService, private val database: HabitateDatabase, private val authRepositoryProvider: Provider&lt;AuthRepository&gt; )</ID>
+    <ID>LongParameterList:HabitRepositoryImpl.kt$HabitRepositoryImpl$( private val habitDao: HabitDao, private val habitLogDao: HabitLogDao, private val habitStreakDao: HabitStreakDao, private val syncQueueDao: SyncQueueDao, private val apiService: ApiService, private val securePreferences: SecurePreferences, private val moshi: Moshi, private val glyphManager: com.ninety5.habitate.core.glyph.HabitateGlyphManager )</ID>
+    <ID>LongParameterList:InsightGenerator.kt$InsightGenerator$( private val habitRepository: HabitRepository, private val workoutDao: WorkoutDao, private val insightDao: InsightDao, private val dailySummaryDao: DailySummaryDao, private val taskDao: TaskDao, private val habitDao: HabitDao, private val habitLogDao: HabitLogDao, private val securePreferences: SecurePreferences )</ID>
+    <ID>LongParameterList:SyncWorker.kt$SyncWorker$( @Assisted context: Context, @Assisted params: WorkerParameters, private val syncQueueDao: SyncQueueDao, private val followDao: FollowDao, private val likeDao: LikeDao, private val commentDao: CommentDao, private val postDao: PostDao, private val taskDao: TaskDao, private val workoutDao: WorkoutDao, private val messageDao: MessageDao, private val apiService: ApiService, private val moshi: Moshi )</ID>
+    <ID>LoopWithTooManyJumpStatements:SyncWorker.kt$SyncWorker$for</ID>
+    <ID>MatchingDeclarationName:FeatureFlags.kt$CoreFeatureFlags</ID>
+    <ID>MatchingDeclarationName:FollowingDao.kt$FollowDao</ID>
+    <ID>MatchingDeclarationName:FollowingEntity.kt$FollowEntity</ID>
+    <ID>MatchingDeclarationName:Navigation.kt$HabitateNavItem</ID>
+    <ID>MatchingDeclarationName:SoundManager.kt$HabitateAudioManager</ID>
+    <ID>MaxLineLength:AICoachingServiceImpl.kt$AICoachingServiceImpl$Message(role = "system", content = "You are a helpful habit coaching assistant. Give a short, motivating tip for the day.")</ID>
+    <ID>MaxLineLength:CreatePostScreen.kt$color = if (content.isNotBlank() || uiState.selectedImageUri != null) MaterialTheme.colorScheme.primary else Color.Gray</ID>
+    <ID>MaxLineLength:CreatePostScreen.kt$enabled = (content.isNotBlank() || uiState.selectedImageUri != null) &amp;&amp; !uiState.isLoading &amp;&amp; !uiState.isUploadingImage</ID>
+    <ID>MaxLineLength:CreateTaskScreen.kt$label = { Text(priority.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }) }</ID>
+    <ID>MaxLineLength:CreateTaskScreen.kt$label = { Text(recurrence?.lowercase()?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() } ?: "None") }</ID>
+    <ID>MaxLineLength:DatabaseModule.kt$DatabaseModule$.</ID>
+    <ID>MaxLineLength:DatabaseModule.kt$DatabaseModule$fun</ID>
+    <ID>MaxLineLength:HabitCreateScreen.kt$border = BorderStroke(1.dp, if (reminderTime != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))</ID>
+    <ID>MaxLineLength:HabitateDatabase.kt$HabitateDatabase.Companion.&lt;no name provided&gt;$db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message' AND operation IN ('CREATE','DELETE')")</ID>
+    <ID>MaxLineLength:InsightDao.kt$InsightDao$@Query("SELECT * FROM insights WHERE type = :type AND relatedEntityId = :entityId AND createdAt &gt;= :since ORDER BY createdAt DESC LIMIT 1")</ID>
+    <ID>MaxLineLength:InsightGenerator.kt$InsightGenerator$description = "You have a ${streak.currentStreak}-day streak for '${habitWithStreak.habit.title}'. Don't break it now!"</ID>
+    <ID>MaxLineLength:InsightGenerator.kt$InsightGenerator$description = "You've completed this habit only $actualCompletions times in the last 2 weeks. Consider reducing the frequency or making it easier."</ID>
+    <ID>MaxLineLength:PrivacyDashboardScreen.kt$Text("This will permanently delete all your data including posts, habits, workouts, and journal entries. This action cannot be undone.")</ID>
+    <ID>MaxLineLength:ProfileScreen.kt$Icon(Icons.Default.History, contentDescription = "Timeline icon", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)</ID>
+    <ID>MaxLineLength:PublicApiScreen.kt$Text("Search for books to see results here.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
+    <ID>MaxLineLength:PublicApiScreen.kt$}</ID>
+    <ID>MaxLineLength:RealtimeClient.kt$WsMessage$Reaction : WsMessage</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$Text("Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be lost.")</ID>
+    <ID>MaxLineLength:SyncQueueDao.kt$SyncQueueDao$@Query("UPDATE sync_queue SET status = 'PENDING', lastAttemptAt = NULL WHERE status = 'IN_PROGRESS' AND COALESCE(lastAttemptAt, createdAt) &lt; :cutoffTime")</ID>
+    <ID>MaxLineLength:SyncWorker.kt$SyncWorker$Timber.w("Conflict detected for operation ${op.id} (Entity: ${op.entityType}, ID: ${op.entityId}). Server state differs from local. Treating as permanent failure (Server Wins).")</ID>
+    <ID>MaxLineLength:SyncWorker.kt$SyncWorker$Timber.w("Validation failed for operation ${op.id} (Entity: ${op.entityType}, ID: ${op.entityId}). Marking operation as failed.")</ID>
+    <ID>MaxLineLength:TaskListScreen.kt$color = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface</ID>
+    <ID>MaxLineLength:TaskListScreen.kt$imageVector = if (task.status == TaskStatus.COMPLETED) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked</ID>
+    <ID>MaxLineLength:TaskListScreen.kt$tint = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant</ID>
+    <ID>MaxLineLength:TimelineDao.kt$TimelineDao$@Query("SELECT * FROM timeline_view WHERE title LIKE '%' || :query || '%' OR subtitle LIKE '%' || :query || '%' ORDER BY timestamp DESC")</ID>
+    <ID>MaxLineLength:User.kt$User$"User(id=$id, displayName=$displayName, username=$username, avatarUrl=$avatarUrl, bio=$bio, followerCount=$followerCount, followingCount=$followingCount, postCount=$postCount, isOnline=$isOnline, isStealthMode=$isStealthMode)"</ID>
+    <ID>MaxLineLength:WorkoutDetailScreen.kt$Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Avatar size (40dp) */ val RefAvatarSize = 40</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Base spacing unit (4dp) */ val RefSpacingXS = 4</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Body text (16sp) - for buttons */ val RefTextSizeLG = 16</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Button height (48dp) */ val RefButtonHeight = 48</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Button shadow elevation (1dp) */ val RefButtonElevation = 1</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Card padding (24dp) */ val RefCardPadding = 24</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Card shadow elevation (2dp) */ val RefCardElevation = 2</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Circular navigation button (64dp) */ val RefCircularButtonSize = 64</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Disabled opacity */ val RefOpacityDisabled = 0.5f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Divider opacity */ val RefOpacityDivider = 0.3f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Extra large icons (40dp) - for FABs and hero actions */ val RefIconSizeXL = 40</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Extra large spacing (32dp) */ val RefSpacingXL = 32</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Extra small icons (16dp) - for dense UI elements */ val RefIconSizeXS = 16</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Full circle - for avatars and circular buttons */ val RefRadiusFull = 1000 // Large enough to be circular</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Headline text (28sp) - for login title */ val RefTextSizeXL = 28</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Hero icons (48dp) - for empty states and major actions */ val RefIconSizeXXL = 48</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Huge spacing (48dp) */ val RefSpacingXXL = 48</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Input field height (48dp) */ val RefInputHeight = 48</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Large avatar size (80dp) */ val RefAvatarSizeLG = 80</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Large corner radius (16dp) - for cards */ val RefRadiusLG = 16</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Large icons (32dp) - for navigation and emphasis */ val RefIconSizeLG = 32</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Large spacing (24dp) */ val RefSpacingLG = 24</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Large title text (32sp) - for onboarding */ val RefTextSizeXXL = 32</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Line height for body text (1.5 ratio) */ val RefLineHeightBody = 1.5f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Line height for dense text (1.2 ratio) */ val RefLineHeightDense = 1.2f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Line height for headings (1.3 ratio) */ val RefLineHeightHeading = 1.3f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Logo size (64dp) */ val RefLogoSize = 64</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Medium corner radius (12dp) - for social buttons */ val RefRadiusMD = 12</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Medium icons (24dp) - for standard actions */ val RefIconSizeMD = 24</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Medium spacing (16dp) */ val RefSpacingMD = 16</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Overlay opacity */ val RefOpacityOverlay = 0.1f</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Regular text (14sp) - for descriptions */ val RefTextSizeMD = 14</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Screen padding (24dp) */ val RefScreenPadding = 24</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Small corner radius (8dp) - for inputs and buttons */ val RefRadiusSM = 8</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Small icons (20dp) - for buttons and inline actions */ val RefIconSizeSM = 20</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Small spacing (8dp) */ val RefSpacingSM = 8</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Small text (12sp) - for links and small labels */ val RefTextSizeSM = 12</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Social button shadow elevation (2dp) */ val RefSocialButtonElevation = 2</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Social button size (56dp) */ val RefSocialButtonSize = 56</ID>
+    <ID>MayBeConst:ReferenceTokens.kt$/** Tiny text (10sp) - for very small elements */ val RefTextSizeXS = 10</ID>
+    <ID>NestedBlockDepth:AuthRepository.kt$AuthRepositoryImpl$override suspend fun login(email: String, password: String): AppResult&lt;String&gt;</ID>
+    <ID>NestedBlockDepth:HabitRepositoryImpl.kt$HabitRepositoryImpl$override suspend fun syncHabits(): AppResult&lt;Unit&gt;</ID>
+    <ID>NestedBlockDepth:InsightGenerator.kt$InsightGenerator$private suspend fun generateStreakRiskInsights()</ID>
+    <ID>NestedBlockDepth:SyncWorker.kt$SyncWorker$private suspend fun rollbackOptimisticUpdate(op: SyncOperationEntity)</ID>
+    <ID>NewLineAtEndOfFile:ApiService.kt$com.ninety5.habitate.data.remote.ApiService.kt</ID>
+    <ID>NewLineAtEndOfFile:FeedViewModel.kt$com.ninety5.habitate.ui.screens.feed.FeedViewModel.kt</ID>
+    <ID>NewLineAtEndOfFile:HabitateGlyphManager.kt$com.ninety5.habitate.core.glyph.HabitateGlyphManager.kt</ID>
+    <ID>NewLineAtEndOfFile:HabitatsScreen.kt$com.ninety5.habitate.ui.screens.habitats.HabitatsScreen.kt</ID>
+    <ID>PrintStackTrace:HealthConnectAdapter.kt$HealthConnectAdapter$e</ID>
+    <ID>SwallowedException:AICoachingServiceImpl.kt$AICoachingServiceImpl$e: Exception</ID>
+    <ID>SwallowedException:AuthRepository.kt$AuthRepositoryImpl$e: FirebaseAuthInvalidCredentialsException</ID>
+    <ID>SwallowedException:AuthRepository.kt$AuthRepositoryImpl$e: FirebaseAuthInvalidUserException</ID>
+    <ID>SwallowedException:AuthRepository.kt$AuthRepositoryImpl$e: com.google.firebase.auth.FirebaseAuthWeakPasswordException</ID>
+    <ID>SwallowedException:Converters.kt$Converters$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:FeedRepositoryImpl.kt$FeedRepositoryImpl$e: IOException</ID>
+    <ID>SwallowedException:FeedRepositoryImpl.kt$FeedRepositoryImpl$e: SocketTimeoutException</ID>
+    <ID>SwallowedException:FirebaseConfigChecker.kt$FirebaseConfigChecker$e: ClassNotFoundException</ID>
+    <ID>SwallowedException:FocusScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:HabitCreateScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:HabitDetailScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:HabitDto.kt$HabitDto$e: Exception</ID>
+    <ID>SwallowedException:HabitDto.kt$HabitLogDto$e: Exception</ID>
+    <ID>SwallowedException:HabitListScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:HealthConnectAdapter.kt$HealthConnectAdapter$e: Exception</ID>
+    <ID>SwallowedException:Mappers.kt$e: Exception</ID>
+    <ID>SwallowedException:PlannerViewModel.kt$PlannerViewModel$e: Exception</ID>
+    <ID>SwallowedException:SecurePreferences.kt$SecurePreferences$e: Exception</ID>
+    <ID>SwallowedException:SecurePreferences.kt$SecurePreferences$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:SettingsViewModel.kt$SettingsViewModel$e: Exception</ID>
+    <ID>SwallowedException:StoryViewerScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:SyncWorker.kt$SyncWorker$e: Exception</ID>
+    <ID>SwallowedException:UserPreferencesRepository.kt$UserPreferencesRepositoryImpl$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:UserRepositoryImpl.kt$UserRepositoryImpl$e: IOException</ID>
+    <ID>SwallowedException:UserRepositoryImpl.kt$UserRepositoryImpl$e: SocketTimeoutException</ID>
+    <ID>ThrowsCount:SyncWorker.kt$SyncWorker$private suspend fun executeOperation(op: SyncOperationEntity)</ID>
+    <ID>ThrowsCount:SyncWorker.kt$SyncWorker$private suspend fun rollbackOptimisticUpdate(op: SyncOperationEntity)</ID>
+    <ID>ThrowsCount:SyncWorker.kt$SyncWorker$private suspend fun syncMessageOperation(op: SyncOperationEntity)</ID>
+    <ID>TooGenericExceptionThrown:AuthRepository.kt$AuthRepositoryImpl$throw Exception("Google Sign-In failed: User is null")</ID>
+    <ID>TooGenericExceptionThrown:UserSyncWorker.kt$UserSyncWorker$throw Exception("Backend login failed: ${loginResponse.code()}")</ID>
+    <ID>TooGenericExceptionThrown:UserSyncWorker.kt$UserSyncWorker$throw Exception("Backend registration failed: $errorCode")</ID>
+    <ID>TooManyFunctions:ApiService.kt$ApiService</ID>
+    <ID>TooManyFunctions:AuthRepository.kt$AuthRepository</ID>
+    <ID>TooManyFunctions:Converters.kt$Converters</ID>
+    <ID>TooManyFunctions:DatabaseModule.kt$DatabaseModule</ID>
+    <ID>TooManyFunctions:HabitDao.kt$HabitDao</ID>
+    <ID>TooManyFunctions:HabitDao.kt$HabitLogDao</ID>
+    <ID>TooManyFunctions:HabitRepository.kt$HabitRepository</ID>
+    <ID>TooManyFunctions:HabitateDatabase.kt$HabitateDatabase : RoomDatabase</ID>
+    <ID>TooManyFunctions:Mappers.kt$com.ninety5.habitate.domain.mapper.Mappers.kt</ID>
+    <ID>TooManyFunctions:PostDao.kt$PostDao</ID>
+    <ID>TooManyFunctions:RepositoryModule.kt$RepositoryModule</ID>
+    <ID>TooManyFunctions:SyncWorker.kt$SyncWorker : CoroutineWorker</ID>
+    <ID>TooManyFunctions:UserRepository.kt$UserRepository</ID>
+    <ID>TopLevelPropertyNaming:SettingsScreen.kt$private const val PRIVACY_POLICY_URL = "https://habitate.app/privacy"</ID>
+    <ID>TopLevelPropertyNaming:SettingsScreen.kt$private const val TERMS_OF_SERVICE_URL = "https://habitate.app/terms"</ID>
+    <ID>TopLevelPropertyNaming:StoryViewerScreen.kt$private const val STORY_DURATION_MS = 5000L // 5 seconds per story</ID>
+    <ID>UnusedParameter:ChatViewModel.kt$ChatViewModel$messageId: String</ID>
+    <ID>UnusedParameter:CommentListItem.kt$commentId: String</ID>
+    <ID>UnusedParameter:CreateScreen.kt$onNavigateBack: () -&gt; Unit</ID>
+    <ID>UnusedParameter:FeedScreen.kt$onChatClick: () -&gt; Unit</ID>
+    <ID>UnusedParameter:Glass.kt$isDark: Boolean = false</ID>
+    <ID>UnusedParameter:Glass.kt$tintColor: Color = Primary500</ID>
+    <ID>UnusedParameter:GlyphMatrixController.kt$GlyphMatrixController$bitmap: Bitmap</ID>
+    <ID>UnusedParameter:HabitCreateScreen.kt$onReminderTimeSelected: (LocalTime) -&gt; Unit</ID>
+    <ID>UnusedParameter:HabitRepositoryImpl.kt$HabitRepositoryImpl$userId: String</ID>
+    <ID>UnusedParameter:HabitatRepositoryImpl.kt$HabitatRepositoryImpl$limit: Int = 20</ID>
+    <ID>UnusedParameter:InsightsDashboardScreen.kt$onNavigateBack: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:PlannerViewModel.kt$PlannerViewModel$userId: String</ID>
+    <ID>UnusedParameter:PostItem.kt$currentUserId: String? = null</ID>
+    <ID>UnusedParameter:ProfileScreen.kt$onSettingsClick: () -&gt; Unit</ID>
+    <ID>UnusedParameter:ProfileScreen.kt$onWorkoutClick: (String) -&gt; Unit</ID>
+    <ID>UnusedParameter:ProfileScreen.kt$userId: String? = null</ID>
+    <ID>UnusedParameter:WellbeingScreen.kt$label: String</ID>
+    <ID>UnusedParameter:WorkoutDetailScreen.kt$onWorkoutClick: (String) -&gt; Unit</ID>
+    <ID>UnusedPrivateMember:HabitatsScreen.kt$@Preview(showBackground = true) @Composable private fun EmptyStatePreview()</ID>
+    <ID>UnusedPrivateMember:HabitatsScreen.kt$@Preview(showBackground = true) @Composable private fun HabitatCardPreview()</ID>
+    <ID>UnusedPrivateMember:LiveNotificationManager.kt$LiveNotificationManager$private fun formatTime(millis: Long): String</ID>
+    <ID>UnusedPrivateProperty:CreatePostViewModel.kt$CreatePostViewModel$private val authRepository: AuthRepository</ID>
+    <ID>UnusedPrivateProperty:CreatePostViewModel.kt$CreatePostViewModel$private val mediaRepository: MediaRepository</ID>
+    <ID>UnusedPrivateProperty:FeedViewModel.kt$FeedViewModel$private val authRepository: AuthRepository</ID>
+    <ID>UnusedPrivateProperty:FirebaseConfigChecker.kt$FirebaseConfigChecker.Companion$// Domain patterns that require Dynamic Links private val DYNAMIC_LINK_DOMAINS = listOf( ".page.link", ".app.goo.gl" )</ID>
+    <ID>UnusedPrivateProperty:FirebaseConfigChecker.kt$FirebaseConfigChecker.Companion$// Valid domains for email link auth that don't require Dynamic Links private val ALLOWED_AUTH_DOMAINS = listOf( "firebaseapp.com" )</ID>
+    <ID>UnusedPrivateProperty:GlyphInterfaceManager.kt$GlyphInterfaceManager$private val context: Context</ID>
+    <ID>UnusedPrivateProperty:GlyphMatrixController.kt$GlyphMatrixController$private val context: Context</ID>
+    <ID>UnusedPrivateProperty:HabitateGlyphManager.kt$HabitateGlyphManager$@ApplicationContext private val context: Context</ID>
+    <ID>UnusedPrivateProperty:HabitateNavHost.kt$val context = LocalContext.current</ID>
+    <ID>UnusedPrivateProperty:HabitatsViewModel.kt$HabitatsViewModel$private val authRepository: AuthRepository</ID>
+    <ID>UnusedPrivateProperty:JournalScreen.kt$val scope = rememberCoroutineScope()</ID>
+    <ID>UnusedPrivateProperty:PostDetailViewModel.kt$PostDetailViewModel$private val authRepository: AuthRepository</ID>
+    <ID>UseCheckOrError:NetworkModule.kt$NetworkModule$throw IllegalStateException("Security Critical: Certificate Pinning MUST be enabled in Release builds!")</ID>
+    <ID>UseRequire:SyncWorker.kt$SyncWorker$throw IllegalArgumentException("Invalid habitat_member payload/entityId: ${op.entityId}")</ID>
+    <ID>UseRequire:SyncWorker.kt$SyncWorker$throw IllegalArgumentException("Invalid like entityId: ${op.entityId}")</ID>
+    <ID>UseRequire:SyncWorker.kt$SyncWorker$throw IllegalArgumentException("Unsupported challenge_progress operation: ${op.operation}")</ID>
+    <ID>UseRequire:SyncWorker.kt$SyncWorker$throw IllegalArgumentException("Unsupported notification_read operation: ${op.operation}")</ID>
+    <ID>UseRequire:SyncWorker.kt$SyncWorker$throw IllegalArgumentException("Unsupported notification_read_all operation: ${op.operation}")</ID>
+    <ID>WildcardImport:ApiSectionCard.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ApiSectionCard.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ApiService.kt$import retrofit2.http.*</ID>
+    <ID>WildcardImport:Buttons.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Buttons.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Buttons.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Buttons.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:Cards.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Cards.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Cards.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:ChallengeDetailScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ChallengeDetailScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ChatListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ChatListScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ChatScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ChatScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ChatScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CommentDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:CommentListItem.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CommentListItem.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CommentListItem.kt$import java.util.*</ID>
+    <ID>WildcardImport:ConversationsListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ConversationsListScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:ConversationsListScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ConversationsListScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ConversationsListScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:CreatePostScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CreatePostScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CreatePostScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CreateScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CreateScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CreateTaskScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CreateTaskScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CreateTaskScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CreateWorkoutScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CreateWorkoutScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CreateWorkoutScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DailyCheckInScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DailyCheckInScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DailyCheckInScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:EditProfileScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:EditProfileScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:EditProfileScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:FeedScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:FeedbackSystem.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:FocusScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:FocusScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:FocusScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:FollowingDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:ForgotPasswordScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ForgotPasswordScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ForgotPasswordScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HabitComponents.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HabitComponents.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HabitComponents.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HabitCreateScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HabitCreateScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HabitCreateScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HabitDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:HabitDetailScreen.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:HabitDetailScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HabitDetailScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HabitDetailScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HabitDetailScreen.kt$import com.ninety5.habitate.ui.components.*</ID>
+    <ID>WildcardImport:HabitListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HabitListScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HabitListScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HabitListScreen.kt$import com.ninety5.habitate.ui.components.*</ID>
+    <ID>WildcardImport:HabitRepositoryImpl.kt$import com.ninety5.habitate.data.local.entity.*</ID>
+    <ID>WildcardImport:HealthConnectPermissionScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HealthConnectPermissionScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HealthConnectPermissionScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Inputs.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Inputs.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Inputs.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Inputs.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:LikeDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:LoginScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:LoginScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:LoginScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:LoginScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:Navigation.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Navigation.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Navigation.kt$import androidx.compose.material.icons.outlined.*</ID>
+    <ID>WildcardImport:Navigation.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Navigation.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:Navigation.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:NotificationSettingsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:NotificationSettingsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:NotificationSettingsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:PostItem.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PostItem.kt$import androidx.compose.material.icons.rounded.*</ID>
+    <ID>WildcardImport:PostItem.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PostItem.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PrivacyDashboardScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PrivacyDashboardScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PrivacyDashboardScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PublicApiScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PublicApiScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:PublicApiScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PublicApiScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:RegisterScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RegisterScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:RegisterScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RegisterScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:RegisterScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:States.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:States.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:States.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:SyncScheduler.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:TaskDetailScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TaskDetailScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TaskListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TaskListScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:VerifyEmailScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:VerifyEmailScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:VerifyEmailScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:WelcomeScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:WelcomeScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:WelcomeScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:WelcomeScreen.kt$import com.ninety5.habitate.ui.theme.*</ID>
+    <ID>WildcardImport:WorkoutListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:WorkoutListScreen.kt$import androidx.compose.material3.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

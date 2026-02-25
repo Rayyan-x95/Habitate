@@ -139,7 +139,7 @@ class ChatRepositoryImpl @Inject constructor(
                 status = MessageStatus.SENDING,
                 createdAt = now
             )
-            queueSync("message", messageId, "CREATE",
+            queueSync("chat_message", messageId, "CREATE",
                 moshi.adapter(MessageDto::class.java).toJson(dto))
 
             AppResult.Success(entity.toDomain())
@@ -163,7 +163,7 @@ class ChatRepositoryImpl @Inject constructor(
             }
 
             messageDao.deleteMessage(messageId) // Soft-delete: sets isDeleted = 1
-            queueSync("message", messageId, "DELETE", "{}")
+            queueSync("chat_message", messageId, "DELETE", "{}")
 
             AppResult.Success(Unit)
         } catch (e: CancellationException) {
@@ -327,8 +327,12 @@ class ChatRepositoryImpl @Inject constructor(
     }
 
     suspend fun deleteMessageLegacy(messageId: String) {
-        messageDao.deleteMessage(messageId)
-        queueSync("message", messageId, "DELETE", "{}")
+        val userId = securePreferences.userId ?: return
+        val message = messageDao.getMessageById(messageId)
+        if (message?.senderId == userId) {
+            messageDao.deleteMessage(messageId)
+            queueSync("chat_message", messageId, "DELETE", "{}")
+        }
     }
 
     suspend fun addReaction(messageId: String, userId: String, emoji: String) {
@@ -412,7 +416,7 @@ class ChatRepositoryImpl @Inject constructor(
             status = MessageStatus.SENDING,
             createdAt = message.createdAt
         )
-        queueSync("message", messageId, "CREATE",
+        queueSync("chat_message", messageId, "CREATE",
             moshi.adapter(MessageDto::class.java).toJson(dto))
     }
 

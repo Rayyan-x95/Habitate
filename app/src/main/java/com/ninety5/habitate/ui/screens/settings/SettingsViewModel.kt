@@ -17,6 +17,13 @@ import com.ninety5.habitate.domain.repository.UserPreferencesRepository
 data class SettingsUiState(
     val themeMode: String = "system", // system, light, dark
     val notificationsEnabled: Boolean = true,
+    val habitRemindersEnabled: Boolean = true,
+    val taskRemindersEnabled: Boolean = true,
+    val socialNotificationsEnabled: Boolean = true,
+    val challengeUpdatesEnabled: Boolean = true,
+    val focusModeRemindersEnabled: Boolean = false,
+    val dailyDigestEnabled: Boolean = true,
+    val weeklyReportEnabled: Boolean = true,
     val isPrivateAccount: Boolean = false,
     val isStealthMode: Boolean = false
 )
@@ -56,6 +63,13 @@ class SettingsViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 notificationsEnabled = securePreferences.notificationsEnabled,
+                habitRemindersEnabled = securePreferences.habitRemindersEnabled,
+                taskRemindersEnabled = securePreferences.taskRemindersEnabled,
+                socialNotificationsEnabled = securePreferences.socialNotificationsEnabled,
+                challengeUpdatesEnabled = securePreferences.challengeUpdatesEnabled,
+                focusModeRemindersEnabled = securePreferences.focusModeRemindersEnabled,
+                dailyDigestEnabled = securePreferences.dailyDigestEnabled,
+                weeklyReportEnabled = securePreferences.weeklyReportEnabled,
                 isPrivateAccount = securePreferences.isPrivateAccount
             )
         }
@@ -85,13 +99,66 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun toggleNotifications(enabled: Boolean) {
-        securePreferences.notificationsEnabled = enabled
-        _uiState.update { it.copy(notificationsEnabled = enabled) }
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.notificationsEnabled = enabled
+            _uiState.update { it.copy(notificationsEnabled = enabled) }
+        }
+    }
+
+    fun toggleHabitReminders(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.habitRemindersEnabled = enabled
+            _uiState.update { it.copy(habitRemindersEnabled = enabled) }
+        }
+    }
+
+    fun toggleTaskReminders(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.taskRemindersEnabled = enabled
+            _uiState.update { it.copy(taskRemindersEnabled = enabled) }
+        }
+    }
+
+    fun toggleSocialNotifications(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.socialNotificationsEnabled = enabled
+            _uiState.update { it.copy(socialNotificationsEnabled = enabled) }
+        }
+    }
+
+    fun toggleChallengeUpdates(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.challengeUpdatesEnabled = enabled
+            _uiState.update { it.copy(challengeUpdatesEnabled = enabled) }
+        }
+    }
+
+    fun toggleFocusModeReminders(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.focusModeRemindersEnabled = enabled
+            _uiState.update { it.copy(focusModeRemindersEnabled = enabled) }
+        }
+    }
+
+    fun toggleDailyDigest(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.dailyDigestEnabled = enabled
+            _uiState.update { it.copy(dailyDigestEnabled = enabled) }
+        }
+    }
+
+    fun toggleWeeklyReport(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.weeklyReportEnabled = enabled
+            _uiState.update { it.copy(weeklyReportEnabled = enabled) }
+        }
     }
 
     fun togglePrivateAccount(enabled: Boolean) {
-        securePreferences.isPrivateAccount = enabled
-        _uiState.update { it.copy(isPrivateAccount = enabled) }
+        viewModelScope.launch(Dispatchers.IO) {
+            securePreferences.isPrivateAccount = enabled
+            _uiState.update { it.copy(isPrivateAccount = enabled) }
+        }
     }
 
     /**

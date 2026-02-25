@@ -3,17 +3,11 @@ package com.ninety5.habitate
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.ninety5.habitate.core.auth.SessionManager
-import com.ninety5.habitate.worker.SyncWorker
 import com.ninety5.habitate.worker.StoryCleanupWorker
+import com.ninety5.habitate.worker.SyncScheduler
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -21,6 +15,7 @@ class HabitateApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
     @Inject lateinit var sessionManager: SessionManager
+    @Inject lateinit var syncScheduler: SyncScheduler
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -35,24 +30,9 @@ class HabitateApplication : Application(), Configuration.Provider {
         } else {
             Timber.plant(com.ninety5.habitate.core.utils.CrashlyticsTree())
         }
-        scheduleSync()
+        syncScheduler.schedulePeriodicSync()
+        syncScheduler.scheduleArchivalWorker()
         StoryCleanupWorker.schedule(this)
         sessionManager.startObserving()
-    }
-
-    private fun scheduleSync() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
-            .setConstraints(constraints)
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "HabitateSync",
-            ExistingPeriodicWorkPolicy.KEEP,
-            syncRequest
-        )
     }
 }

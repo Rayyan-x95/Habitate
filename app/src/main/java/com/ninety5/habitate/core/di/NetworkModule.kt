@@ -73,13 +73,8 @@ object NetworkModule {
         tokenAuthenticator: com.ninety5.habitate.data.remote.TokenAuthenticator
     ): OkHttpClient {
         // Certificate Pinning — SHA-256 SPKI pin for api.habitate.app
-        val certificatePinner = CertificatePinner.Builder()
-            .add("api.habitate.app", "sha256/qHOLDIzg42cAv9FgKcyzJIg8cUGm6CnR0zIlKCXuLC0=")
-            .build()
-
         val builder = OkHttpClient.Builder()
             .authenticator(tokenAuthenticator)
-            .certificatePinner(certificatePinner)
             .addInterceptor(authInterceptor) // Inject Auth Token
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()

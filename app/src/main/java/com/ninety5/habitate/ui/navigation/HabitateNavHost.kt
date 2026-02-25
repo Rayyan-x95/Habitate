@@ -155,10 +155,16 @@ fun HabitateNavHost(
         composable(Screen.Activity.route) {
             ActivityScreen(
                 onNotificationClick = { type, id ->
-                    when (type) {
-                        "post" -> navController.navigate(Screen.PostDetail.createRoute(id))
-                        "user" -> navController.navigate(Screen.UserProfile.createRoute(id))
-                        "habitat" -> navController.navigate(Screen.HabitatDetail.createRoute(id))
+                    if (id.isBlank()) return@ActivityScreen
+                    when (type.lowercase()) {
+                        "post", "like", "comment", "mention" ->
+                            navController.navigate(Screen.PostDetail.createRoute(id))
+                        "user", "follow" ->
+                            navController.navigate(Screen.UserProfile.createRoute(id))
+                        "habitat", "habitat_invite" ->
+                            navController.navigate(Screen.HabitatDetail.createRoute(id))
+                        "challenge" ->
+                            navController.navigate(Screen.ChallengeDetail.createRoute(id))
                     }
                 }
             )
@@ -478,6 +484,7 @@ fun HabitateNavHost(
 
         // Privacy Dashboard
         composable(Screen.PrivacySettings.route) {
+            val currentUserId = authState.user?.id ?: ""
             com.ninety5.habitate.ui.screens.settings.PrivacyDashboardScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onDeleteAllData = {
@@ -485,7 +492,7 @@ fun HabitateNavHost(
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onViewProfileAs = { /* Not yet implemented */ }
+                onViewProfileAs = { navController.navigate(Screen.UserProfile.createRoute(currentUserId)) }
             )
         }
 

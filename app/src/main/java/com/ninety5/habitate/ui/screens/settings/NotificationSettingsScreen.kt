@@ -9,26 +9,20 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettingsScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    // Use rememberSaveable to persist across configuration changes
-    var pushEnabled by rememberSaveable { mutableStateOf(true) }
-    var habitReminders by rememberSaveable { mutableStateOf(true) }
-    var taskReminders by rememberSaveable { mutableStateOf(true) }
-    var socialNotifications by rememberSaveable { mutableStateOf(true) }
-    var challengeUpdates by rememberSaveable { mutableStateOf(true) }
-    var focusModeReminders by rememberSaveable { mutableStateOf(false) }
-    var dailyDigest by rememberSaveable { mutableStateOf(true) }
-    var weeklyReport by rememberSaveable { mutableStateOf(true) }
+    val uiState by viewModel.uiState.collectAsState()
+    val pushEnabled = uiState.notificationsEnabled
 
     Scaffold(
         topBar = {
@@ -90,7 +84,7 @@ fun NotificationSettingsScreen(
                     }
                     Switch(
                         checked = pushEnabled,
-                        onCheckedChange = { pushEnabled = it }
+                        onCheckedChange = viewModel::toggleNotifications
                     )
                 }
             }
@@ -107,15 +101,15 @@ fun NotificationSettingsScreen(
                 NotificationToggleItem(
                     title = "Habit Reminders",
                     subtitle = "Daily reminders for your habits",
-                    checked = habitReminders,
-                    onCheckedChange = { habitReminders = it }
+                    checked = uiState.habitRemindersEnabled,
+                    onCheckedChange = viewModel::toggleHabitReminders
                 )
 
                 NotificationToggleItem(
                     title = "Task Reminders",
                     subtitle = "Reminders for due tasks",
-                    checked = taskReminders,
-                    onCheckedChange = { taskReminders = it }
+                    checked = uiState.taskRemindersEnabled,
+                    onCheckedChange = viewModel::toggleTaskReminders
                 )
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -123,15 +117,15 @@ fun NotificationSettingsScreen(
                 NotificationToggleItem(
                     title = "Social Notifications",
                     subtitle = "Likes, comments, and new followers",
-                    checked = socialNotifications,
-                    onCheckedChange = { socialNotifications = it }
+                    checked = uiState.socialNotificationsEnabled,
+                    onCheckedChange = viewModel::toggleSocialNotifications
                 )
 
                 NotificationToggleItem(
                     title = "Challenge Updates",
                     subtitle = "Leaderboard changes and challenge milestones",
-                    checked = challengeUpdates,
-                    onCheckedChange = { challengeUpdates = it }
+                    checked = uiState.challengeUpdatesEnabled,
+                    onCheckedChange = viewModel::toggleChallengeUpdates
                 )
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -139,8 +133,8 @@ fun NotificationSettingsScreen(
                 NotificationToggleItem(
                     title = "Focus Mode Reminders",
                     subtitle = "Notifications during focus sessions",
-                    checked = focusModeReminders,
-                    onCheckedChange = { focusModeReminders = it }
+                    checked = uiState.focusModeRemindersEnabled,
+                    onCheckedChange = viewModel::toggleFocusModeReminders
                 )
 
                 Text(
@@ -153,15 +147,15 @@ fun NotificationSettingsScreen(
                 NotificationToggleItem(
                     title = "Daily Digest",
                     subtitle = "Summary of your daily progress",
-                    checked = dailyDigest,
-                    onCheckedChange = { dailyDigest = it }
+                    checked = uiState.dailyDigestEnabled,
+                    onCheckedChange = viewModel::toggleDailyDigest
                 )
 
                 NotificationToggleItem(
                     title = "Weekly Report",
                     subtitle = "Weekly achievement summary",
-                    checked = weeklyReport,
-                    onCheckedChange = { weeklyReport = it }
+                    checked = uiState.weeklyReportEnabled,
+                    onCheckedChange = viewModel::toggleWeeklyReport
                 )
             }
 

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ninety5.habitate.data.local.entity.SyncOperationEntity
 import com.ninety5.habitate.data.local.entity.SyncStatus
+import java.time.Instant
 
 @Dao
 interface SyncQueueDao {
@@ -23,15 +24,23 @@ interface SyncQueueDao {
      * Operations in IN_PROGRESS for more than 5 minutes are reset to PENDING.
      * Uses COALESCE to fallback to createdAt if lastAttemptAt is null.
      */
-    @Query("UPDATE sync_queue SET status = 'PENDING' WHERE status = 'IN_PROGRESS' AND COALESCE(lastAttemptAt, createdAt) < :cutoffTime")
+    @Query("UPDATE sync_queue SET status = 'PENDING', lastAttemptAt = NULL WHERE status = 'IN_PROGRESS' AND COALESCE(lastAttemptAt, createdAt) < :cutoffTime")
     suspend fun resetStaleOperations(cutoffTime: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(operation: SyncOperationEntity)
 
-    @Query("UPDATE sync_queue SET status = :status WHERE id = :id")
-    suspend fun updateStatus(id: Long, status: SyncStatus)
+    @Query("UPDATE sync_queue SET status = :status, lastAttemptAt = :attemptedAt WHERE id = :id")
+    suspend fun updateStatusAt(id: Long, status: SyncStatus, attemptedAt: Instant)
     
-    @Query("UPDATE sync_queue SET retryCount = :retryCount, status = :status WHERE id = :id")
-    suspend fun updateRetry(id: Long, retryCount: Int, status: SyncStatus)
+    @Query("UPDATE sync_queue SET retryCount = :retryCount, status = :status, lastAttemptAt = :attemptedAt WHERE id = :id")
+    suspend fun updateRetryAt(id: Long, retryCount: Int, status: SyncStatus, attemptedAt: Instant)
+
+    suspend fun updateStatus(id: Long, status: SyncStatus) {
+        updateStatusAt(id, status, Instant.now())
+    }
+
+    suspend fun updateRetry(id: Long, retryCount: Int, status: SyncStatus) {
+        updateRetryAt(id, retryCount, status, Instant.now())
+    }
 }

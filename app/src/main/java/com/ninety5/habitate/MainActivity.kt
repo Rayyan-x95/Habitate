@@ -84,9 +84,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        intent?.data?.toString()?.let { link ->
-            authViewModel.handleDeepLink(link)
-        }
+        val link = intent?.data?.toString()
+        link?.let(authViewModel::handleDeepLink)
     }
 }
 

@@ -57,6 +57,10 @@ fun HabitatDetailScreen(
     onNavigateToChallenge: (String) -> Unit,
     viewModel: HabitatDetailViewModel = hiltViewModel()
 ) {
+    androidx.compose.runtime.LaunchedEffect(habitatId) {
+        viewModel.loadHabitat(habitatId)
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val habitat = uiState.habitat
     val activeChallenge = uiState.activeChallenge

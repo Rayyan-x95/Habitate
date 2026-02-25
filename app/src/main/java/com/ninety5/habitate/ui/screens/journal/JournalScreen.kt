@@ -278,12 +278,13 @@ fun JournalScreen(
                 editingEntry = uiState.editingEntry,
                 isSaving = uiState.isSaving,
                 onSave = { title, content, mood, tags ->
-                    if (uiState.editingEntry != null) {
+                    val editingEntry = uiState.editingEntry
+                    if (editingEntry != null) {
                         val moodEnum = mood?.let {
                             try { com.ninety5.habitate.domain.model.JournalMood.valueOf(it.uppercase()) } catch (_: Exception) { null }
                         }
                         viewModel.updateEntry(
-                            uiState.editingEntry!!.copy(
+                            editingEntry.copy(
                                 title = title,
                                 content = content,
                                 mood = moodEnum,
@@ -410,7 +411,7 @@ private fun JournalEntryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(48.dp)) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Edit",
@@ -418,7 +419,7 @@ private fun JournalEntryCard(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete",

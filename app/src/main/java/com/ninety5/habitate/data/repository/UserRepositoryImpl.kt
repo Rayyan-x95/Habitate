@@ -257,9 +257,6 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getFollowers(userId: String): AppResult<List<User>> {
         return try {
-            // Offline-first: return local data, then refresh from network
-            val localFollowers = followDao.getFollowersOnce(userId)
-            
             // Attempt network refresh in the background
             try {
                 val remoteFollowers = apiService.getUserFollowers(userId)
@@ -284,9 +281,6 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getFollowing(userId: String): AppResult<List<User>> {
         return try {
-            // Offline-first: return local data, then refresh from network
-            val localFollowing = followDao.getFollowingOnce(userId)
-            
             // Attempt network refresh in the background
             try {
                 val remoteFollowing = apiService.getUserFollowing(userId)

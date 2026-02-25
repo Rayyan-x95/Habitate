@@ -538,11 +538,11 @@ class AuthRepositoryImpl @Inject constructor(
             }
             
             firebaseAuth.sendPasswordResetEmail(email).await()
-            Timber.d( "Password reset email sent to $email")
+            Timber.d("Password reset email requested")
             AppResult.Success(Unit)
         } catch (e: FirebaseAuthInvalidUserException) {
             // Don't reveal if email exists for security
-            Timber.w( "Password reset - user not found: $email")
+            Timber.w("Password reset requested for non-existing user")
             AppResult.Success(Unit) // Pretend success for security
         } catch (e: Exception) {
             Timber.e(e, "Password reset failed")
@@ -613,7 +613,7 @@ class AuthRepositoryImpl @Inject constructor(
         
         return try {
             user.sendEmailVerification().await()
-            Timber.d( "Verification email sent to ${user.email}")
+            Timber.d("Verification email sent")
             AppResult.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to send verification email")

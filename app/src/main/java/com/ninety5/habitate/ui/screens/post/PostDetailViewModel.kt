@@ -40,7 +40,7 @@ class PostDetailViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val postId: String = checkNotNull(savedStateHandle["postId"])
+    private var postId: String = checkNotNull(savedStateHandle["postId"])
 
     private val _uiState = MutableStateFlow(PostDetailUiState())
     val uiState: StateFlow<PostDetailUiState> = _uiState.asStateFlow()
@@ -48,6 +48,14 @@ class PostDetailViewModel @Inject constructor(
     init {
         loadPost()
         loadComments()
+    }
+
+    fun loadPost(id: String) {
+        if (postId != id) {
+            postId = id
+            loadPost()
+            loadComments()
+        }
     }
 
     private fun loadPost() {

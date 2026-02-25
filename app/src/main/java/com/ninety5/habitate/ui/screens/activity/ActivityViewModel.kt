@@ -2,6 +2,7 @@ package com.ninety5.habitate.ui.screens.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ninety5.habitate.domain.model.NotificationType
 import com.ninety5.habitate.domain.repository.AuthRepository
 import com.ninety5.habitate.domain.repository.NotificationRepository
 import com.ninety5.habitate.domain.model.Notification
@@ -37,9 +38,17 @@ fun Notification.toUiModel() = NotificationUiModel(
     message = body,
     timestamp = createdAt.toEpochMilli(),
     isRead = isRead,
-    type = type.name,
+    type = type.toNavigationType(),
     targetId = targetId
 )
+
+private fun NotificationType.toNavigationType(): String = when (this) {
+    NotificationType.LIKE, NotificationType.COMMENT, NotificationType.MENTION -> "post"
+    NotificationType.FOLLOW -> "user"
+    NotificationType.HABITAT_INVITE -> "habitat"
+    NotificationType.CHALLENGE -> "challenge"
+    else -> "activity"
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel

@@ -75,6 +75,18 @@ class WorkoutRepositoryImpl @Inject constructor(
                     )
                 )
             }
+            
+            // Attempt immediate sync
+            try {
+                val payload = moshi.adapter(WorkoutEntity::class.java).toJson(entity)
+                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                apiService.create("workouts", requestBody)
+                workoutDao.updateSyncState(id, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("workout", id, "CREATE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for workout $id, will retry later")
+            }
+            
             AppResult.Success(entity.toDomain())
         } catch (e: CancellationException) {
             throw e
@@ -101,6 +113,17 @@ class WorkoutRepositoryImpl @Inject constructor(
                     lastAttemptAt = null
                 )
             )
+            
+            // Attempt immediate sync
+            try {
+                val requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), payload)
+                apiService.update("workouts", workout.id, requestBody)
+                workoutDao.updateSyncState(workout.id, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("workout", workout.id, "UPDATE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for workout ${workout.id}, will retry later")
+            }
+            
             AppResult.Success(Unit)
         } catch (e: CancellationException) {
             throw e
@@ -134,6 +157,16 @@ class WorkoutRepositoryImpl @Inject constructor(
                     )
                 )
             }
+            
+            // Attempt immediate sync
+            try {
+                apiService.delete("workouts", workoutId)
+                workoutDao.updateSyncState(workoutId, SyncState.SYNCED)
+                syncQueueDao.deleteByEntity("workout", workoutId, "DELETE")
+            } catch (e: Exception) {
+                Timber.w(e, "Immediate sync failed for workout $workoutId, will retry later")
+            }
+            
             AppResult.Success(Unit)
         } catch (e: CancellationException) {
             throw e

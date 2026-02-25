@@ -91,6 +91,8 @@ class SecurePreferences @Inject constructor(
             SyncStatus.valueOf(
                 sharedPreferences.getString("pending_sync_status", SyncStatus.NONE.name) ?: SyncStatus.NONE.name
             )
+        } catch (e: IllegalArgumentException) {
+            SyncStatus.NONE
         } catch (e: Exception) {
             SyncStatus.NONE
         }
@@ -152,15 +154,21 @@ class SecurePreferences @Inject constructor(
     fun hasFailedSync(): Boolean = pendingSyncStatus == SyncStatus.FAILED
     
     fun clearAuth() {
-        // Preserve app-level settings that shouldn't be reset on logout
-        val onboarded = isOnboarded
-        val theme = themeMode
-        
-        sharedPreferences.edit().clear().apply()
-        
-        // Restore preserved settings
-        isOnboarded = onboarded
-        themeMode = theme
+        sharedPreferences.edit()
+            .remove("auth_token")
+            .remove("refresh_token")
+            .remove("user_id")
+            .remove("user_email")
+            .remove("user_display_name")
+            .remove("user_username")
+            .remove("user_avatar_url")
+            .remove("user_bio")
+            .remove("pending_sync_status")
+            .remove("pending_sync_email")
+            .remove("pending_sync_password")
+            .remove("pending_sync_display_name")
+            .remove("pending_sync_username")
+            .apply()
     }
 
     // Settings
@@ -171,6 +179,34 @@ class SecurePreferences @Inject constructor(
     var notificationsEnabled: Boolean
         get() = sharedPreferences.getBoolean("notifications_enabled", true)
         set(value) = sharedPreferences.edit().putBoolean("notifications_enabled", value).apply()
+
+    var habitRemindersEnabled: Boolean
+        get() = sharedPreferences.getBoolean("habit_reminders_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("habit_reminders_enabled", value).apply()
+
+    var taskRemindersEnabled: Boolean
+        get() = sharedPreferences.getBoolean("task_reminders_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("task_reminders_enabled", value).apply()
+
+    var socialNotificationsEnabled: Boolean
+        get() = sharedPreferences.getBoolean("social_notifications_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("social_notifications_enabled", value).apply()
+
+    var challengeUpdatesEnabled: Boolean
+        get() = sharedPreferences.getBoolean("challenge_updates_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("challenge_updates_enabled", value).apply()
+
+    var focusModeRemindersEnabled: Boolean
+        get() = sharedPreferences.getBoolean("focus_mode_reminders_enabled", false)
+        set(value) = sharedPreferences.edit().putBoolean("focus_mode_reminders_enabled", value).apply()
+
+    var dailyDigestEnabled: Boolean
+        get() = sharedPreferences.getBoolean("daily_digest_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("daily_digest_enabled", value).apply()
+
+    var weeklyReportEnabled: Boolean
+        get() = sharedPreferences.getBoolean("weekly_report_enabled", true)
+        set(value) = sharedPreferences.edit().putBoolean("weekly_report_enabled", value).apply()
 
     var isPrivateAccount: Boolean
         get() = sharedPreferences.getBoolean("is_private_account", false)

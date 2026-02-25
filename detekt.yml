@@ -9,15 +9,13 @@ config:
   validation: true
 
 complexity:
-  ComplexMethod:
-    active: true
-    threshold: 20
   LongMethod:
     active: true
     threshold: 80
   LongParameterList:
     active: true
-    threshold: 8
+    functionThreshold: 8
+    constructorThreshold: 8
     ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotatedParameter: ["Inject"]
@@ -45,11 +43,11 @@ style:
       - "kotlinx.coroutines.flow.*"
   ForbiddenComment:
     active: true
-    values:
-      - reason: "Remove FIXME before merging"
-        value: "FIXME"
-      - reason: "Remove HACK before merging"
-        value: "HACK"
+    comments:
+      - value: "FIXME"
+        reason: "Fixes should be addressed before merging"
+      - value: "HACK"
+        reason: "Hacks should be refactored into proper solutions"
   MaxLineLength:
     active: true
     maxLineLength: 140

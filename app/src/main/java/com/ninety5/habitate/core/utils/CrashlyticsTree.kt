@@ -11,7 +11,7 @@ class CrashlyticsTree : Timber.Tree() {
         }
 
         val crashlytics = FirebaseCrashlytics.getInstance()
-        crashlytics.log(message)
+        crashlytics.log("[${tag ?: "App"}] priority=$priority message=$message")
 
         if (t != null) {
             crashlytics.recordException(t)

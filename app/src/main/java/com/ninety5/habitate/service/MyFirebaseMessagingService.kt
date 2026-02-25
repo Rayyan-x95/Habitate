@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequestBuilder
@@ -79,7 +80,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            deepLink?.let { putExtra("deep_link", it) }
+            deepLink?.let {
+                val uri = Uri.parse(it)
+                val scheme = uri.scheme
+                if (scheme == "habitate" || scheme == "http" || scheme == "https") {
+                    action = Intent.ACTION_VIEW
+                    data = uri
+                } else {
+                    Timber.w("Rejected deep link with disallowed scheme: $scheme")
+                }
+            }
         }
 
         val pendingIntent = PendingIntent.getActivity(

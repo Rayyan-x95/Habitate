@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -13,6 +12,8 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+import io.gitlab.arturbosch.detekt.Detekt
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 val localProperties = Properties()
@@ -20,6 +21,7 @@ val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
 }
+val isCiBuild = providers.environmentVariable("CI").orNull?.equals("true", ignoreCase = true) == true
 
 android {
     namespace = "com.ninety5.habitate"
@@ -69,12 +71,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-opt-in=kotlin.RequiresOptIn"
-        )
-    }
     // Room schema export for migration verification
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
@@ -110,6 +106,13 @@ android {
         baseline = file("lint-baseline.xml")
         // Exclude Timber lint checks that use deprecated Transform API
         checkDependencies = false
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -227,10 +230,17 @@ detekt {
     config.setFrom(files("${rootProject.projectDir}/detekt.yml"))
     buildUponDefaultConfig = true
     parallel = true
+}
+
+tasks.withType<Detekt>().configureEach {
     // Generate reports
     reports {
         html.required.set(true)
         xml.required.set(true)
         sarif.required.set(true)
     }
+}
+
+tasks.matching { it.name == "uploadCrashlyticsMappingFileRelease" }.configureEach {
+    onlyIf { isCiBuild }
 }

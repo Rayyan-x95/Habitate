@@ -60,6 +60,10 @@ fun PostDetailScreen(
     onUserClick: (String) -> Unit,
     viewModel: PostDetailViewModel = hiltViewModel()
 ) {
+    androidx.compose.runtime.LaunchedEffect(postId) {
+        viewModel.loadPost(postId)
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     var commentText by remember { mutableStateOf("") }
 
