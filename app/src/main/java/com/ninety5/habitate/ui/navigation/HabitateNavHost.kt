@@ -423,9 +423,14 @@ fun HabitateNavHost(
 
         composable(Screen.WorkoutList.route) {
             WorkoutListScreen(
-                onBackClick = { navController.popBackStack() },
                 onWorkoutClick = { workoutId ->
                     navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
+                },
+                onCreateWorkoutClick = {
+                    navController.navigate(Screen.CreateWorkout.route)
+                },
+                onNavigateToHealthConnect = {
+                    navController.navigate(Screen.HealthConnect.route)
                 }
             )
         }
@@ -491,7 +496,7 @@ fun HabitateNavHost(
                     }
                 },
                 onViewProfileAs = { 
-                    val userId = authViewModel.uiState.value.userId
+                    val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                     if (userId != null) {
                         navController.navigate(Screen.UserProfile.createRoute(userId))
                     }
