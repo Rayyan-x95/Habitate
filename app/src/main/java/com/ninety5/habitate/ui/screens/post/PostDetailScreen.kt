@@ -26,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,8 +48,7 @@ import com.ninety5.habitate.ui.components.designsystem.HabitateErrorState
 import com.ninety5.habitate.ui.components.UserAvatar
 import com.ninety5.habitate.ui.components.PostItem
 import com.ninety5.habitate.ui.screens.feed.PostUiModel
-import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,19 +66,19 @@ fun PostDetailScreen(
     var commentText by remember { mutableStateOf("") }
 
     Scaffold(
-        containerColor = HabitateDarkGreenStart,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Post", color = HabitateOffWhite) },
+                title = { Text("Post", color = HabitateTheme.colors.onBackground) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = HabitateOffWhite)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = HabitateTheme.colors.onBackground)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = HabitateDarkGreenStart,
-                    titleContentColor = HabitateOffWhite,
-                    navigationIconContentColor = HabitateOffWhite
+                    containerColor = HabitateTheme.colors.background,
+                    titleContentColor = HabitateTheme.colors.onBackground,
+                    navigationIconContentColor = HabitateTheme.colors.onBackground
                 )
             )
         },
@@ -168,12 +166,12 @@ fun PostDetailScreen(
                             )
                         }
 
-                        HorizontalDivider(color = HabitateOffWhite.copy(alpha = 0.1f))
+                        HorizontalDivider(color = HabitateTheme.colors.divider)
 
                         Text(
                             text = "Comments",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = HabitateOffWhite,
+                            style = HabitateTheme.typography.titleMedium,
+                            color = HabitateTheme.colors.onBackground,
                             modifier = Modifier.padding(16.dp)
 
                         )
@@ -184,8 +182,8 @@ fun PostDetailScreen(
                         item {
                             Text(
                                 text = "No comments yet. Be the first!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = HabitateTheme.typography.bodyMedium,
+                                color = HabitateTheme.colors.onSurfaceVariant,
                                 modifier = Modifier.padding(16.dp)
                             )
                         }
@@ -201,11 +199,11 @@ fun PostDetailScreen(
                                 Column {
                                     Text(
                                         text = comment.authorDisplayName,
-                                        style = MaterialTheme.typography.labelMedium
+                                        style = HabitateTheme.typography.labelMedium
                                     )
                                     Text(
                                         text = comment.text,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = HabitateTheme.typography.bodyMedium
                                     )
                                 }
                             }

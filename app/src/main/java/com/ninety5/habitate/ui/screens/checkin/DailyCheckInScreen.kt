@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +50,7 @@ fun DailyCheckInScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("How are you feeling today?", style = MaterialTheme.typography.titleLarge)
+            Text("How are you feeling today?", style = HabitateTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(16.dp))
             
             val moods = listOf("Happy", "Energetic", "Calm", "Stressed", "Tired", "Sad")

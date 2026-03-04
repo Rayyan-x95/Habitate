@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -106,10 +107,10 @@ fun CreateWorkoutScreen(
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                color = HabitateTheme.colors.primary
                             )
                         } else {
-                            Text("Save", style = MaterialTheme.typography.titleMedium)
+                            Text("Save", style = HabitateTheme.typography.titleMedium)
                         }
                     }
                 }
@@ -123,7 +124,7 @@ fun CreateWorkoutScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("Workout Type", style = MaterialTheme.typography.titleSmall)
+            Text("Workout Type", style = HabitateTheme.typography.titleSmall)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -209,8 +210,8 @@ fun CreateWorkoutScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = uiState.error ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = HabitateTheme.colors.error,
+                    style = HabitateTheme.typography.bodyMedium
                 )
             }
         }

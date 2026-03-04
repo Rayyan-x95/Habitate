@@ -6,21 +6,29 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Diversity3
-import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.Rocket
 import androidx.compose.material.icons.rounded.RocketLaunch
-import androidx.compose.material.icons.rounded.SelfImprovement
-import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.TrendingUp
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,14 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.ninety5.habitate.ui.theme.*
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -43,30 +50,32 @@ import kotlinx.coroutines.launch
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     val pages = listOf(
         OnboardingPage(
             icon = Icons.Rounded.RocketLaunch,
             title = "Reach your goals with no distractions",
             description = "",
-            accentColor = MaterialTheme.colorScheme.primary
+            accentColor = colors.primary
         ),
         OnboardingPage(
             icon = Icons.Rounded.Diversity3,
             title = "Welcome to the community!",
             description = "",
-            accentColor = MaterialTheme.colorScheme.secondary
+            accentColor = colors.secondary
         ),
         OnboardingPage(
             icon = Icons.Rounded.Favorite,
             title = "A place where wellbeing combines with social aspects",
             description = "Together for a better us.",
-            accentColor = MaterialTheme.colorScheme.tertiary
+            accentColor = colors.accent
         ),
         OnboardingPage(
             icon = Icons.Rounded.TrendingUp,
             title = "Inspire yourself to do better",
             description = "",
-            accentColor = MaterialTheme.colorScheme.primary
+            accentColor = colors.primary
         )
     )
 
@@ -76,11 +85,9 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
+            .background(colors.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Pager
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -97,7 +104,7 @@ fun OnboardingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp)
+                    .padding(Spacing.xl)
             ) {
                 // Page indicators
                 Row(
@@ -113,19 +120,19 @@ fun OnboardingScreen(
                         )
                         Box(
                             modifier = Modifier
-                                .padding(end = 8.dp)
+                                .padding(end = Spacing.xs)
                                 .height(8.dp)
                                 .width(width)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                    if (isSelected) colors.primary
+                                    else colors.primary.copy(alpha = 0.3f)
                                 )
                         )
                     }
                 }
 
-                // Action button (Circular Arrow)
+                // Action button
                 IconButton(
                     onClick = {
                         if (pagerState.currentPage < pages.size - 1) {
@@ -139,12 +146,12 @@ fun OnboardingScreen(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .size(64.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        .background(colors.primary, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                         contentDescription = "Next",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = colors.onPrimary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -158,6 +165,7 @@ fun OnboardingPageContent(
     page: OnboardingPage,
     isActive: Boolean
 ) {
+    val colors = HabitateTheme.colors
     val scale by animateFloatAsState(
         targetValue = if (isActive) 1f else 0.85f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy),
@@ -167,46 +175,43 @@ fun OnboardingPageContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = Spacing.xl)
             .scale(scale),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = page.title,
-            fontSize = 32.sp,
+            style = HabitateTheme.typography.headlineLarge,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
-            color = HabitateOffWhite,
-            lineHeight = 40.sp
+            color = colors.onBackground
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
-        // Placeholder for Illustration
-        // In a real app, use Image(painter = painterResource(id = page.imageRes), ...)
         Box(
             modifier = Modifier
                 .size(280.dp)
                 .clip(CircleShape)
-                .background(Color.Transparent), // Transparent background for illustration
+                .background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
-             Icon(
+            Icon(
                 imageVector = page.icon,
                 contentDescription = null,
                 modifier = Modifier.size(120.dp),
-                tint = HabitateOffWhite
+                tint = colors.onBackground
             )
         }
 
         if (page.description.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
             Text(
                 text = page.description,
-                fontSize = 20.sp,
+                style = HabitateTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
-                color = HabitateOffWhite
+                color = colors.onBackground
             )
         }
     }

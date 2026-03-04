@@ -49,6 +49,11 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
+    fun retryLoadProfile() {
+        clearError()
+        loadProfile()
+    }
+
     private fun loadProfile() {
         profileJob?.cancel()
         

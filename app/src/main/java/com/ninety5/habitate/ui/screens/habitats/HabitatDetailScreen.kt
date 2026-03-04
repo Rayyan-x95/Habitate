@@ -24,7 +24,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,8 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.ui.components.PostItem
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
-import com.ninety5.habitate.ui.theme.SageGreen
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 
@@ -67,13 +65,13 @@ fun HabitatDetailScreen(
     val context = LocalContext.current
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
                         text = habitat?.name ?: "Habitat",
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = HabitateTheme.colors.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -81,12 +79,12 @@ fun HabitatDetailScreen(
                         Icon(
                             Icons.AutoMirrored.Rounded.ArrowBack, 
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = HabitateTheme.colors.onBackground
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = HabitateTheme.colors.background
                 )
             )
         }
@@ -121,15 +119,15 @@ fun HabitatDetailScreen(
                                 }
                                 Text(
                                     text = habitat.description ?: "",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    style = HabitateTheme.typography.bodyMedium,
+                                    color = HabitateTheme.colors.onBackground
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
                                     text = "${habitat.memberCount} members",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = HabitateTheme.typography.labelMedium,
+                                    color = HabitateTheme.colors.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -149,20 +147,20 @@ fun HabitatDetailScreen(
                                             Icon(
                                                 Icons.Rounded.EmojiEvents,
                                                 contentDescription = null,
-                                                tint = SageGreen
+                                                tint = HabitateTheme.colors.primary
                                             )
                                             Spacer(modifier = Modifier.width(16.dp))
                                             Column {
                                                 Text(
                                                     "Active Challenge",
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    color = HabitateOffWhite.copy(alpha = 0.7f)
+                                                    style = HabitateTheme.typography.labelMedium,
+                                                    color = HabitateTheme.colors.onBackground.copy(alpha = 0.7f)
                                                 )
                                                 Text(
                                                     activeChallenge.title,
-                                                    style = MaterialTheme.typography.titleMedium,
+                                                    style = HabitateTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = HabitateOffWhite
+                                                    color = HabitateTheme.colors.onBackground
                                                 )
                                             }
                                         }
@@ -172,8 +170,8 @@ fun HabitatDetailScreen(
 
                                 Text(
                                     text = "Recent Posts",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    style = HabitateTheme.typography.titleMedium,
+                                    color = HabitateTheme.colors.onBackground
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }

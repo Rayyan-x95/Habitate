@@ -38,7 +38,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import kotlinx.coroutines.delay
 
@@ -81,7 +81,7 @@ fun StudiesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = HabitateTheme.colors.surface
                 )
             )
         }
@@ -129,7 +129,7 @@ fun StudiesScreen(
                 item {
                     Text(
                         text = "Your Study Habits",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = HabitateTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -154,7 +154,7 @@ fun StudiesScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "💡 Study Tips",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = HabitateTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -190,7 +190,7 @@ private fun StatsOverviewCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = HabitateTheme.colors.primaryContainer
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -210,14 +210,14 @@ private fun StatsOverviewCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "$streak",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = HabitateTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = "day streak",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelMedium,
+                        color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 }
 
@@ -227,20 +227,20 @@ private fun StatsOverviewCard(
                         Icon(
                             Icons.Default.Timer,
                             contentDescription = "Today's study time",
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = HabitateTheme.colors.primary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${todayMinutes}m",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = HabitateTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = "today",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelMedium,
+                        color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -250,8 +250,8 @@ private fun StatsOverviewCard(
             // Weekly progress
             Text(
                 text = "Weekly Goal: ${weeklyGoal / 60}h",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                style = HabitateTheme.typography.labelMedium,
+                color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.height(4.dp))
             LinearProgressIndicator(
@@ -260,14 +260,14 @@ private fun StatsOverviewCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                color = HabitateTheme.colors.primary,
+                trackColor = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.2f)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${(weeklyProgress * 100).toInt()}% complete",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                style = HabitateTheme.typography.labelSmall,
+                color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
             )
         }
     }
@@ -285,8 +285,8 @@ private fun StudyHabitCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) 
-                MaterialTheme.colorScheme.secondaryContainer 
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                HabitateTheme.colors.secondaryContainer 
+                else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -300,7 +300,7 @@ private fun StudyHabitCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = habit.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = HabitateTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     if (habit.completedToday) {
@@ -318,8 +318,8 @@ private fun StudyHabitCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = desc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = HabitateTheme.typography.bodySmall,
+                        color = HabitateTheme.colors.onSurfaceVariant
                     )
                 }
                 
@@ -327,12 +327,12 @@ private fun StudyHabitCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "🎯 ${habit.targetMinutes} min",
-                        style = MaterialTheme.typography.labelMedium
+                        style = HabitateTheme.typography.labelMedium
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = "🔥 ${habit.streak} day streak",
-                        style = MaterialTheme.typography.labelMedium
+                        style = HabitateTheme.typography.labelMedium
                     )
                 }
             }
@@ -341,7 +341,7 @@ private fun StudyHabitCard(
                 Button(
                     onClick = onStop,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                        containerColor = HabitateTheme.colors.error
                     )
                 ) {
                     Icon(Icons.Default.Stop, contentDescription = "Stop study session", modifier = Modifier.size(18.dp))
@@ -380,7 +380,7 @@ private fun ActiveSessionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = HabitateTheme.colors.accentContainer
         )
     ) {
         Column(
@@ -391,7 +391,7 @@ private fun ActiveSessionCard(
         ) {
             Text(
                 text = "📚 Study Session Active",
-                style = MaterialTheme.typography.titleMedium,
+                style = HabitateTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             
@@ -399,9 +399,9 @@ private fun ActiveSessionCard(
             
             Text(
                 text = String.format(java.util.Locale.US, "%02d:%02d", minutes, seconds),
-                style = MaterialTheme.typography.displayMedium,
+                style = HabitateTheme.typography.displayMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
+                color = HabitateTheme.colors.onAccentContainer
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -409,7 +409,7 @@ private fun ActiveSessionCard(
             Button(
                 onClick = onStop,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = HabitateTheme.colors.error
                 )
             ) {
                 Icon(Icons.Default.Stop, contentDescription = "End study session")
@@ -426,7 +426,7 @@ private fun TipCard(tip: String) {
         modifier = Modifier.width(280.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -435,7 +435,7 @@ private fun TipCard(tip: String) {
         ) {
             Text(
                 text = tip,
-                style = MaterialTheme.typography.bodyMedium
+                style = HabitateTheme.typography.bodyMedium
             )
         }
     }
@@ -447,7 +447,7 @@ private fun EmptyStateCard(onNavigateToFocus: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -458,19 +458,19 @@ private fun EmptyStateCard(onNavigateToFocus: () -> Unit) {
         ) {
             Text(
                 text = "📖",
-                style = MaterialTheme.typography.displayMedium
+                style = HabitateTheme.typography.displayMedium
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "No study habits yet",
-                style = MaterialTheme.typography.titleMedium,
+                style = HabitateTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Create study-related habits in Focus mode to track your learning progress here",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = HabitateTheme.typography.bodyMedium,
+                color = HabitateTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -487,7 +487,7 @@ private fun FocusModeCard(onNavigateToFocus: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = HabitateTheme.colors.secondaryContainer
         )
     ) {
         Row(
@@ -500,13 +500,13 @@ private fun FocusModeCard(onNavigateToFocus: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "🍅 Need deep focus?",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = HabitateTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = "Try Focus mode with Pomodoro timer",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                    style = HabitateTheme.typography.bodySmall,
+                    color = HabitateTheme.colors.onSecondaryContainer.copy(alpha = 0.7f)
                 )
             }
             OutlinedButton(onClick = onNavigateToFocus) {

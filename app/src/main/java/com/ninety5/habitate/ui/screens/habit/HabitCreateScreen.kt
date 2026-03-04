@@ -29,6 +29,7 @@ import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.BorderStroke
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 /**
  * Habit Create/Edit Screen - Form for creating or editing habits.
@@ -62,14 +63,14 @@ fun HabitCreateScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(if (habitId != null) "Edit Habit" else "Create Habit", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text(if (habitId != null) "Edit Habit" else "Create Habit", color = HabitateTheme.colors.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateTheme.colors.background,
+                    navigationIconContentColor = HabitateTheme.colors.onBackground,
+                    actionIconContentColor = HabitateTheme.colors.onBackground
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -80,13 +81,13 @@ fun HabitCreateScreen(
                     TextButton(
                         onClick = { viewModel.saveHabit() },
                         enabled = !uiState.isSaving,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.primary)
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
                                 strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = HabitateTheme.colors.primary
                             )
                         } else {
                             Text("SAVE")
@@ -114,13 +115,13 @@ fun HabitCreateScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        cursorColor = MaterialTheme.colorScheme.primary
+                        focusedTextColor = HabitateTheme.colors.onBackground,
+                        unfocusedTextColor = HabitateTheme.colors.onBackground,
+                        focusedBorderColor = HabitateTheme.colors.primary,
+                        unfocusedBorderColor = HabitateTheme.colors.onBackground.copy(alpha = 0.5f),
+                        focusedLabelColor = HabitateTheme.colors.primary,
+                        unfocusedLabelColor = HabitateTheme.colors.onBackground.copy(alpha = 0.7f),
+                        cursorColor = HabitateTheme.colors.primary
                     )
                 )
             }
@@ -134,13 +135,13 @@ fun HabitCreateScreen(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        cursorColor = MaterialTheme.colorScheme.primary
+                        focusedTextColor = HabitateTheme.colors.onBackground,
+                        unfocusedTextColor = HabitateTheme.colors.onBackground,
+                        focusedBorderColor = HabitateTheme.colors.primary,
+                        unfocusedBorderColor = HabitateTheme.colors.onBackground.copy(alpha = 0.5f),
+                        focusedLabelColor = HabitateTheme.colors.primary,
+                        unfocusedLabelColor = HabitateTheme.colors.onBackground.copy(alpha = 0.7f),
+                        cursorColor = HabitateTheme.colors.primary
                     )
                 )
             }
@@ -149,8 +150,8 @@ fun HabitCreateScreen(
             item {
                 Text(
                     "Category *",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = HabitateTheme.typography.titleSmall,
+                    color = HabitateTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -176,8 +177,8 @@ fun HabitCreateScreen(
             item {
                 Text(
                     "Color",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = HabitateTheme.typography.titleSmall,
+                    color = HabitateTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -193,8 +194,8 @@ fun HabitCreateScreen(
             item {
                 Text(
                     "Icon",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = HabitateTheme.typography.titleSmall,
+                    color = HabitateTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -210,8 +211,8 @@ fun HabitCreateScreen(
             item {
                 Text(
                     "Frequency *",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = HabitateTheme.typography.titleSmall,
+                    color = HabitateTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -228,8 +229,8 @@ fun HabitCreateScreen(
                 item {
                     Text(
                         "Select days",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        style = HabitateTheme.typography.titleSmall,
+                        color = HabitateTheme.colors.onBackground,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -246,8 +247,8 @@ fun HabitCreateScreen(
             item {
                 Text(
                     "Reminder (optional)",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = HabitateTheme.typography.titleSmall,
+                    color = HabitateTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -278,7 +279,7 @@ private fun CategoryCard(
     val color = try {
         Color(android.graphics.Color.parseColor(category.getColor()))
     } catch (e: Exception) {
-        MaterialTheme.colorScheme.primary
+        HabitateTheme.colors.primary
     }
     
     Card(
@@ -286,7 +287,7 @@ private fun CategoryCard(
             .aspectRatio(1f)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) color.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.05f)
+            containerColor = if (selected) color.copy(alpha = 0.2f) else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.05f)
         ),
         border = if (selected) BorderStroke(2.dp, color) else null
     ) {
@@ -309,7 +310,7 @@ private fun CategoryCard(
             Spacer(Modifier.height(4.dp))
             Text(
                 category.getDisplayName(),
-                style = MaterialTheme.typography.labelSmall,
+                style = HabitateTheme.typography.labelSmall,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
             )
         }
@@ -382,15 +383,15 @@ private fun IconPicker(
                 onClick = { onIconSelected(icon) },
                 shape = RoundedCornerShape(8.dp),
                 color = if (selectedIcon == icon) 
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    HabitateTheme.colors.primary.copy(alpha = 0.3f)
                 else 
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.05f),
+                    HabitateTheme.colors.surfaceVariant.copy(alpha = 0.05f),
                 modifier = Modifier.aspectRatio(1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         icon,
-                        style = MaterialTheme.typography.titleLarge
+                        style = HabitateTheme.typography.titleLarge
                     )
                 }
             }
@@ -413,9 +414,9 @@ private fun FrequencySelector(
                 selected = selectedFrequency == frequency,
                 onClick = { onFrequencySelected(frequency) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                    labelColor = MaterialTheme.colorScheme.onBackground
+                    selectedContainerColor = HabitateTheme.colors.primary,
+                    selectedLabelColor = HabitateTheme.colors.onPrimary,
+                    labelColor = HabitateTheme.colors.onBackground
                 ),
                 label = {
                     Text(
@@ -480,9 +481,9 @@ private fun ReminderTimePicker(
             onClick = { showTimePicker = true },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onBackground
+                contentColor = HabitateTheme.colors.onBackground
             ),
-            border = BorderStroke(1.dp, if (reminderTime != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, if (reminderTime != null) HabitateTheme.colors.primary else HabitateTheme.colors.onBackground.copy(alpha = 0.5f))
         ) {
             Icon(Icons.Rounded.AccessTime, contentDescription = null)
             Spacer(Modifier.width(8.dp))
@@ -493,7 +494,7 @@ private fun ReminderTimePicker(
         
         if (reminderTime != null) {
             IconButton(onClick = onClearReminder) {
-                Icon(Icons.Rounded.Close, "Clear reminder", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(Icons.Rounded.Close, "Clear reminder", tint = HabitateTheme.colors.onBackground)
             }
         }
     }

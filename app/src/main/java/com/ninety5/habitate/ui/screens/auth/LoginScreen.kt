@@ -3,30 +3,49 @@ package com.ninety5.habitate.ui.screens.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.rounded.Facebook
-import androidx.compose.material.icons.rounded.PhoneAndroid
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,16 +55,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.R
-import com.ninety5.habitate.ui.components.HabitateLogo
-import com.ninety5.habitate.ui.theme.*
-
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import androidx.compose.ui.platform.LocalContext
+import com.ninety5.habitate.R
+import com.ninety5.habitate.ui.components.HabitateLogo
+import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Size
+import com.ninety5.habitate.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
 @Composable
@@ -61,6 +81,7 @@ fun LoginScreen(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val colors = HabitateTheme.colors
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -90,11 +111,8 @@ fun LoginScreen(
                 val credential = result.credential
                 if (credential is com.google.android.libraries.identity.googleid.GoogleIdTokenCredential) {
                     viewModel.handleGoogleSignIn(credential.idToken)
-                } else {
-                    // Handle other credential types if needed
                 }
             } catch (e: Exception) {
-                // Handle error
                 e.printStackTrace()
             }
         }
@@ -115,238 +133,239 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = ReferenceColors.lightGradient
-            ),
+            .background(colors.background),
         contentAlignment = Alignment.Center
     ) {
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(RefScreenPadding.dp),
-            shape = RoundedCornerShape(RefRadiusLG.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = ReferenceColors.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = RefCardElevation.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.screenHorizontal),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            Spacer(modifier = Modifier.height(80.dp))
+
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.ic_habitate_logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(72.dp)
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            Text(
+                text = "Welcome back",
+                style = HabitateTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.onBackground
+            )
+
+            Text(
+                text = "Enter your email and password to log in",
+                style = HabitateTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.xl)
+            )
+
+            // Email Field
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = {
+                    Text(
+                        "your@email.com",
+                        color = colors.onSurfaceVariant
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Radius.md),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = colors.surface,
+                    unfocusedContainerColor = colors.surface,
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.borderSubtle,
+                ),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                )
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Password Field
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = {
+                    Text(
+                        "Password",
+                        color = colors.onSurfaceVariant
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Radius.md),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = colors.surface,
+                    unfocusedContainerColor = colors.surface,
+                    focusedBorderColor = colors.primary,
+                    unfocusedBorderColor = colors.borderSubtle,
+                ),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = colors.onSurfaceVariant
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        viewModel.login(email, password)
+                    }
+                )
+            )
+
+            // Remember Me & Forgot Password
+            Row(
                 modifier = Modifier
-                    .padding(RefCardPadding.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.sm),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Logo
-                Image(
-                    painter = painterResource(id = R.drawable.ic_habitate_logo),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(RefLogoSize.dp)
-                )
-                
-                Spacer(modifier = Modifier.height(RefSpacingMD.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { rememberMe = !rememberMe }
+                ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = colors.primary,
+                            uncheckedColor = colors.onSurfaceVariant
+                        )
+                    )
+                    Text(
+                        text = "Remember me",
+                        style = HabitateTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant
+                    )
+                }
 
                 Text(
-                    text = "Login",
-                    fontSize = RefTextSizeXL.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = ReferenceColors.textPrimary
+                    text = "Forgot Password?",
+                    style = HabitateTheme.typography.bodySmall,
+                    color = colors.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable { onNavigateToForgotPassword() }
                 )
+            }
 
-                Text(
-                    text = "Enter your email and password to log in",
-                    fontSize = RefTextSizeMD.sp,
-                    color = ReferenceColors.textSecondary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = RefSpacingSM.dp, bottom = RefSpacingLG.dp)
-                )
+            Spacer(modifier = Modifier.height(Spacing.md))
 
-                // Email Field
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = { Text("your@email.com", color = ReferenceColors.textSecondary) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(RefRadiusSM.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = ReferenceColors.surface,
-                        unfocusedContainerColor = ReferenceColors.surface,
-                        focusedBorderColor = ReferenceColors.border,
-                        unfocusedBorderColor = ReferenceColors.border,
-                        focusedPlaceholderColor = ReferenceColors.textSecondary,
-                        unfocusedPlaceholderColor = ReferenceColors.textSecondary
-                    ),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(RefSpacingMD.dp))
-
-                // Password Field
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = { Text("*******", color = ReferenceColors.textSecondary) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(RefRadiusSM.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = ReferenceColors.surface,
-                        unfocusedContainerColor = ReferenceColors.surface,
-                        focusedBorderColor = ReferenceColors.border,
-                        unfocusedBorderColor = ReferenceColors.border,
-                        focusedPlaceholderColor = ReferenceColors.textSecondary,
-                        unfocusedPlaceholderColor = ReferenceColors.textSecondary
-                    ),
-                    singleLine = true,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                tint = ReferenceColors.textSecondary
-                            )
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            viewModel.login(email, password)
-                        }
-                    )
-                )
-
-                // Remember Me & Forgot Password
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = RefSpacingMD.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { rememberMe = !rememberMe }
-                    ) {
-                        Checkbox(
-                            checked = rememberMe,
-                            onCheckedChange = { rememberMe = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = ReferenceColors.accent,
-                                uncheckedColor = ReferenceColors.textSecondary
-                            )
-                        )
-                        Text(
-                            text = "Remember me",
-                            fontSize = RefTextSizeSM.sp,
-                            color = ReferenceColors.textSecondary
-                        )
-                    }
-
-                    Text(
-                        text = "Forgot Password ?",
-                        fontSize = RefTextSizeSM.sp,
-                        color = ReferenceColors.accent,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable { onNavigateToForgotPassword() }
-                    )
-                }
-
-                // Login Button
-                Button(
-                    onClick = { viewModel.login(email, password) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(RefButtonHeight.dp),
-                    shape = RoundedCornerShape(RefRadiusSM.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ReferenceColors.accent
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = RefButtonElevation.dp
-                    )
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = ReferenceColors.onAccent
-                        )
-                    } else {
-                        Text(
-                            text = "Log In",
-                            fontSize = RefTextSizeLG.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = ReferenceColors.onAccent
-                        )
-                    }
-                }
-
-                // Or login with
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = RefSpacingLG.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f), 
-                        color = ReferenceColors.divider
-                    )
-                    Text(
-                        text = "Or login with",
-                        fontSize = RefTextSizeSM.sp,
-                        color = ReferenceColors.textSecondary,
-                        modifier = Modifier.padding(horizontal = RefSpacingMD.dp)
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f), 
-                        color = ReferenceColors.divider
-                    )
-                }
-
-                // Social Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    SocialButton(
-                        icon = { 
-                            // Google Icon placeholder - using text G for now or a colored box
-                            Text("G", fontWeight = FontWeight.Bold, color = ReferenceColors.googleRed)
-                        },
-                        onClick = { signInWithGoogle() }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(RefSpacingLG.dp))
-
-                // Sign Up
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+            // Error message
+            AnimatedVisibility(
+                visible = uiState.error != null,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    color = colors.errorContainer,
+                    shape = RoundedCornerShape(Radius.md),
+                    modifier = Modifier.padding(bottom = Spacing.md)
                 ) {
                     Text(
-                        text = "Don't have an account? ",
-                        fontSize = RefTextSizeSM.sp,
-                        color = ReferenceColors.textSecondary
-                    )
-                    Text(
-                        text = "Sign Up",
-                        fontSize = RefTextSizeSM.sp,
-                        color = ReferenceColors.accent,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { onNavigateToRegister() }
+                        text = uiState.error ?: "",
+                        color = colors.error,
+                        modifier = Modifier.padding(Spacing.md),
+                        style = HabitateTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
+
+            // Login Button
+            HabitatePrimaryButton(
+                text = "Log In",
+                onClick = { viewModel.login(email, password) },
+                modifier = Modifier.fillMaxWidth(),
+                loading = uiState.isLoading,
+                enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank()
+            )
+
+            // Or login with
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.lg),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = colors.borderSubtle.copy(alpha = 0.3f)
+                )
+                Text(
+                    text = "Or login with",
+                    style = HabitateTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = Spacing.md)
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = colors.borderSubtle.copy(alpha = 0.3f)
+                )
+            }
+
+            // Social Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                SocialButton(
+                    icon = {
+                        Text(
+                            "G",
+                            fontWeight = FontWeight.Bold,
+                            color = colors.error
+                        )
+                    },
+                    onClick = { signInWithGoogle() }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.xl))
+
+            // Sign Up
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Don't have an account? ",
+                    style = HabitateTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant
+                )
+                Text(
+                    text = "Sign Up",
+                    style = HabitateTheme.typography.bodySmall,
+                    color = colors.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable { onNavigateToRegister() }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
 }
@@ -356,12 +375,14 @@ fun SocialButton(
     icon: @Composable () -> Unit,
     onClick: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(RefRadiusMD.dp),
-        color = ReferenceColors.socialButtonBg,
-        modifier = Modifier.size(RefSocialButtonSize.dp),
-        shadowElevation = RefSocialButtonElevation.dp
+        shape = RoundedCornerShape(Radius.md),
+        color = colors.surfaceVariant.copy(alpha = 0.5f),
+        modifier = Modifier.size(56.dp),
+        shadowElevation = 0.dp
     ) {
         Box(contentAlignment = Alignment.Center) {
             icon()

@@ -3,39 +3,43 @@ package com.ninety5.habitate.ui.screens.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.ninety5.habitate.ui.theme.*
-import com.ninety5.habitate.ui.theme.LocalHabitateColors
-
-/**
- * ╔══════════════════════════════════════════════════════════════════════════╗
- * ║                  HABITATE CONVERSATIONS LIST SCREEN (PIXEL-PERFECT)       ║
- * ║                                                                          ║
- * ║  Replicates the chat/messages screen from reference images:               ║
- * ║  • Top bar with "Messages" title and search icon                         ║
- * ║  • List of conversations with user avatars                               ║
- * ║  • User names, last messages, and timestamps                            ║
- * ║  • Online status indicators                                             ║
- * ║  • Clean, minimal design matching reference                              ║
- * ╚══════════════════════════════════════════════════════════════════════════╝
- */
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Size
+import com.ninety5.habitate.ui.theme.Spacing
 
 @Composable
 fun ConversationsListScreen(
@@ -43,22 +47,22 @@ fun ConversationsListScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ReferenceColors.backgroundLight)
+            .background(colors.background)
     ) {
-        // Top Bar
         ConversationsTopBar(
             onNavigateToSearch = onNavigateToSearch,
             onNavigateBack = onNavigateBack
         )
-        
-        // Conversations List
+
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = RefSpacingSM.dp),
-            verticalArrangement = Arrangement.spacedBy(RefSpacingXS.dp)
+            contentPadding = PaddingValues(horizontal = Spacing.sm, vertical = Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {
             items(getSampleConversations()) { conversation ->
                 ConversationItem(
@@ -75,45 +79,44 @@ fun ConversationsTopBar(
     onNavigateToSearch: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ReferenceColors.surface)
-            .padding(RefSpacingMD.dp),
+            .background(colors.surface)
+            .padding(Spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Back button
         IconButton(
             onClick = onNavigateBack,
-            modifier = Modifier.size(RefIconSizeXL.dp)
+            modifier = Modifier.size(Size.iconXl)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
-                tint = ReferenceColors.textPrimary,
-                modifier = Modifier.size(RefIconSizeMD.dp)
+                tint = colors.onBackground,
+                modifier = Modifier.size(Size.iconMd)
             )
         }
-        
-        // Title
+
         Text(
             text = "Messages",
-            fontSize = RefTextSizeLG.sp,
+            style = HabitateTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            color = ReferenceColors.textPrimary
+            color = colors.onBackground
         )
-        
-        // Search button
+
         IconButton(
             onClick = onNavigateToSearch,
-            modifier = Modifier.size(RefIconSizeXL.dp)
+            modifier = Modifier.size(Size.iconXl)
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = ReferenceColors.textPrimary,
-                modifier = Modifier.size(RefIconSizeMD.dp)
+                tint = colors.onBackground,
+                modifier = Modifier.size(Size.iconMd)
             )
         }
     }
@@ -124,65 +127,61 @@ fun ConversationItem(
     conversation: Conversation,
     onClick: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics { contentDescription = "Conversation: ${conversation.userName}" }
             .clickable { onClick() },
-        shape = RoundedCornerShape(RefRadiusLG.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = CardDefaults.cardColors(
-            containerColor = ReferenceColors.surface
+            containerColor = colors.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = RefCardElevation.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(RefSpacingMD.dp),
+                .padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar with online status
-            Box(
-                modifier = Modifier.size(RefAvatarSizeLG.dp)
-            ) {
-                // Avatar
+            Box(modifier = Modifier.size(Size.avatarMd)) {
                 Box(
                     modifier = Modifier
-                        .size(RefAvatarSizeLG.dp)
+                        .size(Size.avatarMd)
                         .clip(CircleShape)
-                        .background(ReferenceColors.border),
+                        .background(colors.border.copy(alpha = 0.3f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = conversation.userName.first().toString(),
-                        fontSize = RefTextSizeXL.sp,
+                        style = HabitateTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = ReferenceColors.textSecondary
+                        color = colors.onBackground.copy(alpha = 0.6f)
                     )
                 }
-                
-                // Online status indicator
+
                 if (conversation.isOnline) {
                     Box(
                         modifier = Modifier
                             .size(12.dp)
                             .clip(CircleShape)
-                            .background(LocalHabitateColors.current.success)
+                            .background(colors.success)
                             .align(Alignment.BottomEnd)
                             .border(
                                 width = 2.dp,
-                                color = ReferenceColors.surface,
+                                color = colors.surface,
                                 shape = CircleShape
                             )
                     )
                 }
             }
-            
-            Spacer(modifier = Modifier.width(RefSpacingMD.dp))
-            
-            // Conversation details
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+
+            Spacer(modifier = Modifier.width(Spacing.md))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -190,23 +189,22 @@ fun ConversationItem(
                 ) {
                     Text(
                         text = conversation.userName,
-                        fontSize = RefTextSizeMD.sp,
+                        style = HabitateTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = ReferenceColors.textPrimary,
+                        color = colors.onBackground,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    
                     Text(
                         text = conversation.timestamp,
-                        fontSize = RefTextSizeXS.sp,
-                        color = ReferenceColors.textSecondary
+                        style = HabitateTheme.typography.labelSmall,
+                        color = colors.onBackground.copy(alpha = 0.5f)
                     )
                 }
-                
-                Spacer(modifier = Modifier.height(RefSpacingXS.dp))
-                
+
+                Spacer(modifier = Modifier.height(Spacing.xxs))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -214,21 +212,20 @@ fun ConversationItem(
                 ) {
                     Text(
                         text = conversation.lastMessage,
-                        fontSize = RefTextSizeSM.sp,
-                        color = if (conversation.isUnread) ReferenceColors.textPrimary else ReferenceColors.textSecondary,
+                        style = HabitateTheme.typography.bodyMedium,
+                        color = if (conversation.isUnread) colors.onBackground else colors.onBackground.copy(alpha = 0.6f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                         fontWeight = if (conversation.isUnread) FontWeight.SemiBold else FontWeight.Normal
                     )
-                    
-                    // Unread indicator
+
                     if (conversation.isUnread) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(ReferenceColors.accent)
+                                .background(colors.primary)
                         )
                     }
                 }
@@ -237,9 +234,6 @@ fun ConversationItem(
     }
 }
 
-/**
- * Sample conversation data
- */
 data class Conversation(
     val id: String,
     val userName: String,

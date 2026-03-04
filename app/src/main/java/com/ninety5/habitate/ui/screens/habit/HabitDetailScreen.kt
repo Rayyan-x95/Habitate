@@ -34,6 +34,7 @@ import com.ninety5.habitate.ui.components.designsystem.HabitateErrorState
 import com.ninety5.habitate.ui.components.designsystem.HabitateLoadingScreen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 /**
  * Habit Detail Screen - Complete view of a single habit.
@@ -87,14 +88,14 @@ fun HabitDetailScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text(uiState.habitWithDetails?.habit?.title ?: "Habit", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text(uiState.habitWithDetails?.habit?.title ?: "Habit", color = HabitateTheme.colors.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateTheme.colors.background,
+                    navigationIconContentColor = HabitateTheme.colors.onBackground,
+                    actionIconContentColor = HabitateTheme.colors.onBackground
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -166,7 +167,7 @@ fun HabitDetailScreen(
                         ) {
                             Card(
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
+                                    containerColor = HabitateTheme.colors.primary
                                 )
                             ) {
                                 Row(
@@ -174,12 +175,12 @@ fun HabitDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text("🎉", style = MaterialTheme.typography.headlineMedium)
+                                    Text("🎉", style = HabitateTheme.typography.headlineMedium)
                                     Text(
                                         "Great job! Keep it up!",
-                                        style = MaterialTheme.typography.bodyLarge,
+                                        style = HabitateTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimary
+                                        color = HabitateTheme.colors.onPrimary
                                     )
                                 }
                             }
@@ -190,8 +191,8 @@ fun HabitDetailScreen(
                     item {
                         Text(
                             "Activity",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            style = HabitateTheme.typography.titleMedium,
+                            color = HabitateTheme.colors.onBackground,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -207,8 +208,8 @@ fun HabitDetailScreen(
                     item {
                         Text(
                             "History",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            style = HabitateTheme.typography.titleMedium,
+                            color = HabitateTheme.colors.onBackground,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -242,7 +243,7 @@ private fun HabitHeaderCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -260,26 +261,26 @@ private fun HabitHeaderCard(
                         color = try {
                             Color(android.graphics.Color.parseColor(habit.color))
                         } catch (e: Exception) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            HabitateTheme.colors.primary.copy(alpha = 0.3f)
                         },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(habit.icon, style = MaterialTheme.typography.titleLarge)
+                            Text(habit.icon, style = HabitateTheme.typography.titleLarge)
                         }
                     }
                     
                     Column {
                         Text(
                             habit.title,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = HabitateTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = HabitateTheme.colors.onSurface
                         )
                         Text(
                             habit.category.getDisplayName(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            style = HabitateTheme.typography.bodyMedium,
+                            color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -289,10 +290,10 @@ private fun HabitHeaderCard(
                     onClick = onCompleteClick,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = if (isCompletedToday)
-                            MaterialTheme.colorScheme.primary
+                            HabitateTheme.colors.primary
                         else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                        contentColor = if (isCompletedToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                            HabitateTheme.colors.onSurface.copy(alpha = 0.1f),
+                        contentColor = if (isCompletedToday) HabitateTheme.colors.onPrimary else HabitateTheme.colors.onSurface
                     )
                 ) {
                     Icon(
@@ -309,8 +310,8 @@ private fun HabitHeaderCard(
                 Spacer(Modifier.height(12.dp))
                 Text(
                     habit.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    style = HabitateTheme.typography.bodyMedium,
+                    color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
 
@@ -333,13 +334,13 @@ private fun HeatmapCalendar(
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 "Last 365 days",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                style = HabitateTheme.typography.labelMedium,
+                color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
             )
             
             Spacer(Modifier.height(8.dp))
@@ -367,7 +368,7 @@ private fun HeatmapCalendar(
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(2.dp))
                             .background(
-                                MaterialTheme.colorScheme.primary.copy(
+                                HabitateTheme.colors.primary.copy(
                                     alpha = if (count > 0) 0.2f + (intensity * 0.8f) else 0.1f
                                 )
                             )
@@ -384,8 +385,8 @@ private fun HeatmapCalendar(
             ) {
                 Text(
                     "Less",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    style = HabitateTheme.typography.labelSmall,
+                    color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
                 repeat(5) { index ->
                     Box(
@@ -393,7 +394,7 @@ private fun HeatmapCalendar(
                             .size(12.dp)
                             .clip(RoundedCornerShape(2.dp))
                             .background(
-                                MaterialTheme.colorScheme.primary.copy(
+                                HabitateTheme.colors.primary.copy(
                                     alpha = 0.1f + (index * 0.2f)
                                 )
                             )
@@ -401,8 +402,8 @@ private fun HeatmapCalendar(
                 }
                 Text(
                     "More",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    style = HabitateTheme.typography.labelSmall,
+                    color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
         }
@@ -416,7 +417,7 @@ private fun CompletionLogCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -426,15 +427,15 @@ private fun CompletionLogCard(
             Column {
                 Text(
                     log.completedAt.toString().substringBefore('T'),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = HabitateTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = HabitateTheme.colors.onSurface
                 )
                 if (log.note?.isNotBlank() == true) {
                     Text(
                         log.note,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.bodyMedium,
+                        color = HabitateTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -442,7 +443,7 @@ private fun CompletionLogCard(
             if (log.mood != null) {
                 Text(
                     log.mood.getEmoji(),
-                    style = MaterialTheme.typography.headlineSmall
+                    style = HabitateTheme.typography.headlineSmall
                 )
             }
         }
@@ -457,9 +458,9 @@ private fun MoodSelectionDialog(
     var notes by remember { mutableStateOf("") }
     
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = HabitateTheme.colors.surface,
+        titleContentColor = HabitateTheme.colors.onSurface,
+        textContentColor = HabitateTheme.colors.onSurface,
         onDismissRequest = onDismiss,
         title = { Text("How did it go?") },
         text = {
@@ -472,13 +473,13 @@ private fun MoodSelectionDialog(
                         Surface(
                             onClick = { onMoodSelected(mood, notes.takeIf { it.isNotBlank() }) },
                             shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            color = HabitateTheme.colors.onSurface.copy(alpha = 0.1f),
                             modifier = Modifier.size(64.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     mood.getEmoji(),
-                                    style = MaterialTheme.typography.headlineMedium
+                                    style = HabitateTheme.typography.headlineMedium
                                 )
                             }
                         }
@@ -492,13 +493,13 @@ private fun MoodSelectionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        cursorColor = MaterialTheme.colorScheme.primary
+                        focusedTextColor = HabitateTheme.colors.onSurface,
+                        unfocusedTextColor = HabitateTheme.colors.onSurface,
+                        focusedBorderColor = HabitateTheme.colors.primary,
+                        unfocusedBorderColor = HabitateTheme.colors.onSurface.copy(alpha = 0.5f),
+                        focusedLabelColor = HabitateTheme.colors.primary,
+                        unfocusedLabelColor = HabitateTheme.colors.onSurface.copy(alpha = 0.7f),
+                        cursorColor = HabitateTheme.colors.primary
                     )
                 )
             }
@@ -506,7 +507,7 @@ private fun MoodSelectionDialog(
         confirmButton = {
             TextButton(
                 onClick = { onMoodSelected(HabitMood.NEUTRAL, notes.takeIf { it.isNotBlank() }) },
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.primary)
             ) {
                 Text("Skip")
             }
@@ -514,7 +515,7 @@ private fun MoodSelectionDialog(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.onSurface.copy(alpha = 0.7f))
             ) {
                 Text("Cancel")
             }
@@ -528,10 +529,10 @@ private fun DeleteConfirmDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
-        iconContentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = HabitateTheme.colors.surface,
+        titleContentColor = HabitateTheme.colors.onSurface,
+        textContentColor = HabitateTheme.colors.onSurface,
+        iconContentColor = HabitateTheme.colors.onSurface,
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Rounded.Warning, null) },
         title = { Text("Delete habit?") },
@@ -540,7 +541,7 @@ private fun DeleteConfirmDialog(
             Button(
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = HabitateTheme.colors.error
                 )
             ) {
                 Text("Delete")
@@ -549,7 +550,7 @@ private fun DeleteConfirmDialog(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.onSurface.copy(alpha = 0.7f))
             ) {
                 Text("Cancel")
             }

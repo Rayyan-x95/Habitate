@@ -36,7 +36,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.JournalEntry
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -91,7 +91,7 @@ fun WellbeingScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = HabitateTheme.colors.surface
                 )
             )
         }
@@ -153,7 +153,7 @@ fun WellbeingScreen(
                     item {
                         Text(
                             text = "Insights",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = HabitateTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -191,13 +191,13 @@ fun WellbeingScreen(
                         ) {
                             Text(
                                 text = "Recent Journal Entries",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = HabitateTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
                                 text = "View all",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
+                                style = HabitateTheme.typography.labelMedium,
+                                color = HabitateTheme.colors.primary,
                                 modifier = Modifier.clickable { onNavigateToJournal() }
                             )
                         }
@@ -240,7 +240,7 @@ private fun WellbeingScoreCard(score: Int) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = HabitateTheme.colors.primaryContainer
         )
     ) {
         Column(
@@ -251,8 +251,8 @@ private fun WellbeingScoreCard(score: Int) {
         ) {
             Text(
                 text = "Your Wellbeing Score",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                style = HabitateTheme.typography.titleMedium,
+                color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -283,14 +283,14 @@ private fun WellbeingScoreCard(score: Int) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = animatedValue.toInt().toString(),
-                        style = MaterialTheme.typography.displayMedium,
+                        style = HabitateTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = HabitateTheme.colors.onPrimaryContainer
                     )
                     Text(
                         text = getScoreLabel(score),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelMedium,
+                        color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -299,8 +299,8 @@ private fun WellbeingScoreCard(score: Int) {
             
             Text(
                 text = getScoreMessage(score),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                style = HabitateTheme.typography.bodyMedium,
+                color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
             )
         }
@@ -319,7 +319,7 @@ private fun QuickStatCard(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Column(
@@ -329,19 +329,19 @@ private fun QuickStatCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = HabitateTheme.colors.primary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = HabitateTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = subtext,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = HabitateTheme.typography.labelSmall,
+                color = HabitateTheme.colors.onSurfaceVariant
             )
         }
     }
@@ -353,7 +353,7 @@ private fun InsightCard(insight: WellbeingInsight) {
         modifier = Modifier.width(240.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = HabitateTheme.colors.secondaryContainer
         )
     ) {
         Row(
@@ -362,20 +362,20 @@ private fun InsightCard(insight: WellbeingInsight) {
         ) {
             Text(
                 text = insight.emoji,
-                style = MaterialTheme.typography.titleLarge
+                style = HabitateTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
                     text = insight.title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = HabitateTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = insight.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                    style = HabitateTheme.typography.bodySmall,
+                    color = HabitateTheme.colors.onSecondaryContainer.copy(alpha = 0.8f)
                 )
             }
         }
@@ -388,13 +388,13 @@ private fun MoodDistributionCard(moodDistribution: Map<String, Int>) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "Mood Distribution",
-                style = MaterialTheme.typography.titleSmall,
+                style = HabitateTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -411,12 +411,12 @@ private fun MoodDistributionCard(moodDistribution: Map<String, Int>) {
                     ) {
                         Text(
                             text = getMoodEmoji(mood),
-                            style = MaterialTheme.typography.titleMedium
+                            style = HabitateTheme.typography.titleMedium
                         )
                         Text(
                             text = if (total > 0) "${((count / total) * 100).toInt()}%" else "0%",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = HabitateTheme.typography.labelSmall,
+                            color = HabitateTheme.colors.onSurfaceVariant
                         )
                     }
                 }
@@ -431,7 +431,7 @@ private fun ActivitySummaryCard(workoutStats: WorkoutStats) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+            containerColor = HabitateTheme.colors.accentContainer
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -439,12 +439,12 @@ private fun ActivitySummaryCard(workoutStats: WorkoutStats) {
                 Icon(
                     Icons.Default.FitnessCenter,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                    tint = HabitateTheme.colors.onAccentContainer
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Activity Summary",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = HabitateTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -458,37 +458,37 @@ private fun ActivitySummaryCard(workoutStats: WorkoutStats) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "${workoutStats.workoutsThisWeek}",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = HabitateTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "workouts",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.onAccentContainer.copy(alpha = 0.7f)
                     )
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "${workoutStats.totalMinutes}",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = HabitateTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "minutes",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.onAccentContainer.copy(alpha = 0.7f)
                     )
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "${workoutStats.totalCalories}",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = HabitateTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "calories",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.onAccentContainer.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -514,7 +514,7 @@ private fun JournalEntryPreviewCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -524,7 +524,7 @@ private fun JournalEntryPreviewCard(
             // Mood emoji
             Text(
                 text = getMoodEmoji(entry.mood?.name?.lowercase() ?: "neutral"),
-                style = MaterialTheme.typography.titleMedium
+                style = HabitateTheme.typography.titleMedium
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -533,7 +533,7 @@ private fun JournalEntryPreviewCard(
                 entry.title?.let { title ->
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = HabitateTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -541,8 +541,8 @@ private fun JournalEntryPreviewCard(
                 }
                 Text(
                     text = entry.content,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = HabitateTheme.typography.bodySmall,
+                    color = HabitateTheme.colors.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -550,8 +550,8 @@ private fun JournalEntryPreviewCard(
             
             Text(
                 text = date.format(dateFormatter),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = HabitateTheme.typography.labelSmall,
+                color = HabitateTheme.colors.onSurfaceVariant
             )
         }
     }
@@ -565,7 +565,7 @@ private fun EmptyJournalCard(onNavigateToJournal: () -> Unit) {
             .clickable { onNavigateToJournal() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -578,19 +578,19 @@ private fun EmptyJournalCard(onNavigateToJournal: () -> Unit) {
                 Icons.Default.Book,
                 contentDescription = null,
                 modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = HabitateTheme.colors.primary
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Start Journaling",
-                style = MaterialTheme.typography.titleMedium,
+                style = HabitateTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Track your mood and thoughts to improve your wellbeing",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = HabitateTheme.typography.bodySmall,
+                color = HabitateTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }

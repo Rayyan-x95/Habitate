@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import com.ninety5.habitate.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,7 @@ fun PrivacyDashboardScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            icon = { Icon(Icons.Rounded.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            icon = { Icon(Icons.Rounded.Delete, contentDescription = null, tint = HabitateTheme.colors.error) },
             title = { Text("Delete All Data?") },
             text = { 
                 Text("This will permanently delete all your data including posts, habits, workouts, and journal entries. This action cannot be undone.")
@@ -42,7 +43,7 @@ fun PrivacyDashboardScreen(
                         showDeleteDialog = false
                         onDeleteAllData()
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.error)
                 ) {
                     Text("Delete Everything")
                 }
@@ -128,15 +129,15 @@ fun PrivacyDashboardScreen(
                 icon = Icons.Rounded.Delete,
                 title = "Delete All Data",
                 onClick = { showDeleteDialog = true },
-                textColor = MaterialTheme.colorScheme.error
+                textColor = HabitateTheme.colors.error
             )
             
             Spacer(modifier = Modifier.height(Spacing.xxl))
             Text(
                 text = "Habitate is designed with privacy first. Your health data is stored locally and only synced when you choose.",
-                style = MaterialTheme.typography.bodyMedium,
+                style = HabitateTheme.typography.bodyMedium,
                 modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = HabitateTheme.colors.onSurfaceVariant
             )
         }
     }

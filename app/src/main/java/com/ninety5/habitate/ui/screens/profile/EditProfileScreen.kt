@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +62,7 @@ fun EditProfileScreen(
                     } else if (uiState.isSaving) {
                         CircularProgressIndicator(
                             modifier = Modifier.padding(end = 16.dp).size(24.dp),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = HabitateTheme.colors.onSurface
                         )
                     }
                 }
@@ -143,7 +144,7 @@ fun EditProfileForm(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(HabitateTheme.colors.surfaceVariant)
             )
             
             // Overlay for editing hint
@@ -165,8 +166,8 @@ fun EditProfileForm(
                 CircularProgressIndicator(
                     progress = { uploadProgress },
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    color = HabitateTheme.colors.primary,
+                    trackColor = HabitateTheme.colors.surfaceVariant,
                 )
             }
         }
@@ -174,8 +175,8 @@ fun EditProfileForm(
         if (saveError != null) {
             Text(
                 text = saveError,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+                color = HabitateTheme.colors.error,
+                style = HabitateTheme.typography.bodyMedium
             )
         }
 

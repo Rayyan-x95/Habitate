@@ -1,269 +1,356 @@
-# Habitate Design System
-
-> **"Quietly powerful, thoughtfully designed, effortless to use"**
-
-## Design Philosophy
-
-Habitate's design system is built around creating a **calm, minimal, human-centric** experience. Our goal is to help users focus on what matters—their habits, health, and connections—without visual noise or distraction.
-
-### Core Principles
-
-1. **Calm Over Loud** - Muted colors, subtle animations, minimal shadows
-2. **Function Over Flash** - Every element serves a purpose
-3. **Breathable Space** - Generous whitespace and padding
-4. **Accessible by Default** - Clear contrast, readable text, touch-friendly targets
+Habitate Design System — Modern Edition
 
----
+“Focused, fluid, and quietly intelligent.”
 
-## Color System
-
-### Primary Palette (Forest Green)
-Our primary color is derived from the Habitate logo—a calming forest green that evokes nature, growth, and wellness.
-
-| Token | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `primary` | `#2D5A47` | `#6B9E8C` | Primary actions, focus states |
-| `primaryContainer` | `#D4E8E0` | `#1F3D32` | Backgrounds, subtle highlights |
-| `onPrimary` | `#FFFFFF` | `#0D1F18` | Text on primary |
-
-### Accent Palette (Warm Amber)
-A warm amber accent adds personality without competing with the primary green.
-
-| Token | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `accent` | `#B8956A` | `#CFA06A` | Highlights, badges, special actions |
-| `accentContainer` | `#F5EEE6` | `#3D3226` | Accent backgrounds |
-
-### Semantic Colors
-All semantic colors are intentionally muted to avoid alarming the user.
-
-| Token | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `success` | `#5A8A72` | `#7AAF94` | Positive states, completed tasks |
-| `warning` | `#C4956B` | `#D4A574` | Caution states, pending items |
-| `error` | `#B56B6B` | `#CF8A8A` | Error states (calm, not alarming) |
-| `info` | `#6B8AAF` | `#8AA5C4` | Informational states |
-
-### Surface & Background
-| Token | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `background` | `#FAFAF8` | `#0F1412` | App background |
-| `surface` | `#FFFFFF` | `#161D1A` | Cards, sheets |
-| `surfaceVariant` | `#F5F5F3` | `#1E2724` | Secondary surfaces |
-
----
-
-## Typography
+Habitate’s design language blends minimalism, warmth, and clarity to support users building habits, maintaining wellbeing, and connecting with communities.
 
-### Font Family
-**Google Sans Flex** (or system default fallback)
+The interface should feel effortless, calm, and modern — never overwhelming.
 
-### Scale
-
-| Style | Size | Weight | Line Height | Usage |
-|-------|------|--------|-------------|-------|
-| `ScreenTitle` | 28sp | Medium (500) | 1.3 | Main screen headers |
-| `SectionTitle` | 20sp | Medium (500) | 1.35 | Section headers, card titles |
-| `CardTitle` | 16sp | Medium (500) | 1.4 | List items, card headings |
-| `BodyText` | 15sp | Normal (400) | 1.5 | Primary content |
-| `SupportingText` | 14sp | Normal (400) | 1.5 | Secondary content |
-| `MetaText` | 13sp | Normal (400) | 1.45 | Labels, metadata |
-| `CaptionText` | 12sp | Normal (400) | 1.4 | Timestamps, helper text |
-| `ButtonText` | 14sp | Medium (500) | 1.3 | Button labels |
-
-### Typography Guidelines
-- Use **Medium (500)** weight sparingly—for titles and emphasis only
-- Body text should always be **Normal (400)** for readability
-- Line height ratios of 1.5 or higher for body text
-- Never use bold (700) in the UI—keep things calm
-
----
+1. Design Philosophy
 
-## Spacing System
+Habitate follows modern calm technology principles.
 
-### Base Scale
-```
-xxs = 2dp    // Tight spacing
-xs  = 4dp    // Minimal gaps
-sm  = 8dp    // Small gaps
-md  = 12dp   // Default gaps
-lg  = 16dp   // Component spacing
-xl  = 24dp   // Section spacing
-xxl = 32dp   // Large section spacing
-xxxl = 48dp  // Screen padding
-```
-
-### Common Patterns
-| Context | Value |
-|---------|-------|
-| Screen horizontal padding | 20dp |
-| Card internal padding | 16dp |
-| Card compact padding | 12dp |
-| List item vertical padding | 14dp |
-| Between form fields | 16dp |
+Core Principles
+1. Clarity Over Complexity
 
----
+Interfaces should communicate information clearly with minimal visual noise.
 
-## Elevation & Shadows
+2. Calm Interaction
 
-**Principle: Flatten the UI**
+Animations, transitions, and colors should feel natural and soothing.
 
-Habitate uses minimal elevation. Most surfaces appear flat with subtle borders rather than shadows.
+3. Structured Minimalism
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `none` | 0dp | Default for most surfaces |
-| `whisper` | 0.5dp | Very subtle lift |
-| `xs` | 1dp | Cards, subtle elevation |
-| `sm` | 2dp | FABs, max for cards |
-| `md` | 4dp | Dialogs, sheets (rare) |
-| `lg` | 8dp | Reserved for modals |
+Minimal does not mean empty — every element must serve a purpose.
 
-### Guidelines
-- Cards should use `xs` (1dp) or `none`
-- FABs should use `sm` (2dp)
-- Never exceed 4dp elevation in feed content
-- Prefer borders over shadows when possible
+4. Depth Through Layers
 
----
+Use subtle surfaces, elevation, and spacing rather than heavy shadows.
 
-## Corner Radius
+5. Human-Centered Interfaces
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `xs` | 4dp | Chips, small elements |
-| `sm` | 8dp | Input fields, tags |
-| `md` | 12dp | Default cards |
-| `lg` | 16dp | Featured cards, images |
-| `xl` | 24dp | Modals, bottom sheets |
-| `pill` | 9999dp | Pills, avatars, search bars |
+Design must prioritize readability, accessibility, and comfortable interaction.
 
----
+2. Color System
 
-## Component Guidelines
+Habitate’s palette is inspired by nature and wellbeing.
 
-### Buttons
+The colors are intentionally muted, earthy, and balanced.
 
-| Type | Use Case |
-|------|----------|
-| **Primary** | Single main action per screen |
-| **Secondary** | Alternative actions |
-| **Text** | Tertiary actions, cancel |
-| **Tonal** | Softer emphasis than primary |
-| **Icon** | Icon-only actions (44dp min target) |
+Primary Color System (Forest Core)
 
-**Touch Targets**: All interactive elements must have a minimum 44dp touch target.
+The primary color evokes growth, stability, and calm focus.
 
-### Cards
+Token	Light	Dark	Usage
+primary	#2D5A47	#6B9E8C	Primary actions
+primaryContainer	#D4E8E0	#1F3D32	Containers
+onPrimary	#FFFFFF	#0D1F18	Text/icons on primary
 
-| Type | Elevation | Border | Use Case |
-|------|-----------|--------|----------|
-| **Standard** | xs (1dp) | None | Default content container |
-| **Outlined** | None | Subtle | Secondary content |
-| **Featured** | xs | Accent border | Highlighted content |
-| **Glass** | None | None | Over images/gradients |
+Usage examples:
 
-### Inputs
+• Focus timer
+• Primary buttons
+• Selected navigation items
 
-- Use outlined style (not filled)
-- Border changes color on focus
-- Show error/success states with color AND text
-- Character counts for text areas
-- Always provide labels (don't rely on placeholders alone)
+Secondary Accent (Warm Earth)
 
-### Navigation
+Accent color adds personality without overwhelming the UI.
 
-- Bottom nav: 72dp height with glass effect
-- 5 tabs: Feed, Habitats, Create (FAB), Activity, Profile
-- Subtle indicator animation on selection
-- Icon size: 24dp (selected), 24dp (unselected)
+Token	Light	Dark	Usage
+accent	#B8956A	#CFA06A	Highlights
+accentContainer	#F5EEE6	#3D3226	Badges
 
----
+Used for:
 
-## Animation Guidelines
+• Achievements
+• Highlights
+• Community badges
 
-### Duration
-| Type | Duration |
-|------|----------|
-| Quick feedback | 150ms |
-| Standard transitions | 250ms |
-| Emphasis animations | 350ms |
-| Loading shimmer | 1400ms |
+Semantic Colors
 
-### Easing
-- Use `tween` with default easing for most transitions
-- Use `spring` with moderate damping for playful interactions
-- Never use bouncy springs—keep animations professional
+Semantic states must feel informative but not alarming.
 
-### Principles
-- Animations should be subtle and purposeful
-- Avoid animations that delay user actions
-- Loading states should feel calm, not frantic
+Token	Light	Dark	Usage
+success	#5A8A72	#7AAF94	Completed states
+warning	#C4956B	#D4A574	Pending items
+error	#B56B6B	#CF8A8A	Errors
+info	#6B8AAF	#8AA5C4	Information
 
----
+Guideline:
+Never use bright red or harsh colors.
 
-## Accessibility
+3. Surface System
 
-### Color Contrast
-- All text must meet WCAG AA contrast ratios
-- Don't rely on color alone to convey information
-- Error states include both color AND text/icon
+Surfaces define visual hierarchy.
 
-### Touch Targets
-- Minimum 44dp × 44dp for all interactive elements
-- Include adequate spacing between touch targets
+Token	Light	Dark
+background	#FAFAF8	#0F1412
+surface	#FFFFFF	#161D1A
+surfaceVariant	#F5F5F3	#1E2724
+outline	#E0E0DD	#2A332F
+4. Typography
 
-### Screen Readers
-- All images must have content descriptions
-- Interactive elements must have meaningful labels
-- Use semantic heading hierarchy
+Typography is designed for clarity and comfort.
 
----
+Font Stack
 
-## Dark Mode
+Primary font:
 
-Dark mode follows the same principles with adjusted colors:
+Google Sans Flex
 
-- Background: Deep charcoal (`#0F1412`) with green undertone
-- Surfaces: Slightly elevated (`#161D1A`)
-- Text: Warm off-white (`#E8E8E6`) to reduce eye strain
-- Primary colors: Slightly more saturated for visibility
-- Maintain same elevation and shadow patterns
+Fallbacks:
 
----
+• Inter
+• System sans-serif
 
-## Do's and Don'ts
+Typography Scale
+Token	Size	Weight	Usage
+Display	32sp	500	Hero titles
+ScreenTitle	28sp	500	Main screens
+SectionTitle	20sp	500	Sections
+CardTitle	16sp	500	Cards
+Body	15sp	400	Body text
+Supporting	14sp	400	Secondary text
+Meta	13sp	400	Labels
+Caption	12sp	400	Metadata
+Button	14sp	500	Buttons
+Typography Rules
 
-### Do ✓
-- Use generous whitespace
-- Keep elevation minimal (1-2dp)
-- Use muted semantic colors
-- Animate subtly and purposefully
-- Test with actual users for readability
+✓ Avoid bold (700) in most cases
+✓ Use medium (500) sparingly
+✓ Maintain line-height ≥ 1.4 for readability
+✓ Avoid dense text blocks
 
-### Don't ✗
-- Use bright, saturated colors for errors
-- Add shadows to everything
-- Use bold text for body content
-- Create flashy, attention-grabbing animations
-- Sacrifice accessibility for aesthetics
+5. Spacing System
 
----
+Spacing defines visual rhythm.
 
-## File Reference
+Base spacing grid = 4dp
 
-| File | Purpose |
-|------|---------|
-| `HabitateColors.kt` | Color system and themes |
-| `Type.kt` | Typography scale and styles |
-| `DesignTokens.kt` | Spacing, sizing, elevation, animation |
-| `Shape.kt` | Corner radii and shapes |
-| `Buttons.kt` | Button components |
-| `Cards.kt` | Card components |
-| `Navigation.kt` | Navigation components |
-| `States.kt` | Empty, loading, error states |
-| `Inputs.kt` | Text fields and form elements |
+xxs = 2dp
+xs  = 4dp
+sm  = 8dp
+md  = 12dp
+lg  = 16dp
+xl  = 24dp
+xxl = 32dp
+xxxl = 48dp
+Layout Patterns
+Pattern	Value
+Screen padding	20dp
+Card padding	16dp
+Compact card padding	12dp
+List item vertical	14dp
+Form spacing	16dp
 
----
+Whitespace is critical.
 
-*Last updated: December 2025*
+Avoid cramped layouts.
+
+6. Elevation System
+
+Habitate prioritizes flat surfaces with subtle depth.
+
+Token	Value	Usage
+none	0dp	Default
+soft	1dp	Cards
+raised	2dp	FAB
+dialog	4dp	Dialogs
+modal	8dp	Bottom sheets
+
+Guidelines:
+
+• Cards should not exceed 1dp elevation
+• Avoid layered shadows
+
+7. Corner Radius
+
+Rounded shapes create a softer feel.
+
+Token	Value
+xs	4dp
+sm	8dp
+md	12dp
+lg	16dp
+xl	24dp
+pill	9999dp
+
+Use cases:
+
+• Cards → md
+• Inputs → sm
+• Modals → xl
+• Chips → pill
+
+8. Component System
+Buttons
+
+Button hierarchy:
+
+Primary
+Secondary
+Tonal
+Text
+Icon
+
+Button rules
+
+Primary buttons should appear once per screen.
+
+Minimum height:
+
+44dp
+
+Cards
+
+Cards are primary containers.
+
+Types:
+
+Type	Use
+Standard	Feed items
+Outlined	Secondary containers
+Featured	Important content
+Glass	Overlay content
+Inputs
+
+Forms should prioritize clarity.
+
+Rules:
+
+✓ Always show labels
+✓ Never rely only on placeholders
+✓ Show error and helper text
+
+Input height:
+
+48dp minimum
+
+Navigation
+
+Bottom navigation:
+
+Height: 72dp
+
+Tabs:
+
+• Feed
+• Habitats
+• Create
+• Activity
+• Profile
+
+Create is centered FAB.
+
+Icons:
+
+24dp.
+
+9. Motion & Animation
+
+Motion should feel natural and supportive.
+
+Durations
+Motion	Duration
+Micro feedback	120–150ms
+Standard transitions	220–250ms
+Emphasis motion	320–350ms
+Loading shimmer	1200–1400ms
+Animation Rules
+
+Animations should:
+
+✓ Guide attention
+✓ Confirm actions
+✓ Maintain flow
+
+Avoid flashy effects.
+
+10. Accessibility
+
+Habitate must be accessible by default.
+
+Contrast
+
+All text must meet WCAG AA.
+
+Touch Targets
+
+Minimum size:
+
+44dp × 44dp
+
+Screen Readers
+
+Ensure:
+
+• All icons have descriptions
+• Inputs have labels
+• Headings follow hierarchy
+
+11. Dark Mode
+
+Dark mode uses warm, eye-friendly tones.
+
+Avoid pure black.
+
+Primary adjustments:
+
+Element	Value
+Background	#0F1412
+Surface	#161D1A
+Text	#E8E8E6
+
+Primary colors become slightly more saturated.
+
+12. Interaction Principles
+
+Habitate interactions should feel:
+
+Calm
+Predictable
+Responsive
+
+Examples:
+
+• Like animations subtle
+• Transitions smooth
+• Loading states calm
+
+13. Do's and Don'ts
+Do
+
+✓ Use generous whitespace
+✓ Maintain consistent spacing
+✓ Keep animations subtle
+✓ Use calm color palette
+
+Don’t
+
+✗ Use bright error colors
+✗ Overuse shadows
+✗ Use heavy bold text
+✗ Add flashy animations
+
+14. Design Tokens Structure
+File	Purpose
+HabitateColors.kt	Color system
+Type.kt	Typography
+Shapes.kt	Corner radius
+DesignTokens.kt	Spacing, elevation
+Buttons.kt	Button components
+Cards.kt	Card components
+Inputs.kt	Text fields
+Navigation.kt	Navigation UI
+States.kt	Loading, empty, error states
+15. Design System Goal
+
+The Habitate interface should feel like:
+
+• Calm productivity tool
+• Wellbeing companion
+• Community platform
+
+All without overwhelming the user.
+
+The result should be a modern, minimal, thoughtful interface that quietly empowers users.

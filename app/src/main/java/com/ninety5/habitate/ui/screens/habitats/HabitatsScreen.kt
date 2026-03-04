@@ -25,20 +25,14 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddCircleOutline
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,7 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,10 +52,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.domain.model.HabitatPrivacy
-import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
+import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
+import com.ninety5.habitate.ui.components.designsystem.HabitateFab
+import com.ninety5.habitate.ui.components.designsystem.HabitateLargeTopBar
+import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
 import com.ninety5.habitate.ui.theme.HabitateTheme
-import com.ninety5.habitate.ui.theme.SageGreen
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Size
+import com.ninety5.habitate.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,71 +69,92 @@ fun HabitatsScreen(
     viewModel: HabitatsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val colors = HabitateTheme.colors
     var selectedFilter by remember { mutableStateOf(HabitatFilter.ALL) }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    Scaffold(
-        containerColor = HabitateDarkGreenStart,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onCreateHabitat,
-                containerColor = SageGreen,
-                contentColor = HabitateDarkGreenStart
+    val filteredMyHabitats = remember(uiState.myHabitats, selectedFilter) {
+        if (selectedFilter == HabitatFilter.ALL) uiState.myHabitats
+        else uiState.myHabitats.filter { it.category == selectedFilter }
+    }
+    val filteredDiscoverHabitats = remember(uiState.discoverHabitats, selectedFilter) {
+        if (selectedFilter == HabitatFilter.ALL) uiState.discoverHabitats
+        else uiState.discoverHabitats.filter { it.category == selectedFilter }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            HabitateLargeTopBar(
+                title = "Habitats",
+                scrollBehavior = scrollBehavior
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(bottom = 96.dp)
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = "Create habitat")
-            }
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            // Filter chips
-            item {
-                FilterChipsRow(
-                    selectedFilter = selectedFilter,
-                    onFilterSelected = { selectedFilter = it }
-                )
-            }
-
-            // My Habitats section
-            item {
-                SectionHeader(
-                    title = "My Habitats",
-                    count = uiState.myHabitats.size
-                )
-            }
-
-            if (uiState.myHabitats.isEmpty()) {
-                item {
-                    EmptyHabitatsState(onCreateHabitat = onCreateHabitat)
+                // Filter chips
+                item(key = "filters") {
+                    FilterChipsRow(
+                        selectedFilter = selectedFilter,
+                        onFilterSelected = { selectedFilter = it }
+                    )
                 }
-            } else {
-                items(uiState.myHabitats, key = { it.id }) { habitat ->
+
+                // My Habitats section
+                item(key = "my_header") {
+                    SectionHeader(
+                        title = "My Habitats",
+                        count = filteredMyHabitats.size
+                    )
+                }
+
+                if (filteredMyHabitats.isEmpty()) {
+                    item(key = "empty") {
+                        EmptyHabitatsState(onCreateHabitat = onCreateHabitat)
+                    }
+                } else {
+                    items(filteredMyHabitats, key = { it.id }) { habitat ->
+                        HabitatCard(
+                            habitat = habitat,
+                            onClick = { onHabitatClick(habitat.id) }
+                        )
+                    }
+                }
+
+                // Discover section
+                item(key = "discover_header") {
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+                    SectionHeader(
+                        title = "Discover",
+                        count = filteredDiscoverHabitats.size
+                    )
+                }
+
+                items(filteredDiscoverHabitats, key = { it.id }) { habitat ->
                     HabitatCard(
                         habitat = habitat,
                         onClick = { onHabitatClick(habitat.id) }
                     )
                 }
             }
-
-            // Discover section
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                SectionHeader(
-                    title = "Discover",
-                    count = uiState.discoverHabitats.size
-                )
-            }
-
-            items(uiState.discoverHabitats, key = { it.id }) { habitat ->
-                HabitatCard(
-                    habitat = habitat,
-                    onClick = { onHabitatClick(habitat.id) }
-                )
-            }
         }
+
+        // FAB
+        HabitateFab(
+            icon = Icons.Rounded.Add,
+            contentDescription = "Create habitat",
+            onClick = onCreateHabitat,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = Spacing.screenHorizontal, bottom = 96.dp)
+        )
     }
 }
 
@@ -144,21 +163,29 @@ private fun FilterChipsRow(
     selectedFilter: HabitatFilter,
     onFilterSelected: (HabitatFilter) -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(horizontal = Spacing.screenHorizontal, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         items(HabitatFilter.entries) { filter ->
             FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(filter.displayName) },
+                label = {
+                    Text(
+                        filter.displayName,
+                        style = HabitateTheme.typography.labelLarge
+                    )
+                },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = SageGreen,
-                    selectedLabelColor = HabitateDarkGreenStart,
-                    containerColor = HabitateOffWhite.copy(alpha = 0.1f),
-                    labelColor = HabitateOffWhite
-                )
+                    selectedContainerColor = colors.primary,
+                    selectedLabelColor = colors.onPrimary,
+                    containerColor = colors.surfaceVariant.copy(alpha = 0.5f),
+                    labelColor = colors.onSurfaceVariant
+                ),
+                shape = RoundedCornerShape(Radius.md)
             )
         }
     }
@@ -166,29 +193,31 @@ private fun FilterChipsRow(
 
 @Composable
 private fun SectionHeader(title: String, count: Int) {
+    val colors = HabitateTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
+            style = HabitateTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = HabitateOffWhite
+            color = colors.onBackground
         )
         if (count > 0) {
             Surface(
-                color = SageGreen.copy(alpha = 0.2f),
+                color = colors.primary.copy(alpha = 0.1f),
                 shape = CircleShape
             ) {
                 Text(
                     text = "$count",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    color = SageGreen
+                    style = HabitateTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                    color = colors.primary
                 )
             }
         }
@@ -197,42 +226,49 @@ private fun SectionHeader(title: String, count: Int) {
 
 @Composable
 private fun EmptyHabitatsState(onCreateHabitat: () -> Unit) {
+    val colors = HabitateTheme.colors
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = Spacing.screenHorizontal)
             .background(
-                HabitateOffWhite.copy(alpha = 0.05f),
-                RoundedCornerShape(16.dp)
+                colors.surfaceVariant.copy(alpha = 0.3f),
+                RoundedCornerShape(Radius.md)
             )
-            .padding(24.dp),
+            .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = Icons.Rounded.AddCircleOutline,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = SageGreen
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        Box(
+            modifier = Modifier
+                .size(Size.iconXl)
+                .background(colors.primary.copy(alpha = 0.1f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.AddCircleOutline,
+                contentDescription = null,
+                modifier = Modifier.size(Size.iconLg),
+                tint = colors.primary
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = "Join or Create a Habitat",
-            style = MaterialTheme.typography.titleMedium,
+            style = HabitateTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = HabitateOffWhite
+            color = colors.onSurface
         )
         Text(
             text = "Connect with others who share your interests.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = HabitateOffWhite.copy(alpha = 0.7f),
-            modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+            style = HabitateTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.padding(top = Spacing.xxs, bottom = Spacing.md)
         )
-        Button(
-            onClick = onCreateHabitat,
-            colors = ButtonDefaults.buttonColors(containerColor = SageGreen, contentColor = HabitateDarkGreenStart)
-        ) {
-            Text("Create New Habitat")
-        }
+        HabitatePrimaryButton(
+            text = "Create New Habitat",
+            onClick = onCreateHabitat
+        )
     }
 }
 
@@ -242,30 +278,32 @@ fun HabitatCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = HabitateTheme.colors
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.xxs)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = CardDefaults.cardColors(
-            containerColor = HabitateDarkGreenStart.copy(alpha = 0.5f)
+            containerColor = colors.surface
         ),
-        border = BorderStroke(1.dp, HabitateOffWhite.copy(alpha = 0.1f)),
+        border = BorderStroke(0.5.dp, colors.borderSubtle.copy(alpha = 0.15f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Habitat image
             Surface(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                color = SageGreen.copy(alpha = 0.1f)
+                    .size(Size.avatarLg)
+                    .clip(RoundedCornerShape(Radius.md)),
+                color = colors.primary.copy(alpha = 0.08f)
             ) {
                 if (habitat.imageUrl != null) {
                     AsyncImage(
@@ -278,59 +316,59 @@ fun HabitatCard(
                         Icon(
                             imageVector = Icons.Rounded.Group,
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = SageGreen
+                            modifier = Modifier.size(Size.iconLg),
+                            tint = colors.primary
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             // Habitat info
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = habitat.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = HabitateTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
-                        color = HabitateOffWhite
+                        color = colors.onSurface
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
                     if (habitat.privacy != HabitatPrivacy.PUBLIC) {
+                        Spacer(modifier = Modifier.width(Spacing.xxs))
                         Icon(
                             imageVector = Icons.Rounded.Lock,
                             contentDescription = "Private",
                             modifier = Modifier.size(14.dp),
-                            tint = HabitateOffWhite.copy(alpha = 0.5f)
+                            tint = colors.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
                 }
 
                 Text(
                     text = habitat.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = HabitateOffWhite.copy(alpha = 0.7f),
+                    style = HabitateTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    modifier = Modifier.padding(vertical = Spacing.xxs)
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "${habitat.memberCount} members",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = SageGreen
+                        style = HabitateTheme.typography.labelMedium,
+                        color = colors.primary
                     )
-                    
+
                     if (habitat.activeChallenge != null) {
                         Text(
-                            text = " • ${habitat.activeChallenge}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = SageGreen.copy(alpha = 0.8f),
+                            text = " · ${habitat.activeChallenge}",
+                            style = HabitateTheme.typography.labelMedium,
+                            color = colors.primary.copy(alpha = 0.7f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -357,7 +395,8 @@ data class HabitatUiModel(
     val memberCount: Int,
     val privacy: HabitatPrivacy,
     val activeChallenge: String?,
-    val isJoined: Boolean
+    val isJoined: Boolean,
+    val category: HabitatFilter? = null
 )
 
 @Preview(showBackground = true)

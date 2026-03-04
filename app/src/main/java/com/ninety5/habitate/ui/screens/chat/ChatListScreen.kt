@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.Conversation
 import com.ninety5.habitate.ui.screens.chat.ChatViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,9 +61,9 @@ fun ChatListScreen(
                     ) {
                         Text(
                             text = error ?: "Something went wrong",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = HabitateTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.error
+                            color = HabitateTheme.colors.error
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.refreshChats() }) {
@@ -76,8 +77,8 @@ fun ChatListScreen(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = HabitateTheme.typography.bodyLarge,
+                        color = HabitateTheme.colors.onSurfaceVariant
                     )
                 }
                 else -> {

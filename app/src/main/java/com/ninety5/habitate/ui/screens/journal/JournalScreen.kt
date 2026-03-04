@@ -45,7 +45,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -75,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.JournalEntry
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
@@ -142,7 +142,7 @@ fun JournalScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = HabitateTheme.colors.surface
                 )
             )
         },
@@ -152,7 +152,7 @@ fun JournalScreen(
                     viewModel.setEditingEntry(null)
                     showCreateSheet = true 
                 },
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = HabitateTheme.colors.primary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "New entry")
             }
@@ -221,19 +221,19 @@ fun JournalScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "📔",
-                            style = MaterialTheme.typography.displayLarge
+                            style = HabitateTheme.typography.displayLarge
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Your journal is empty",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = HabitateTheme.typography.titleMedium,
+                            color = HabitateTheme.colors.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Start writing your thoughts, track your mood, and reflect on your day",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            style = HabitateTheme.typography.bodyMedium,
+                            color = HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.7f),
                             modifier = Modifier.padding(horizontal = 32.dp)
                         )
                     }
@@ -313,7 +313,7 @@ fun JournalScreen(
                         showDeleteDialog = null
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text("Delete", color = HabitateTheme.colors.error)
                 }
             },
             dismissButton = {
@@ -343,7 +343,7 @@ private fun JournalEntryCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Column(
@@ -358,15 +358,15 @@ private fun JournalEntryCard(
                 entry.mood?.let { mood ->
                     Text(
                         text = getMoodEmoji(mood.name.lowercase()),
-                        style = MaterialTheme.typography.titleLarge
+                        style = HabitateTheme.typography.titleLarge
                     )
                 }
                 
                 // Date
                 Text(
                     text = date.format(dateFormatter),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = HabitateTheme.typography.labelSmall,
+                    color = HabitateTheme.colors.onSurfaceVariant
                 )
             }
 
@@ -374,7 +374,7 @@ private fun JournalEntryCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = HabitateTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -382,10 +382,10 @@ private fun JournalEntryCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = entry.content,
-                style = MaterialTheme.typography.bodyMedium,
+                style = HabitateTheme.typography.bodyMedium,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = HabitateTheme.colors.onSurfaceVariant
             )
 
             // Tags
@@ -398,7 +398,7 @@ private fun JournalEntryCard(
                     entry.tags.forEach { tag ->
                         AssistChip(
                             onClick = { },
-                            label = { Text(tag, style = MaterialTheme.typography.labelSmall) }
+                            label = { Text(tag, style = HabitateTheme.typography.labelSmall) }
                         )
                     }
                 }
@@ -416,7 +416,7 @@ private fun JournalEntryCard(
                         Icons.Default.Edit,
                         contentDescription = "Edit",
                         modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = HabitateTheme.colors.primary
                     )
                 }
                 IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
@@ -424,7 +424,7 @@ private fun JournalEntryCard(
                         Icons.Default.Delete,
                         contentDescription = "Delete",
                         modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.error
+                        tint = HabitateTheme.colors.error
                     )
                 }
             }
@@ -458,7 +458,7 @@ private fun CalendarView(
                 }
                 Text(
                     text = "${selectedMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${selectedMonth.year}",
-                    style = MaterialTheme.typography.titleMedium
+                    style = HabitateTheme.typography.titleMedium
                 )
                 IconButton(onClick = { onMonthChange(selectedMonth.plusMonths(1)) }) {
                     Icon(Icons.Default.ChevronRight, contentDescription = "Next month")
@@ -476,8 +476,8 @@ private fun CalendarView(
                     ) {
                         Text(
                             text = day,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = HabitateTheme.typography.labelSmall,
+                            color = HabitateTheme.colors.onSurfaceVariant
                         )
                     }
                 }
@@ -513,8 +513,8 @@ private fun CalendarView(
                                             .clip(CircleShape)
                                             .clickable { onDateSelected(date) },
                                         color = when {
-                                            isSelected -> MaterialTheme.colorScheme.primary
-                                            isToday -> MaterialTheme.colorScheme.primaryContainer
+                                            isSelected -> HabitateTheme.colors.primary
+                                            isToday -> HabitateTheme.colors.primaryContainer
                                             else -> Color.Transparent
                                         },
                                         shape = CircleShape
@@ -523,10 +523,10 @@ private fun CalendarView(
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Text(
                                                     text = dayCounter.toString(),
-                                                    style = MaterialTheme.typography.bodySmall,
+                                                    style = HabitateTheme.typography.bodySmall,
                                                     color = when {
-                                                        isSelected -> MaterialTheme.colorScheme.onPrimary
-                                                        else -> MaterialTheme.colorScheme.onSurface
+                                                        isSelected -> HabitateTheme.colors.onPrimary
+                                                        else -> HabitateTheme.colors.onSurface
                                                     }
                                                 )
                                                 if (hasEntry) {
@@ -534,8 +534,8 @@ private fun CalendarView(
                                                         modifier = Modifier
                                                             .size(4.dp)
                                                             .background(
-                                                                if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                                                else MaterialTheme.colorScheme.primary,
+                                                                if (isSelected) HabitateTheme.colors.onPrimary
+                                                                else HabitateTheme.colors.primary,
                                                                 CircleShape
                                                             )
                                                     )
@@ -577,7 +577,7 @@ private fun JournalEntryEditor(
     ) {
         Text(
             text = if (editingEntry != null) "Edit Entry" else "New Entry",
-            style = MaterialTheme.typography.headlineSmall,
+            style = HabitateTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
 
@@ -586,8 +586,8 @@ private fun JournalEntryEditor(
         // Mood selector
         Text(
             text = "How are you feeling?",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = HabitateTheme.typography.labelLarge,
+            color = HabitateTheme.colors.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
         FlowRow(
@@ -600,8 +600,8 @@ private fun JournalEntryEditor(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .clickable { selectedMood = if (isSelected) null else mood },
-                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    color = if (isSelected) HabitateTheme.colors.primaryContainer
+                            else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
@@ -612,7 +612,7 @@ private fun JournalEntryEditor(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = mood.replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.labelMedium
+                            style = HabitateTheme.typography.labelMedium
                         )
                     }
                 }
@@ -728,7 +728,7 @@ private fun JournalEntryEditor(
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = HabitateTheme.colors.onPrimary
                     )
                 } else {
                     Text("Save")

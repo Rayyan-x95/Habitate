@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.Message
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
 import com.ninety5.habitate.ui.screens.chat.ChatViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,8 +53,8 @@ fun ChatScreen(
                         if (typingUsers.isNotEmpty()) {
                             Text(
                                 "Typing...",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                style = HabitateTheme.typography.bodySmall,
+                                color = HabitateTheme.colors.primary
                             )
                         }
                     }
@@ -93,10 +94,10 @@ fun ChatScreen(
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Type a message") },
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        focusedContainerColor = HabitateTheme.colors.surfaceVariant,
+                        unfocusedContainerColor = HabitateTheme.colors.surfaceVariant,
+                        focusedTextColor = HabitateTheme.colors.onSurface,
+                        unfocusedTextColor = HabitateTheme.colors.onSurface
                     )
                 )
                 IconButton(onClick = {
@@ -105,7 +106,7 @@ fun ChatScreen(
                         inputText = ""
                     }
                 }) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = HabitateTheme.colors.primary)
                 }
             }
         }
@@ -122,14 +123,14 @@ fun ChatScreen(
 
             if (error != null) {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    colors = CardDefaults.cardColors(containerColor = HabitateTheme.colors.errorContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = error ?: "Unknown error",
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        color = HabitateTheme.colors.onErrorContainer,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -192,22 +193,22 @@ fun MessageItem(
                 onLongClick = { showMenu = true }
             ),
             colors = CardDefaults.cardColors(
-                containerColor = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                containerColor = if (isMe) HabitateTheme.colors.primary else HabitateTheme.colors.surfaceVariant
             )
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = message.content ?: "",
-                    color = if (isMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isMe) HabitateTheme.colors.onPrimary else HabitateTheme.colors.onSurfaceVariant
                 )
                 if (message.reactions.isNotEmpty()) {
                     Row(modifier = Modifier.padding(top = 4.dp)) {
                         message.reactions.forEach { reaction ->
                             Text(
                                 text = reaction.emoji,
-                                style = MaterialTheme.typography.bodySmall,
+                                style = HabitateTheme.typography.bodySmall,
                                 modifier = Modifier.padding(end = 4.dp),
-                                color = if (isMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (isMe) HabitateTheme.colors.onPrimary else HabitateTheme.colors.onSurfaceVariant
                             )
                         }
                     }
@@ -218,8 +219,8 @@ fun MessageItem(
         if (isMe) {
             Text(
                 text = if (message.isRead) "Read" else "Sent",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = HabitateTheme.typography.labelSmall,
+                color = HabitateTheme.colors.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }

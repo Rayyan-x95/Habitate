@@ -22,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.ninety5.habitate.ui.theme.*
@@ -29,9 +31,10 @@ import com.ninety5.habitate.ui.theme.*
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE COMPONENT LIBRARY - NAVIGATION               ║
+ * ║                         Version 3.0 — Floating Pill Redesign             ║
  * ║                                                                          ║
- * ║  Premium navigation with glass effect and minimal visual weight          ║
- * ║  Design principle: Unobtrusive, clear hierarchy, smooth transitions      ║
+ * ║  Design: Floating pill-shaped bottom bar with centered Create FAB        ║
+ * ║  Minimal visual weight, smooth transitions, 48dp touch targets           ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
@@ -55,17 +58,17 @@ val DefaultNavItems = listOf(
         unselectedIcon = Icons.Outlined.Home
     ),
     HabitateNavItem(
+        route = "focus",
+        label = "Focus",
+        selectedIcon = Icons.Filled.SelfImprovement,
+        unselectedIcon = Icons.Outlined.SelfImprovement
+    ),
+    // Create button is special - handled separately as centered FAB
+    HabitateNavItem(
         route = "habitats",
         label = "Habitats",
         selectedIcon = Icons.Filled.Groups,
         unselectedIcon = Icons.Outlined.Groups
-    ),
-    // Create button is special - handled separately
-    HabitateNavItem(
-        route = "activity",
-        label = "Activity",
-        selectedIcon = Icons.Filled.Notifications,
-        unselectedIcon = Icons.Outlined.Notifications
     ),
     HabitateNavItem(
         route = "profile",
@@ -76,11 +79,12 @@ val DefaultNavItems = listOf(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-// BOTTOM NAVIGATION BAR
+// FLOATING PILL BOTTOM NAVIGATION BAR
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Premium bottom navigation with glass effect and centered FAB.
+ * Floating pill-shaped bottom navigation bar with centered Create FAB.
+ * Hovers above content with subtle shadow, rounded corners, and glass tint.
  */
 @Composable
 fun HabitateBottomNavBar(
@@ -91,166 +95,170 @@ fun HabitateBottomNavBar(
     items: List<HabitateNavItem> = DefaultNavItems
 ) {
     val colors = HabitateTheme.colors
-    
+
     Box(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.sm),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        // Glass background
-        GlassNavBar(
+        // Floating pill container
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(Size.bottomNavHeight)
-                .align(Alignment.BottomCenter)
+                .height(68.dp),
+            shape = RoundedCornerShape(Radius.pill),
+            color = colors.navBarBackground,
+            shadowElevation = Elevation.md,
+            tonalElevation = Elevation.whisper
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.sm),
+                    .fillMaxSize()
+                    .padding(horizontal = Spacing.xs),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // First two items
-                items.take(2).forEach { item ->
-                    HabitateNavItem(
-                        item = item,
-                        isSelected = currentRoute == item.route,
-                        onClick = { onNavigate(item.route) }
-                    )
-                }
-                
-                // Spacer for FAB
-                Spacer(Modifier.width(Size.fabMedium + Spacing.lg))
-                
-                // Last two items
-                items.drop(2).forEach { item ->
-                    HabitateNavItem(
-                        item = item,
-                        isSelected = currentRoute == item.route,
-                        onClick = { onNavigate(item.route) }
-                    )
+                if (items.isNotEmpty()) {
+                    val midpoint = items.size / 2
+
+                    // Left items (before FAB)
+                    items.take(midpoint).forEach { item ->
+                        FloatingNavItem(
+                            item = item,
+                            isSelected = currentRoute == item.route,
+                            onClick = { onNavigate(item.route) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // Center FAB space
+                    Box(
+                        modifier = Modifier.weight(1.2f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        FloatingCreateFab(onClick = onCreateClick)
+                    }
+
+                    // Right items (after FAB)
+                    items.drop(midpoint).forEach { item ->
+                        FloatingNavItem(
+                            item = item,
+                            isSelected = currentRoute == item.route,
+                            onClick = { onNavigate(item.route) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
-        
-        // Centered FAB
-        HabitateCreateFab(
-            onClick = onCreateClick,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-20).dp)
-        )
     }
 }
 
 /**
- * Individual nav item with smooth animation.
- * Minimal visual weight, clear selection state.
+ * Individual floating nav item with pill indicator on selection.
  */
 @Composable
-private fun HabitateNavItem(
+private fun FloatingNavItem(
     item: HabitateNavItem,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val colors = HabitateTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
-    
+
     val iconColor by animateColorAsState(
         targetValue = if (isSelected) colors.primary else colors.textMuted,
         animationSpec = tween(durationMillis = Duration.fast),
         label = "navIconColor"
     )
-    
-    val textColor by animateColorAsState(
-        targetValue = if (isSelected) colors.textPrimary else colors.textMuted,
+
+    val labelColor by animateColorAsState(
+        targetValue = if (isSelected) colors.primary else colors.textMuted,
         animationSpec = tween(durationMillis = Duration.fast),
-        label = "navTextColor"
+        label = "navLabelColor"
     )
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.05f else 1f,
-        animationSpec = spring(dampingRatio = 0.7f),
-        label = "navItemScale"
+
+    val indicatorAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(durationMillis = Duration.normal),
+        label = "navIndicatorAlpha"
     )
-    
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
-            .scale(scale),
+            .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Icon with optional badge
-        Box {
-            Icon(
-                imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                contentDescription = item.label,
-                modifier = Modifier.size(Size.iconMd),
-                tint = iconColor
-            )
-            
-            if (item.badge != null && item.badge > 0) {
-                Badge(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = 4.dp, y = (-4).dp),
-                    containerColor = colors.accent
-                ) {
-                    Text(
-                        text = if (item.badge > 99) "99+" else item.badge.toString(),
-                        style = CaptionText
-                    )
+        // Pill indicator behind icon when selected
+        Box(
+            modifier = Modifier
+                .size(width = 48.dp, height = 28.dp)
+                .clip(RoundedCornerShape(Radius.pill))
+                .background(
+                    colors.primaryContainer.copy(alpha = indicatorAlpha * 0.8f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            // Icon with optional badge
+            Box {
+                Icon(
+                    imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
+                    contentDescription = item.label,
+                    modifier = Modifier.size(22.dp),
+                    tint = iconColor
+                )
+
+                if (item.badge != null && item.badge > 0) {
+                    Badge(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 6.dp, y = (-4).dp),
+                        containerColor = colors.accent
+                    ) {
+                        Text(
+                            text = if (item.badge > 99) "99+" else item.badge.toString(),
+                            style = CaptionText
+                        )
+                    }
                 }
             }
         }
-        
-        Spacer(Modifier.height(Spacing.xxs))
-        
+
+        Spacer(Modifier.height(2.dp))
+
         Text(
             text = item.label,
             style = CaptionText,
-            color = textColor
-        )
-        
-        // Subtle selection indicator
-        val indicatorWidth by animateDpAsState(
-            targetValue = if (isSelected) 16.dp else 0.dp,
-            animationSpec = tween(durationMillis = Duration.fast),
-            label = "navIndicator"
-        )
-        
-        Spacer(Modifier.height(Spacing.xxs))
-        
-        Box(
-            modifier = Modifier
-                .width(indicatorWidth)
-                .height(2.dp)
-                .clip(NavIndicatorShape)
-                .background(colors.navBarIndicator)
+            color = labelColor
         )
     }
 }
 
 /**
- * Centered create FAB for bottom nav.
- * Subtle elevation, smooth press feedback.
+ * Centered create FAB that sits within the pill.
+ * Slightly elevated above the bar with brand gradient.
  */
 @Composable
-private fun HabitateCreateFab(
+private fun FloatingCreateFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = HabitateTheme.colors
-    
+
     FloatingActionButton(
         onClick = onClick,
-        modifier = modifier.size(Size.fabMedium),
-        containerColor = colors.fabBackground,
-        contentColor = colors.fabContent,
+        modifier = modifier
+            .size(52.dp)
+            .offset(y = (-8).dp),
+        containerColor = colors.primary,
+        contentColor = colors.onPrimary,
         shape = CircleShape,
         elevation = FloatingActionButtonDefaults.elevation(
             defaultElevation = Elevation.sm,
@@ -261,9 +269,24 @@ private fun HabitateCreateFab(
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Create",
-            modifier = Modifier.size(Size.iconLg)
+            modifier = Modifier.size(Size.iconMd)
         )
     }
+}
+
+/**
+ * Legacy bottom nav bar reference — prefer [HabitateBottomNavBar].
+ */
+@Deprecated("Use HabitateBottomNavBar for the floating pill design", ReplaceWith("HabitateBottomNavBar(currentRoute, onNavigate, onCreateClick, modifier, items)"))
+@Composable
+fun HabitateBottomNavBarLegacy(
+    currentRoute: String,
+    onNavigate: (String) -> Unit,
+    onCreateClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    items: List<HabitateNavItem> = DefaultNavItems
+) {
+    HabitateBottomNavBar(currentRoute, onNavigate, onCreateClick, modifier, items)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -23,7 +23,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,6 +41,7 @@ import com.ninety5.habitate.domain.model.InsightPriority
 import com.ninety5.habitate.domain.model.InsightType
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
 import com.ninety5.habitate.ui.screens.insights.InsightsViewModel
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +76,7 @@ fun InsightsDashboardScreen(
                     item {
                         Text(
                             text = "No insights available yet. Keep using the app to generate insights!",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = HabitateTheme.typography.bodyLarge,
                             modifier = Modifier.padding(16.dp)
                         )
                     }
@@ -101,9 +101,9 @@ fun InsightCard(
     onAction: () -> Unit
 ) {
     val containerColor = when (insight.priority) {
-        InsightPriority.HIGH, InsightPriority.CRITICAL -> MaterialTheme.colorScheme.errorContainer
-        InsightPriority.MEDIUM -> MaterialTheme.colorScheme.secondaryContainer
-        InsightPriority.LOW -> MaterialTheme.colorScheme.surfaceVariant
+        InsightPriority.HIGH, InsightPriority.CRITICAL -> HabitateTheme.colors.errorContainer
+        InsightPriority.MEDIUM -> HabitateTheme.colors.secondaryContainer
+        InsightPriority.LOW -> HabitateTheme.colors.surfaceVariant
     }
 
     val icon = when (insight.type) {
@@ -133,12 +133,12 @@ fun InsightCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = HabitateTheme.colors.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = insight.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = HabitateTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -147,7 +147,7 @@ fun InsightCard(
             
             Text(
                 text = insight.description,
-                style = MaterialTheme.typography.bodyMedium
+                style = HabitateTheme.typography.bodyMedium
             )
             
             Spacer(modifier = Modifier.height(16.dp))

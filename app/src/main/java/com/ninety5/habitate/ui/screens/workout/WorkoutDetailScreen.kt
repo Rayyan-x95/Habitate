@@ -9,7 +9,6 @@ import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -18,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,25 +27,25 @@ fun WorkoutDetailScreen(
     onShareClick: () -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Workout Details", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text("Workout Details", color = HabitateTheme.colors.onBackground) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = HabitateTheme.colors.onBackground)
                     }
                 },
                 actions = {
                     IconButton(onClick = onShareClick) {
-                        Icon(Icons.Rounded.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(Icons.Rounded.Share, contentDescription = "Share", tint = HabitateTheme.colors.onBackground)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateTheme.colors.background,
+                    titleContentColor = HabitateTheme.colors.onBackground,
+                    navigationIconContentColor = HabitateTheme.colors.onBackground,
+                    actionIconContentColor = HabitateTheme.colors.onBackground
                 )
             )
         }
@@ -56,7 +56,7 @@ fun WorkoutDetailScreen(
                 .padding(paddingValues),
             contentAlignment = Alignment.Center
         ) {
-            Text("Workout Detail: $workoutId", color = MaterialTheme.colorScheme.onBackground)
+            Text("Workout Detail: $workoutId", color = HabitateTheme.colors.onBackground)
         }
     }
 }

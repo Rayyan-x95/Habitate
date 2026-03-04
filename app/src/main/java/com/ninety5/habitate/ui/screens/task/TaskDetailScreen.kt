@@ -11,9 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
-import com.ninety5.habitate.ui.theme.SageGreen
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -31,19 +29,19 @@ fun TaskDetailScreen(
     val task by viewModel.task.collectAsState()
 
     Scaffold(
-        containerColor = HabitateDarkGreenStart,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Task Details", color = HabitateOffWhite) },
+                title = { Text("Task Details", color = HabitateTheme.colors.onBackground) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = HabitateOffWhite)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = HabitateTheme.colors.onBackground)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = HabitateDarkGreenStart,
-                    titleContentColor = HabitateOffWhite,
-                    navigationIconContentColor = HabitateOffWhite
+                    containerColor = HabitateTheme.colors.background,
+                    titleContentColor = HabitateTheme.colors.onBackground,
+                    navigationIconContentColor = HabitateTheme.colors.onBackground
                 )
             )
         }
@@ -54,16 +52,16 @@ fun TaskDetailScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = currentTask.title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = HabitateOffWhite
+                        style = HabitateTheme.typography.headlineMedium,
+                        color = HabitateTheme.colors.onBackground
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     currentTask.description?.let { description ->
                         Text(
                             text = description,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = HabitateOffWhite.copy(alpha = 0.8f)
+                            style = HabitateTheme.typography.bodyLarge,
+                            color = HabitateTheme.colors.onBackground.copy(alpha = 0.8f)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -73,20 +71,20 @@ fun TaskDetailScreen(
                             .withZone(ZoneId.systemDefault())
                         Text(
                             text = "Due: ${formatter.format(dueAt)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SageGreen
+                            style = HabitateTheme.typography.bodyMedium,
+                            color = HabitateTheme.colors.primary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
                     Text(
                         text = "Status: ${currentTask.status}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = HabitateOffWhite.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.bodyMedium,
+                        color = HabitateTheme.colors.onBackground.copy(alpha = 0.7f)
                     )
                 }
             } else {
-                Text("Loading...", modifier = Modifier.padding(16.dp), color = HabitateOffWhite)
+                Text("Loading...", modifier = Modifier.padding(16.dp), color = HabitateTheme.colors.onBackground)
             }
         }
     }

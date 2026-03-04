@@ -16,7 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -31,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.HabitatPrivacy
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +90,7 @@ fun CreateHabitatScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Privacy", style = MaterialTheme.typography.titleMedium)
+                Text("Privacy", style = HabitateTheme.typography.titleMedium)
                 
                 HabitatPrivacy.values().forEach { privacy ->
                     Row(
@@ -112,8 +112,8 @@ fun CreateHabitatScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = uiState.error ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        color = HabitateTheme.colors.error,
+                        style = HabitateTheme.typography.bodySmall
                     )
                 }
 

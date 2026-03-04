@@ -21,6 +21,7 @@ import com.ninety5.habitate.domain.model.HabitCategory
 import com.ninety5.habitate.ui.components.*
 import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
 import com.ninety5.habitate.ui.components.designsystem.HabitateLoadingScreen
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 /**
  * Habit List Screen - Main hub for viewing and managing habits.
@@ -54,7 +55,7 @@ fun HabitListScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             if (showSearchBar) {
@@ -65,10 +66,10 @@ fun HabitListScreen(
                 )
             } else {
                 TopAppBar(
-                    title = { Text("My Habits", color = MaterialTheme.colorScheme.onBackground) },
+                    title = { Text("My Habits", color = HabitateTheme.colors.onBackground) },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
+                        containerColor = HabitateTheme.colors.background,
+                        actionIconContentColor = HabitateTheme.colors.onBackground
                     ),
                     actions = {
                         IconButton(onClick = { showSearchBar = true }) {
@@ -81,8 +82,8 @@ fun HabitListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateHabitClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = HabitateTheme.colors.primary,
+                contentColor = HabitateTheme.colors.onPrimary
             ) {
                 Icon(Icons.Rounded.Add, "Create habit")
             }
@@ -169,7 +170,7 @@ private fun CategoryFilters(
         item {
             CategoryChip(
                 categoryName = "All",
-                color = MaterialTheme.colorScheme.primary,
+                color = HabitateTheme.colors.primary,
                 selected = selectedCategory == null,
                 onClick = { onCategorySelected(null) }
             )
@@ -180,7 +181,7 @@ private fun CategoryFilters(
             val color = try {
                 Color(android.graphics.Color.parseColor(category.getColor()))
             } catch (e: Exception) {
-                MaterialTheme.colorScheme.primary
+                HabitateTheme.colors.primary
             }
             
             CategoryChip(
@@ -203,24 +204,24 @@ private fun SearchBar(
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground
+            containerColor = HabitateTheme.colors.background,
+            navigationIconContentColor = HabitateTheme.colors.onBackground,
+            actionIconContentColor = HabitateTheme.colors.onBackground
         ),
         title = {
             TextField(
                 value = query,
                 onValueChange = onQueryChange,
-                placeholder = { Text("Search habits...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)) },
+                placeholder = { Text("Search habits...", color = HabitateTheme.colors.onBackground.copy(alpha = 0.7f)) },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    focusedTextColor = HabitateTheme.colors.onBackground,
+                    unfocusedTextColor = HabitateTheme.colors.onBackground,
+                    cursorColor = HabitateTheme.colors.primary
                 ),
                 modifier = Modifier.fillMaxWidth()
             )

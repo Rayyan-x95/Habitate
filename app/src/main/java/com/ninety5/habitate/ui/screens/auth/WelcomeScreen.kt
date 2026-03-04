@@ -5,10 +5,20 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,7 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.ninety5.habitate.ui.components.HabitateLogo
 import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
 import com.ninety5.habitate.ui.components.designsystem.HabitateSecondaryButton
-import com.ninety5.habitate.ui.theme.*
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Spacing
 
 /**
  * Welcome screen with calm, premium design following the Habitate design system.
@@ -31,13 +42,14 @@ fun WelcomeScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
+
     // Animation states
     val logoScale = remember { Animatable(0f) }
     val contentAlpha = remember { Animatable(0f) }
     val buttonsOffset = remember { Animatable(40f) }
 
     LaunchedEffect(Unit) {
-        // Gentle logo animation - no bouncy overshoot
         logoScale.animateTo(
             targetValue = 1f,
             animationSpec = spring(
@@ -45,24 +57,15 @@ fun WelcomeScreen(
                 stiffness = Spring.StiffnessLow
             )
         )
-        // Fade in content
-        contentAlpha.animateTo(1f, animationSpec = tween(Duration.medium))
-        buttonsOffset.animateTo(0f, animationSpec = tween(Duration.medium))
+        contentAlpha.animateTo(1f, animationSpec = tween(300))
+        buttonsOffset.animateTo(0f, animationSpec = tween(300))
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
+            .background(colors.background)
     ) {
-        // Minimal background
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        )
-        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,60 +74,56 @@ fun WelcomeScreen(
         ) {
             Spacer(modifier = Modifier.weight(0.25f))
 
-            // Logo container with brand gradient
+            // Logo
             Box(
                 modifier = Modifier
                     .scale(logoScale.value)
                     .size(140.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(colors.primary),
                 contentAlignment = Alignment.Center
             ) {
                 HabitateLogo(
                     size = 72.dp,
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = colors.onPrimary
                 )
             }
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
-            // App name
             Text(
                 text = "Habitate",
-                style = Typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                style = HabitateTheme.typography.displayMedium,
+                color = colors.onBackground,
                 modifier = Modifier.alpha(contentAlpha.value)
             )
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
-            // Tagline - calm, not aggressive
             Text(
                 text = "Build habits. Track progress.\nGrow together.",
-                style = BodyText,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = HabitateTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.alpha(contentAlpha.value)
             )
 
             Spacer(modifier = Modifier.weight(0.35f))
 
-            // Buttons section with stagger animation
+            // Buttons
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(contentAlpha.value)
                     .graphicsLayer { translationY = buttonsOffset.value },
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                // Primary CTA
                 HabitatePrimaryButton(
                     text = "Get Started",
                     onClick = onNavigateToRegister,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Secondary action
                 HabitateSecondaryButton(
                     text = "I already have an account",
                     onClick = onNavigateToLogin,
@@ -132,13 +131,12 @@ fun WelcomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
-            // Terms and privacy - subtle, not intrusive
             Text(
                 text = "By continuing, you agree to our Terms of Service\nand Privacy Policy",
-                style = CaptionText,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                style = HabitateTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .alpha(contentAlpha.value * 0.8f)

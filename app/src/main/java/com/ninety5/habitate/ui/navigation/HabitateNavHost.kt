@@ -1,5 +1,12 @@
 package com.ninety5.habitate.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,9 +47,36 @@ import com.ninety5.habitate.ui.screens.auth.WelcomeScreen
 import com.ninety5.habitate.ui.screens.challenge.ChallengeDetailScreen
 import com.ninety5.habitate.ui.screens.archive.ArchiveScreen
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TRANSITION DEFINITIONS — Fade-through for tabs, slide for detail screens
+// ═══════════════════════════════════════════════════════════════════════════
+
+private const val FADE_DURATION = 200
+private const val SLIDE_DURATION = 300
+
+/** Fade-through enter (used for bottom-nav tab swaps) */
+private val FadeEnter: EnterTransition = fadeIn(animationSpec = tween(FADE_DURATION))
+private val FadeExit: ExitTransition = fadeOut(animationSpec = tween(FADE_DURATION))
+
+/** Slide + fade enter (used for detail/push screens) */
+private val SlideInRight: EnterTransition =
+    slideInHorizontally(initialOffsetX = { (it * 0.15).toInt() }, animationSpec = tween(SLIDE_DURATION)) +
+        fadeIn(animationSpec = tween(SLIDE_DURATION))
+private val SlideOutLeft: ExitTransition =
+    slideOutHorizontally(targetOffsetX = { -(it * 0.05).toInt() }, animationSpec = tween(SLIDE_DURATION)) +
+        fadeOut(animationSpec = tween(SLIDE_DURATION / 2))
+
+/** Pop transitions (going back) */
+private val SlideInLeft: EnterTransition =
+    slideInHorizontally(initialOffsetX = { -(it * 0.05).toInt() }, animationSpec = tween(SLIDE_DURATION)) +
+        fadeIn(animationSpec = tween(SLIDE_DURATION))
+private val SlideOutRight: ExitTransition =
+    slideOutHorizontally(targetOffsetX = { (it * 0.15).toInt() }, animationSpec = tween(SLIDE_DURATION)) +
+        fadeOut(animationSpec = tween(SLIDE_DURATION / 2))
+
 /**
  * Main navigation host for Habitate app.
- * Handles all navigation between screens with proper argument passing.
+ * Fade-through transitions for tab swaps, slide transitions for detail screens.
  */
 @Composable
 fun HabitateNavHost(
@@ -54,10 +88,22 @@ fun HabitateNavHost(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = { SlideInRight },
+        exitTransition = { SlideOutLeft },
+        popEnterTransition = { SlideInLeft },
+        popExitTransition = { SlideOutRight }
     ) {
-        // Main bottom navigation screens
-        composable(Screen.Feed.route) {
+        // ═════════════════════════════════════════════════════════════════
+        // MAIN BOTTOM NAV SCREENS — Fade-through transitions
+        // ═════════════════════════════════════════════════════════════════
+        composable(
+            route = Screen.Feed.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             FeedScreen(
                 onPostClick = { postId ->
                     navController.navigate(Screen.PostDetail.createRoute(postId))
@@ -84,7 +130,13 @@ fun HabitateNavHost(
             )
         }
 
-        composable(Screen.Habitats.route) {
+        composable(
+            route = Screen.Habitats.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             HabitatsScreen(
                 onHabitatClick = { habitatId ->
                     navController.navigate(Screen.HabitatDetail.createRoute(habitatId))
@@ -95,7 +147,13 @@ fun HabitateNavHost(
             )
         }
 
-        composable(Screen.Focus.route) {
+        composable(
+            route = Screen.Focus.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             FocusScreen()
         }
 
@@ -140,7 +198,13 @@ fun HabitateNavHost(
         }
 
 
-        composable(Screen.Create.route) {
+        composable(
+            route = Screen.Create.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             CreateScreen(
                 onCreatePost = { navController.navigate(Screen.CreatePost.route) },
                 onCreateTask = { navController.navigate(Screen.CreateTask.route) },
@@ -151,7 +215,13 @@ fun HabitateNavHost(
             )
         }
 
-        composable(Screen.Activity.route) {
+        composable(
+            route = Screen.Activity.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             ActivityScreen(
                 onNotificationClick = { type, id ->
                     if (id.isBlank()) return@ActivityScreen
@@ -169,7 +239,13 @@ fun HabitateNavHost(
             )
         }
 
-        composable(Screen.Profile.route) {
+        composable(
+            route = Screen.Profile.route,
+            enterTransition = { FadeEnter },
+            exitTransition = { FadeExit },
+            popEnterTransition = { FadeEnter },
+            popExitTransition = { FadeExit }
+        ) {
             ProfileScreen(
                 onSettingsClick = { navController.navigate(Screen.Settings.route) },
                 onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
@@ -213,6 +289,7 @@ fun HabitateNavHost(
             val userId = backStackEntry.arguments?.getString("userId")
             ProfileScreen(
                 userId = userId,
+                isViewAsMode = true,
                 onSettingsClick = { navController.navigate(Screen.Settings.route) },
                 onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
                 onPostClick = { postId ->
@@ -220,7 +297,8 @@ fun HabitateNavHost(
                 },
                 onWorkoutClick = { workoutId ->
                     navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
-                }
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

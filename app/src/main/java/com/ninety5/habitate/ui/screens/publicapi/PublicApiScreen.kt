@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.ui.components.ApiSectionCard
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +39,8 @@ fun PublicApiScreen(
             TopAppBar(
                 title = { Text("Explore APIs") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = HabitateTheme.colors.primaryContainer,
+                    titleContentColor = HabitateTheme.colors.onPrimaryContainer
                 )
             )
         },
@@ -72,15 +73,15 @@ fun PublicApiScreen(
                             ) {
                                 Text(
                                     text = "${it.temperature}°",
-                                    style = MaterialTheme.typography.displayMedium,
+                                    style = HabitateTheme.typography.displayMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Column {
                                     Text("Wind: ${it.windSpeed} km/h")
-                                    Text("Lat: 52.52, Long: 13.41", style = MaterialTheme.typography.bodySmall)
+                                    Text("Lat: 52.52, Long: 13.41", style = HabitateTheme.typography.bodySmall)
                                 }
                             }
-                        } ?: Text("Tap to load weather data", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } ?: Text("Tap to load weather data", style = HabitateTheme.typography.bodyMedium, color = HabitateTheme.colors.onSurfaceVariant)
                     }
                 }
 
@@ -99,17 +100,17 @@ fun PublicApiScreen(
                             Column(modifier = Modifier.padding(8.dp)) {
                                 Text(
                                     text = "\u201c${it.text}\u201d",
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = HabitateTheme.typography.headlineSmall,
                                     fontStyle = FontStyle.Italic
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = "— ${it.author}",
-                                    style = MaterialTheme.typography.labelLarge,
+                                    style = HabitateTheme.typography.labelLarge,
                                     modifier = Modifier.align(Alignment.End)
                                 )
                             }
-                        } ?: Text("Need some inspiration?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } ?: Text("Need some inspiration?", style = HabitateTheme.typography.bodyMedium, color = HabitateTheme.colors.onSurfaceVariant)
                     }
                 }
 
@@ -136,14 +137,14 @@ fun PublicApiScreen(
                                         .clip(RoundedCornerShape(12.dp))
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text(it.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text(it.name, style = HabitateTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                                 AssistChip(
                                     onClick = { },
                                     label = { Text(it.category) },
                                     leadingIcon = { Icon(Icons.Default.Category, null) }
                                 )
                             }
-                        } ?: Text("Hungry? Get a random meal idea.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } ?: Text("Hungry? Get a random meal idea.", style = HabitateTheme.typography.bodyMedium, color = HabitateTheme.colors.onSurfaceVariant)
                     }
                 }
 
@@ -161,7 +162,7 @@ fun PublicApiScreen(
                         }
                     ) {
                         if (uiState.books.isEmpty()) {
-                            Text("Search for books to see results here.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Search for books to see results here.", style = HabitateTheme.typography.bodyMedium, color = HabitateTheme.colors.onSurfaceVariant)
                         }
                     }
                 }

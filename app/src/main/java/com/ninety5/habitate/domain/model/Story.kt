@@ -14,6 +14,7 @@ data class Story(
     val caption: String?,
     val visibility: PostVisibility,
     val viewCount: Int,
+    val isViewed: Boolean = false,
     val isSaved: Boolean,
     val createdAt: Instant,
     val expiresAt: Instant

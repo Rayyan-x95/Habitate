@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.ninety5.habitate.ui.theme.HabitateTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,9 +82,9 @@ fun NotificationSettingsScreen(
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = if (pushEnabled)
-                        MaterialTheme.colorScheme.primaryContainer
+                        HabitateTheme.colors.primaryContainer
                     else
-                        MaterialTheme.colorScheme.surfaceVariant
+                        HabitateTheme.colors.surfaceVariant
                 )
             ) {
                 Row(
@@ -104,13 +105,13 @@ fun NotificationSettingsScreen(
                         Column {
                             Text(
                                 text = "Push Notifications",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = HabitateTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
                                 text = if (pushEnabled) "Enabled" else "Disabled",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = HabitateTheme.typography.bodySmall,
+                                color = HabitateTheme.colors.onSurfaceVariant
                             )
                         }
                     }
@@ -139,8 +140,8 @@ fun NotificationSettingsScreen(
             if (pushEnabled) {
                 Text(
                     text = "NOTIFICATION TYPES",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = HabitateTheme.typography.labelMedium,
+                    color = HabitateTheme.colors.primary,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
@@ -185,8 +186,8 @@ fun NotificationSettingsScreen(
 
                 Text(
                     text = "SUMMARIES",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = HabitateTheme.typography.labelMedium,
+                    color = HabitateTheme.colors.primary,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
@@ -227,12 +228,12 @@ private fun NotificationToggleItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge
+                style = HabitateTheme.typography.bodyLarge
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = HabitateTheme.typography.bodySmall,
+                color = HabitateTheme.colors.onSurfaceVariant
             )
         }
         Switch(

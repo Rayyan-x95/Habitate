@@ -27,7 +27,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,6 +55,7 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.ninety5.habitate.domain.model.Story
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
@@ -168,13 +168,13 @@ fun StoryViewerScreen(
                 Text(
                     text = "No stories available",
                     color = Color.White,
-                    style = MaterialTheme.typography.titleMedium
+                    style = HabitateTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Stories expire after 24 hours",
                     color = Color.White.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = HabitateTheme.typography.bodyMedium
                 )
             }
         } else {
@@ -294,7 +294,7 @@ fun StoryViewerScreen(
                         Text(
                             text = caption,
                             color = Color.White,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = HabitateTheme.typography.bodyLarge
                         )
                     }
                 }

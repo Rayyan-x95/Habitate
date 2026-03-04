@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ninety5.habitate.ui.theme.SoftIndigo
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import androidx.health.connect.client.PermissionController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,21 +55,21 @@ fun HealthConnectPermissionScreen(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Connect Health Data",
                 modifier = Modifier.size(64.dp),
-                tint = SoftIndigo
+                tint = HabitateTheme.colors.primary
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "Connect Health Data",
-                style = MaterialTheme.typography.headlineMedium,
+                style = HabitateTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Habitate can import your workouts and step counts. " +
                         "Your health data is never shared without your permission.",
-                style = MaterialTheme.typography.bodyLarge,
+                style = HabitateTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = HabitateTheme.colors.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -80,7 +80,7 @@ fun HealthConnectPermissionScreen(
                 is HealthUiState.NotAvailable -> {
                     Text(
                         "Health Connect is not available on this device.",
-                        color = MaterialTheme.colorScheme.error
+                        color = HabitateTheme.colors.error
                     )
                 }
                 is HealthUiState.NeedsPermission -> {
@@ -89,7 +89,7 @@ fun HealthConnectPermissionScreen(
                             permissionLauncher.launch(viewModel.getPermissions())
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = SoftIndigo)
+                        colors = ButtonDefaults.buttonColors(containerColor = HabitateTheme.colors.primary)
                     ) {
                         Text("Grant Health Permissions")
                     }
@@ -97,8 +97,8 @@ fun HealthConnectPermissionScreen(
                 is HealthUiState.Ready -> {
                     Text(
                         "Health Connect is connected!",
-                        color = SoftIndigo,
-                        style = MaterialTheme.typography.titleMedium
+                        color = HabitateTheme.colors.primary,
+                        style = HabitateTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
@@ -111,7 +111,7 @@ fun HealthConnectPermissionScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = status,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = HabitateTheme.typography.bodyMedium
                         )
                     }
                 }

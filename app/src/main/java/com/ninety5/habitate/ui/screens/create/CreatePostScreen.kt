@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
 import com.ninety5.habitate.domain.model.PostVisibility
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,13 +80,13 @@ fun CreatePostScreen(
                         if (uiState.isLoading || uiState.isUploadingImage) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                color = HabitateTheme.colors.primary
                             )
                         } else {
                             Text(
                                 "Post",
-                                color = if (content.isNotBlank() || uiState.selectedImageUri != null) MaterialTheme.colorScheme.primary else Color.Gray,
-                                style = MaterialTheme.typography.titleMedium
+                                color = if (content.isNotBlank() || uiState.selectedImageUri != null) HabitateTheme.colors.primary else Color.Gray,
+                                style = HabitateTheme.typography.titleMedium
                             )
                         }
                     }
@@ -110,7 +111,7 @@ fun CreatePostScreen(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent
                 ),
-                textStyle = MaterialTheme.typography.bodyLarge
+                textStyle = HabitateTheme.typography.bodyLarge
             )
 
             // Visibility Selector
@@ -160,7 +161,7 @@ fun CreatePostScreen(
                         Icon(
                             Icons.Default.Close,
                             contentDescription = "Remove image",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = HabitateTheme.colors.onSurface
                         )
                     }
                 }
@@ -192,14 +193,14 @@ fun CreatePostScreen(
                     Icon(
                         Icons.Default.AddPhotoAlternate,
                         contentDescription = "Add photo",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = HabitateTheme.colors.primary
                     )
                 }
                 
                 Text(
                     text = "${content.length}/2000",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = HabitateTheme.typography.bodySmall,
+                    color = HabitateTheme.colors.onSurfaceVariant
                 )
             }
         }

@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ninety5.habitate.domain.model.Challenge
 import com.ninety5.habitate.ui.components.ExperimentalFeatureBanner
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -54,7 +55,7 @@ fun ChallengeDetailScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = HabitateTheme.colors.primary
                     )
                 ) {
                     Text("Join Challenge")
@@ -89,7 +90,7 @@ fun ChallengeDetailScreen(
                     item {
                         Text(
                             "Leaderboard",
-                            style = MaterialTheme.typography.titleLarge,
+                            style = HabitateTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -110,21 +111,21 @@ fun ChallengeDetailScreen(
 @Composable
 fun ChallengeHeader(challenge: Challenge) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = HabitateTheme.colors.primaryContainer),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = challenge.title,
-                style = MaterialTheme.typography.headlineMedium,
+                style = HabitateTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = HabitateTheme.colors.onPrimaryContainer
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = challenge.description ?: "No description",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                style = HabitateTheme.typography.bodyLarge,
+                color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.8f)
             )
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -135,29 +136,29 @@ fun ChallengeHeader(challenge: Challenge) {
                 Column {
                     Text(
                         "Goal",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        style = HabitateTheme.typography.labelMedium,
+                        color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.6f)
                     )
                     Text(
                         "${challenge.targetValue.toInt()} ${challenge.metricType.name}",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = HabitateTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = HabitateTheme.colors.onPrimaryContainer
                     )
                 }
                 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         "Ends",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        style = HabitateTheme.typography.labelMedium,
+                        color = HabitateTheme.colors.onPrimaryContainer.copy(alpha = 0.6f)
                     )
                     val formatter = DateTimeFormatter.ofPattern("MMM dd").withZone(ZoneId.systemDefault())
                     Text(
                         formatter.format(challenge.endDate),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = HabitateTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = HabitateTheme.colors.onPrimaryContainer
                     )
                 }
             }
@@ -171,7 +172,7 @@ fun LeaderboardItem(entry: LeaderboardEntry) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (entry.isCurrentUser) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f) 
+                if (entry.isCurrentUser) HabitateTheme.colors.secondaryContainer.copy(alpha = 0.3f) 
                 else Color.Transparent,
                 RoundedCornerShape(8.dp)
             )
@@ -180,7 +181,7 @@ fun LeaderboardItem(entry: LeaderboardEntry) {
     ) {
         Text(
             text = "#${entry.rank}",
-            style = MaterialTheme.typography.titleMedium,
+            style = HabitateTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.width(40.dp)
         )
@@ -191,7 +192,7 @@ fun LeaderboardItem(entry: LeaderboardEntry) {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(HabitateTheme.colors.surfaceVariant),
             contentScale = ContentScale.Crop
         )
         
@@ -199,16 +200,16 @@ fun LeaderboardItem(entry: LeaderboardEntry) {
         
         Text(
             text = entry.userName,
-            style = MaterialTheme.typography.bodyLarge,
+            style = HabitateTheme.typography.bodyLarge,
             fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.weight(1f)
         )
         
         Text(
             text = "${entry.score.toInt()}",
-            style = MaterialTheme.typography.titleMedium,
+            style = HabitateTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = HabitateTheme.colors.primary
         )
     }
 }

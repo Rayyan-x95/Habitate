@@ -15,7 +15,10 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("storyId")]
+    indices = [
+        Index("storyId"),
+        Index(value = ["storyId", "viewerId"], unique = true)
+    ]
 )
 data class StoryViewEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

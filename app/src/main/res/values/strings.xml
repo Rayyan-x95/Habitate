@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Habitate</string>
+    <string name="back">Back</string>
+    <string name="settings_title">Settings</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_preview_title">Public Profile Preview</string>
+    <string name="profile_stat_posts">Posts</string>
+    <string name="profile_stat_followers">Followers</string>
+    <string name="profile_stat_following">Following</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="timeline">Timeline</string>
+    <string name="profile_error_title">Something went wrong</string>
+    <string name="profile_error_description">Please try again</string>
+    <string name="profile_no_posts_title">No posts yet</string>
+    <string name="profile_no_posts_owner_desc">Share your first thought with the community</string>
+    <string name="profile_no_posts_other_desc">This user hasn\'t posted yet</string>
 </resources>
 

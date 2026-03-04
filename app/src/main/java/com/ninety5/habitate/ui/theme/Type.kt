@@ -9,13 +9,19 @@ import androidx.compose.ui.unit.sp
 /**
  * ╔══════════════════════════════════════════════════════════════════════════╗
  * ║                    HABITATE DESIGN SYSTEM - TYPOGRAPHY                   ║
- * ║                         Version 3.0 - 2026 Spatial UI                    ║
+ * ║                         Version 4.0 - 2026 Spatial UI                    ║
  * ║                                                                          ║
  * ║  Philosophy:                                                              ║
  * ║  • Quietly powerful, effortless to read                                  ║
  * ║  • Generous line heights for calm reading (1.5x)                         ║
  * ║  • Avoid excessive bold - use weight meaningfully                        ║
  * ║  • Clear hierarchy without visual noise                                  ║
+ * ║                                                                          ║
+ * ║  Font Families (see FontFamilies.kt):                                    ║
+ * ║  • Google Sans Flex — Primary UI (Display, Headline, Title, Label)       ║
+ * ║  • Inter — Body text (optimized for readability at small sizes)          ║
+ * ║  • Space Grotesk — Accent headings (distinctive geometric sans)          ║
+ * ║  • Google Sans — Branding / special usage (bundled)                      ║
  * ║                                                                          ║
  * ║  Hierarchy: Display → Headline → Title → Body → Label                    ║
  * ║                                                                          ║
@@ -24,90 +30,89 @@ import androidx.compose.ui.unit.sp
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FONT FAMILY
+// FONT FAMILY ALIASES
+// Google Sans Flex = primary UI font (Display, Headlines, Titles, Labels)
+// Inter = body/reading font (Body text, Supporting text)
+// Space Grotesk & Google Sans available via FontFamilies.kt
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Using system default for now (Roboto on Android)
-// To use Google Sans Flex: add the font files to res/font/ and uncomment below.
-// val GoogleSansFlex = FontFamily(
-//     Font(R.font.google_sans_flex_regular, FontWeight.Normal),
-//     Font(R.font.google_sans_flex_medium, FontWeight.Medium),
-//     Font(R.font.google_sans_flex_semibold, FontWeight.SemiBold),
-// )
+/** Primary UI font — used for Display, Headline, Title, Label */
+val AppFontFamily: FontFamily = GoogleSansFlexFamily
 
-val AppFontFamily = FontFamily.Default
+/** Reading / body font — optimized for long-form text at small sizes */
+val BodyFontFamily: FontFamily = InterFamily
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SEMANTIC TYPOGRAPHY ALIASES (Used by design-system components)
 // Maps semantic names to Material 3 scale
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Screen / page titles (headlineMedium) */
+/** Screen / page titles (headlineMedium) — Google Sans Flex */
 val ScreenTitle = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = AppFontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 20.sp,
     lineHeight = 28.sp,
     letterSpacing = 0.sp
 )
 
-/** Section headers inside screens (titleLarge) */
+/** Section headers inside screens (titleLarge) — Google Sans Flex */
 val SectionTitle = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = AppFontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 18.sp,
     lineHeight = 26.sp,
     letterSpacing = 0.sp
 )
 
-/** Card / list item title (titleMedium) */
+/** Card / list item title (titleMedium) — Google Sans Flex */
 val CardTitle = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = AppFontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 16.sp,
     lineHeight = 24.sp,
     letterSpacing = 0.15.sp
 )
 
-/** Primary body text (bodyMedium) */
+/** Primary body text (bodyMedium) — Inter */
 val BodyText = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = BodyFontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 14.sp,
     lineHeight = 21.sp,
     letterSpacing = 0.25.sp
 )
 
-/** Supporting / secondary description text (bodySmall) */
+/** Supporting / secondary description text (bodySmall) — Inter */
 val SupportingText = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = BodyFontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 12.sp,
     lineHeight = 18.sp,
     letterSpacing = 0.4.sp
 )
 
-/** Metadata, timestamps, overlines (labelSmall) */
+/** Metadata, timestamps, overlines (labelSmall) — Google Sans Flex */
 val MetaText = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = AppFontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 11.sp,
     lineHeight = 16.sp,
     letterSpacing = 0.5.sp
 )
 
-/** Caption / fine-print text (labelSmall) */
+/** Caption / fine-print text (labelSmall) — Inter */
 val CaptionText = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = BodyFontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 11.sp,
     lineHeight = 16.sp,
     letterSpacing = 0.5.sp
 )
 
-/** Button label text (labelLarge) */
+/** Button label text (labelLarge) — Google Sans Flex */
 val ButtonText = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = AppFontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 14.sp,
     lineHeight = 20.sp,
@@ -120,7 +125,7 @@ val ButtonText = TextStyle(
 
 val Typography = Typography(
     // ─────────────────────────────────────────────────────────────────────────
-    // DISPLAY - Hero text, splash screens, onboarding
+    // DISPLAY - Hero text, splash screens, onboarding (Google Sans Flex)
     // Use sparingly - these are for impact moments
     // ─────────────────────────────────────────────────────────────────────────
     displayLarge = TextStyle(
@@ -146,7 +151,7 @@ val Typography = Typography(
     ),
     
     // ─────────────────────────────────────────────────────────────────────────
-    // HEADLINE - Screen titles, section headers
+    // HEADLINE - Screen titles, section headers (Google Sans Flex)
     // Primary navigation and section markers
     // ─────────────────────────────────────────────────────────────────────────
     headlineLarge = TextStyle(
@@ -172,7 +177,7 @@ val Typography = Typography(
     ),
     
     // ─────────────────────────────────────────────────────────────────────────
-    // TITLE - Card titles, list headers, dialog titles
+    // TITLE - Card titles, list headers, dialog titles (Google Sans Flex)
     // ─────────────────────────────────────────────────────────────────────────
     titleLarge = TextStyle(
         fontFamily = AppFontFamily,
@@ -197,24 +202,25 @@ val Typography = Typography(
     ),
     
     // ─────────────────────────────────────────────────────────────────────────
-    // BODY - Main content, descriptions, long-form text
+    // BODY - Main content, descriptions, long-form text (Inter)
+    // Inter is optimized for readability at small sizes with optical sizing
     // ─────────────────────────────────────────────────────────────────────────
     bodyLarge = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = BodyFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = BodyFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 21.sp,
         letterSpacing = 0.25.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = BodyFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 18.sp,
@@ -222,7 +228,7 @@ val Typography = Typography(
     ),
     
     // ─────────────────────────────────────────────────────────────────────────
-    // LABEL - Buttons, tags, overlines, tiny metadata
+    // LABEL - Buttons, tags, overlines, tiny metadata (Google Sans Flex)
     // ─────────────────────────────────────────────────────────────────────────
     labelLarge = TextStyle(
         fontFamily = AppFontFamily,

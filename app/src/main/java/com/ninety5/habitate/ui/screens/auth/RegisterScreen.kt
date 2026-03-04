@@ -3,16 +3,48 @@ package com.ninety5.habitate.ui.screens.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -27,7 +59,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.ui.components.designsystem.HabitatePrimaryButton
-import com.ninety5.habitate.ui.theme.*
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +84,14 @@ fun RegisterScreen(
     var acceptedTerms by remember { mutableStateOf(false) }
 
     val passwordsMatch = password == confirmPassword || confirmPassword.isEmpty()
-    val isFormValid = displayName.isNotBlank() && 
-                      username.isNotBlank() && 
-                      email.isNotBlank() && 
-                      password.length >= 8 && 
-                      password == confirmPassword &&
-                      acceptedTerms
+    val isFormValid = displayName.isNotBlank() &&
+            username.isNotBlank() &&
+            email.isNotBlank() &&
+            password.length >= 8 &&
+            password == confirmPassword &&
+            acceptedTerms
+
+    val fieldShape = RoundedCornerShape(Radius.md)
 
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
@@ -63,36 +99,27 @@ fun RegisterScreen(
         }
     }
 
-    Scaffold(
-        containerColor = colors.background,
-        topBar = {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top bar
             TopAppBar(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = colors.textPrimary
+                            tint = colors.onBackground
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Minimal background
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
             )
 
             Column(
@@ -104,14 +131,14 @@ fun RegisterScreen(
             ) {
                 Text(
                     text = "Create Account",
-                    style = ScreenTitle,
-                    color = colors.textPrimary
+                    style = HabitateTheme.typography.headlineLarge,
+                    color = colors.onBackground
                 )
 
                 Text(
                     text = "Join Habitate and start your journey",
-                    style = BodyText,
-                    color = colors.textSecondary,
+                    style = HabitateTheme.typography.bodyLarge,
+                    color = colors.onBackground.copy(alpha = 0.6f),
                     modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xl)
                 )
 
@@ -133,7 +160,7 @@ fun RegisterScreen(
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = InputShape,
+                    shape = fieldShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colors.primary,
                         unfocusedBorderColor = colors.border,
@@ -163,7 +190,7 @@ fun RegisterScreen(
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = InputShape,
+                    shape = fieldShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colors.primary,
                         unfocusedBorderColor = colors.border,
@@ -195,7 +222,7 @@ fun RegisterScreen(
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = InputShape,
+                    shape = fieldShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colors.primary,
                         unfocusedBorderColor = colors.border,
@@ -223,7 +250,7 @@ fun RegisterScreen(
                             Icon(
                                 imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                 contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                tint = colors.textMuted
+                                tint = colors.onBackground.copy(alpha = 0.5f)
                             )
                         }
                     },
@@ -237,7 +264,7 @@ fun RegisterScreen(
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = InputShape,
+                    shape = fieldShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colors.primary,
                         unfocusedBorderColor = colors.border,
@@ -276,7 +303,7 @@ fun RegisterScreen(
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = InputShape,
+                    shape = fieldShape,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colors.primary,
                         unfocusedBorderColor = colors.border,
@@ -309,23 +336,23 @@ fun RegisterScreen(
                     )
                     Text(
                         text = "I agree to the Terms of Service and Privacy Policy",
-                        style = CaptionText,
+                        style = HabitateTheme.typography.bodySmall,
                         modifier = Modifier.clickable { acceptedTerms = !acceptedTerms },
-                        color = colors.textSecondary
+                        color = colors.onBackground.copy(alpha = 0.6f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
-                // Registration success message (shown when backend sync is pending)
+                // Registration success message
                 AnimatedVisibility(
                     visible = uiState.registrationStatus is RegistrationStatus.Success &&
-                              !(uiState.registrationStatus as? RegistrationStatus.Success)?.backendSynced.let { it == true },
+                            !(uiState.registrationStatus as? RegistrationStatus.Success)?.backendSynced.let { it == true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Surface(
-                        color = colors.successContainer,
-                        shape = CardShape,
+                        color = colors.primaryContainer,
+                        shape = RoundedCornerShape(Radius.md),
                         modifier = Modifier.padding(bottom = Spacing.lg)
                     ) {
                         Row(
@@ -336,12 +363,12 @@ fun RegisterScreen(
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
                                 strokeWidth = 2.dp,
-                                color = colors.success
+                                color = colors.primary
                             )
                             Text(
                                 text = "Account created! Finishing setup...",
-                                color = colors.success,
-                                style = BodyText
+                                color = colors.primary,
+                                style = HabitateTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -354,14 +381,14 @@ fun RegisterScreen(
                 ) {
                     Surface(
                         color = colors.errorContainer,
-                        shape = CardShape,
+                        shape = RoundedCornerShape(Radius.md),
                         modifier = Modifier.padding(bottom = Spacing.lg)
                     ) {
                         Text(
                             text = uiState.error ?: "",
                             color = colors.error,
                             modifier = Modifier.padding(Spacing.lg),
-                            style = BodyText,
+                            style = HabitateTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -386,12 +413,12 @@ fun RegisterScreen(
                 ) {
                     Text(
                         text = "Already have an account? ",
-                        style = BodyText,
-                        color = colors.textSecondary
+                        style = HabitateTheme.typography.bodyMedium,
+                        color = colors.onBackground.copy(alpha = 0.6f)
                     )
                     Text(
                         text = "Sign In",
-                        style = BodyText,
+                        style = HabitateTheme.typography.bodyMedium,
                         color = colors.primary,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier

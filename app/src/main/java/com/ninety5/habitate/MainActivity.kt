@@ -6,27 +6,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ninety5.habitate.core.auth.SessionState
+import com.ninety5.habitate.ui.components.designsystem.HabitateBottomNavBar
+import com.ninety5.habitate.ui.components.designsystem.DefaultNavItems
 import com.ninety5.habitate.ui.navigation.HabitateNavHost
 import com.ninety5.habitate.ui.navigation.Screen
 import com.ninety5.habitate.ui.navigation.bottomNavItems
@@ -61,9 +64,6 @@ class MainActivity : ComponentActivity() {
 
         handleIntent(intent)
 
-        // AppViewModel auto-observes SessionManager in its init block
-        // No need to manually call observeAuthAndInitServices
-
         setContent {
             val settingsState by settingsViewModel.uiState.collectAsState()
             val darkTheme = when (settingsState.themeMode) {
@@ -94,6 +94,7 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags, appViewMod
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
     val uiState by viewModel.uiState.collectAsState()
     val sessionState by appViewModel.sessionState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,20 +109,17 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags, appViewMod
         }
     }
 
-    // Screens that should show bottom navigation
+    // Screens that should show the floating bottom navigation
     val bottomNavScreens = mutableListOf(
         Screen.Feed.route,
         Screen.Habitats.route,
         Screen.Create.route,
         Screen.Activity.route,
-        Screen.Profile.route
+        Screen.Profile.route,
+        Screen.Focus.route
     )
 
-    if (featureFlags.isFocusModeEnabled) {
-        bottomNavScreens.add(Screen.Focus.route)
-    }
-
-    val showBottomBar = currentDestination?.route in bottomNavScreens
+    val showBottomBar = currentRoute in bottomNavScreens
 
     val startDestination = when {
         !uiState.isOnboarded -> Screen.Welcome.route
@@ -133,21 +131,31 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags, appViewMod
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = HabitateTheme.colors.background,
             bottomBar = {
-                if (showBottomBar) {
-                    HabitateBottomNavigation(
-                        currentRoute = currentDestination?.route,
-                        featureFlags = featureFlags,
-                        onNavigate = { screen ->
-                            navController.navigate(screen.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
+                // Animated floating pill navigation
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    HabitateBottomNavBar(
+                        currentRoute = currentRoute ?: Screen.Feed.route,
+                        onNavigate = { route ->
+                            navController.navigate(route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
-                                // Avoid multiple copies of the same destination
                                 launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        },
+                        onCreateClick = {
+                            navController.navigate(Screen.Create.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
                                 restoreState = true
                             }
                         }
@@ -159,38 +167,6 @@ fun HabitateApp(viewModel: AuthViewModel, featureFlags: FeatureFlags, appViewMod
                 navController = navController,
                 modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
                 startDestination = startDestination
-            )
-        }
-    }
-}
-
-@Composable
-fun HabitateBottomNavigation(
-    currentRoute: String?,
-    featureFlags: FeatureFlags,
-    onNavigate: (Screen) -> Unit
-) {
-    val items = androidx.compose.runtime.remember(featureFlags) {
-        bottomNavItems.filter { item ->
-            when (item.screen) {
-                Screen.Focus -> featureFlags.isFocusModeEnabled
-                else -> true
-            }
-        }
-    }
-
-    NavigationBar {
-        items.forEach { item ->
-            NavigationBarItem(
-                selected = currentRoute == item.screen.route,
-                onClick = { onNavigate(item.screen) },
-                icon = {
-                    Icon(
-                        imageVector = if (currentRoute == item.screen.route) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label
-                    )
-                },
-                label = { Text(item.label) }
             )
         }
     }

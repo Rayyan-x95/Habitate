@@ -1,7 +1,11 @@
 package com.ninety5.habitate.ui.screens.activity
 
+import android.text.format.DateUtils
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,23 +22,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import android.text.format.DateUtils
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Archive
-import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,17 +41,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.ui.components.UserAvatar
-import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
-import com.ninety5.habitate.ui.theme.SageGreen
+import com.ninety5.habitate.ui.components.designsystem.HabitateEmptyState
+import com.ninety5.habitate.ui.components.designsystem.ShimmerBox
+import com.ninety5.habitate.ui.components.designsystem.ShimmerLine
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Size
+import com.ninety5.habitate.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,40 +61,60 @@ fun ActivityScreen(
     onNotificationClick: (type: String, id: String) -> Unit,
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
+    val colors = HabitateTheme.colors
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold(
-        containerColor = HabitateDarkGreenStart,
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (uiState.notifications.isEmpty()) {
-            EmptyState(modifier = Modifier.padding(padding))
-        } else {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
+        AnimatedVisibility(
+            visible = uiState.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            ActivitySkeleton()
+        }
+
+        AnimatedVisibility(
+            visible = !uiState.isLoading && uiState.notifications.isEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            HabitateEmptyState(
+                icon = Icons.Rounded.Notifications,
+                title = "All Caught Up",
+                description = "You have no new notifications.",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        AnimatedVisibility(
+            visible = !uiState.isLoading && uiState.notifications.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(vertical = 8.dp)
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = Spacing.sm,
+                    bottom = 96.dp
+                )
             ) {
                 items(uiState.notifications, key = { it.id }) { notification ->
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = {
                             if (it == SwipeToDismissBoxValue.StartToEnd) {
                                 viewModel.markAsRead(notification.id)
-                                false // Don't actually dismiss the item
+                                false
                             } else {
                                 false
                             }
                         }
                     )
 
-                    // Reset dismiss state when isRead becomes true
                     LaunchedEffect(notification.isRead) {
                         if (notification.isRead && dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
                             dismissState.reset()
@@ -121,6 +141,11 @@ fun ActivityScreen(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -129,13 +154,15 @@ private fun NotificationItem(
     notification: NotificationUiModel,
     onClick: () -> Unit
 ) {
+    val colors = HabitateTheme.colors
     val backgroundColor by animateColorAsState(
         targetValue = if (notification.isRead) {
-            HabitateDarkGreenStart
+            colors.background
         } else {
-            SageGreen.copy(alpha = 0.1f)
+            colors.primary.copy(alpha = 0.06f)
         },
-        animationSpec = tween(500), label = ""
+        animationSpec = tween(500),
+        label = "notif_bg"
     )
 
     Row(
@@ -143,33 +170,33 @@ private fun NotificationItem(
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .background(backgroundColor)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         UserAvatar(
             avatarUrl = null,
             name = notification.title,
-            size = 48.dp
+            size = Size.avatarMd
         )
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(Spacing.lg))
         Column(Modifier.weight(1f)) {
             Text(
                 text = notification.message,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.Bold,
+                style = HabitateTheme.typography.bodyLarge,
+                fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.SemiBold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                color = HabitateOffWhite
+                color = colors.onBackground
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(Spacing.xxs))
             Text(
                 text = DateUtils.getRelativeTimeSpanString(
                     notification.timestamp,
                     System.currentTimeMillis(),
                     DateUtils.MINUTE_IN_MILLIS
                 ).toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HabitateOffWhite.copy(alpha = 0.7f)
+                style = HabitateTheme.typography.bodySmall,
+                color = colors.onBackground.copy(alpha = 0.6f)
             )
         }
     }
@@ -177,42 +204,50 @@ private fun NotificationItem(
 
 @Composable
 private fun SwipeBackground(isRead: Boolean) {
-    val color = if (isRead) Color.Transparent else SageGreen.copy(alpha = 0.2f)
+    val colors = HabitateTheme.colors
+    val color = if (isRead) Color.Transparent else colors.primary.copy(alpha = 0.1f)
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = Spacing.xl),
         contentAlignment = Alignment.CenterStart
     ) {
         if (!isRead) {
             Icon(
                 Icons.Rounded.Archive,
                 contentDescription = "Mark as read",
-                tint = SageGreen
+                tint = colors.primary
             )
         }
     }
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+private fun ActivitySkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = Spacing.lg)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                "All Caught Up",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = HabitateOffWhite
-            )
-            Text(
-                "You have no new notifications.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = HabitateOffWhite.copy(alpha = 0.7f)
-            )
+        repeat(6) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.screenHorizontal, vertical = Spacing.md),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ShimmerBox(
+                    modifier = Modifier.size(Size.avatarMd),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                Spacer(Modifier.width(Spacing.lg))
+                Column(Modifier.weight(1f)) {
+                    ShimmerLine(modifier = Modifier.fillMaxWidth(0.8f))
+                    Spacer(Modifier.height(Spacing.xs))
+                    ShimmerLine(modifier = Modifier.fillMaxWidth(0.4f))
+                }
+            }
         }
     }
 }

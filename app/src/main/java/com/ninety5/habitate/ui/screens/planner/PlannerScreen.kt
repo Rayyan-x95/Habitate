@@ -40,7 +40,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -48,6 +47,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import com.ninety5.habitate.ui.theme.LocalHabitateColors
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -109,7 +109,7 @@ fun PlannerScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = HabitateTheme.colors.surface
                 )
             )
         },
@@ -123,7 +123,7 @@ fun PlannerScreen(
             // Tab Row
             TabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = HabitateTheme.colors.surface
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -145,8 +145,8 @@ fun PlannerScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "Analyzing your habits and tasks...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = HabitateTheme.typography.bodyMedium,
+                                color = HabitateTheme.colors.onSurfaceVariant
                             )
                         }
                     }
@@ -220,13 +220,13 @@ private fun TodayPlanView(
             ) {
                 Text(
                     text = "Today's Schedule",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = HabitateTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d")),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = HabitateTheme.typography.labelMedium,
+                    color = HabitateTheme.colors.onSurfaceVariant
                 )
             }
         }
@@ -249,7 +249,7 @@ private fun TodayPlanView(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Habits to complete",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = HabitateTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -268,7 +268,7 @@ private fun DailyAdviceCard(advice: String) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = HabitateTheme.colors.primaryContainer
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -276,22 +276,22 @@ private fun DailyAdviceCard(advice: String) {
                 Icon(
                     Icons.Default.AutoAwesome,
                     contentDescription = "AI Insight",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = HabitateTheme.colors.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "AI Insight",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = HabitateTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = HabitateTheme.colors.primary
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = advice,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                style = HabitateTheme.typography.bodyMedium,
+                color = HabitateTheme.colors.onPrimaryContainer
             )
         }
     }
@@ -307,8 +307,8 @@ private fun PlannedTaskCard(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (task.isCompleted) 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
+                else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -328,7 +328,7 @@ private fun PlannedTaskCard(
                         .clip(CircleShape)
                         .background(
                             if (task.isCompleted) LocalHabitateColors.current.success.copy(alpha = 0.2f)
-                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            else HabitateTheme.colors.primary.copy(alpha = 0.1f)
                         )
                         .clickable { if (!task.isCompleted) onComplete() },
                     contentAlignment = Alignment.Center
@@ -348,12 +348,12 @@ private fun PlannedTaskCard(
                 Column {
                     Text(
                         text = task.title,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = HabitateTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                         color = if (task.isCompleted) 
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.onSurfaceVariant
+                            HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.5f)
+                            else HabitateTheme.colors.onSurfaceVariant
                     )
                     task.scheduledTime?.let { time ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -361,13 +361,13 @@ private fun PlannedTaskCard(
                                 Icons.Default.Schedule,
                                 contentDescription = "Scheduled time",
                                 modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                tint = HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.6f)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = time,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                style = HabitateTheme.typography.labelSmall,
+                                color = HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.6f)
                             )
                         }
                     }
@@ -392,7 +392,7 @@ private fun PriorityChip(priority: TaskPriority) {
     
     Text(
         text = text,
-        style = MaterialTheme.typography.labelSmall,
+        style = HabitateTheme.typography.labelSmall,
         color = color,
         fontWeight = FontWeight.Medium
     )
@@ -404,7 +404,7 @@ private fun PlannedHabitCard(habit: PlannedHabit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+            containerColor = HabitateTheme.colors.secondaryContainer.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -417,19 +417,19 @@ private fun PlannedHabitCard(habit: PlannedHabit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = habit.emoji,
-                    style = MaterialTheme.typography.titleMedium
+                    style = HabitateTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
                         text = habit.name,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = HabitateTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = "🔥 ${habit.streak} day streak",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.onSecondaryContainer.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -457,7 +457,7 @@ private fun WeeklyPlanView(
         item {
             Text(
                 text = "Weekly Overview",
-                style = MaterialTheme.typography.titleMedium,
+                style = HabitateTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -486,8 +486,8 @@ private fun DayPlanCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isToday) 
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                HabitateTheme.colors.primaryContainer.copy(alpha = 0.5f)
+                else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -503,16 +503,16 @@ private fun DayPlanCard(
             ) {
                 Text(
                     text = dayPlan.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (isToday) MaterialTheme.colorScheme.primary 
-                            else MaterialTheme.colorScheme.onSurfaceVariant
+                    style = HabitateTheme.typography.labelMedium,
+                    color = if (isToday) HabitateTheme.colors.primary 
+                            else HabitateTheme.colors.onSurfaceVariant
                 )
                 Text(
                     text = dayPlan.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = HabitateTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = if (isToday) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurface
+                    color = if (isToday) HabitateTheme.colors.primary
+                            else HabitateTheme.colors.onSurface
                 )
             }
             
@@ -522,15 +522,15 @@ private fun DayPlanCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${dayPlan.taskCount} tasks • ${dayPlan.habitCount} habits",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = HabitateTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
                 if (dayPlan.focusArea != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Focus: ${dayPlan.focusArea}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.onSurfaceVariant
                     )
                 }
             }
@@ -544,7 +544,7 @@ private fun DayPlanCard(
                 color = when {
                     dayPlan.completionRate >= 0.8f -> completionColor.success
                     dayPlan.completionRate >= 0.5f -> completionColor.warning
-                    else -> MaterialTheme.colorScheme.outline
+                    else -> HabitateTheme.colors.border
                 }
             )
         }
@@ -566,20 +566,20 @@ private fun SuggestionsView(
                 Icon(
                     Icons.Default.Lightbulb,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = HabitateTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "AI Suggestions",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = HabitateTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Based on your habits and patterns",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = HabitateTheme.typography.bodySmall,
+                color = HabitateTheme.colors.onSurfaceVariant
             )
         }
 
@@ -589,7 +589,7 @@ private fun SuggestionsView(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
                     )
                 ) {
                     Column(
@@ -598,16 +598,16 @@ private fun SuggestionsView(
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("✨", style = MaterialTheme.typography.displaySmall)
+                        Text("✨", style = HabitateTheme.typography.displaySmall)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "No suggestions right now",
-                            style = MaterialTheme.typography.titleSmall
+                            style = HabitateTheme.typography.titleSmall
                         )
                         Text(
                             text = "Keep using the app and I'll learn your patterns!",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = HabitateTheme.typography.bodySmall,
+                            color = HabitateTheme.colors.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -635,35 +635,35 @@ private fun SuggestionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = HabitateTheme.colors.secondaryContainer
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Text(
                     text = suggestion.emoji,
-                    style = MaterialTheme.typography.titleLarge
+                    style = HabitateTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = suggestion.title,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = HabitateTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = suggestion.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                        style = HabitateTheme.typography.bodySmall,
+                        color = HabitateTheme.colors.onSecondaryContainer.copy(alpha = 0.8f)
                     )
                     
                     suggestion.reason?.let { reason ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Why: $reason",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                            style = HabitateTheme.typography.labelSmall,
+                            color = HabitateTheme.colors.onSecondaryContainer.copy(alpha = 0.6f)
                         )
                     }
                 }
@@ -699,7 +699,7 @@ private fun EmptyScheduleCard() {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = HabitateTheme.colors.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -708,16 +708,16 @@ private fun EmptyScheduleCard() {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("📋", style = MaterialTheme.typography.displaySmall)
+            Text("📋", style = HabitateTheme.typography.displaySmall)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Your schedule is clear!",
-                style = MaterialTheme.typography.titleSmall
+                style = HabitateTheme.typography.titleSmall
             )
             Text(
                 text = "Add tasks or habits to get AI-powered planning",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = HabitateTheme.typography.bodySmall,
+                color = HabitateTheme.colors.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -734,12 +734,12 @@ private fun ErrorView(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("❌", style = MaterialTheme.typography.displayMedium)
+            Text("❌", style = HabitateTheme.typography.displayMedium)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
+                style = HabitateTheme.typography.bodyMedium,
+                color = HabitateTheme.colors.error,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
@@ -765,25 +765,25 @@ private fun OfflineView(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    containerColor = HabitateTheme.colors.accentContainer
                 )
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("📡", style = MaterialTheme.typography.titleLarge)
+                    Text("📡", style = HabitateTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "You're offline",
-                            style = MaterialTheme.typography.titleSmall,
+                            style = HabitateTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "Showing cached advice",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            style = HabitateTheme.typography.bodySmall,
+                            color = HabitateTheme.colors.onAccentContainer.copy(alpha = 0.7f)
                         )
                     }
                     OutlinedButton(onClick = onRetry) {

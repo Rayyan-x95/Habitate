@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.TaskPriority
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -123,13 +124,13 @@ fun CreateTaskScreen(
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                color = HabitateTheme.colors.primary
                             )
                         } else {
                             Text(
                                 "Save",
-                                color = if (title.isNotBlank()) MaterialTheme.colorScheme.primary else Color.Gray,
-                                style = MaterialTheme.typography.titleMedium
+                                color = if (title.isNotBlank()) HabitateTheme.colors.primary else Color.Gray,
+                                style = HabitateTheme.typography.titleMedium
                             )
                         }
                     }
@@ -166,7 +167,7 @@ fun CreateTaskScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Due Date & Time", style = MaterialTheme.typography.titleSmall)
+            Text("Due Date & Time", style = HabitateTheme.typography.titleSmall)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = { showDatePicker = true },
@@ -188,7 +189,7 @@ fun CreateTaskScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Priority", style = MaterialTheme.typography.titleSmall)
+            Text("Priority", style = HabitateTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TaskPriority.values().forEach { priority ->
                     FilterChip(
@@ -201,7 +202,7 @@ fun CreateTaskScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Recurrence", style = MaterialTheme.typography.titleSmall)
+            Text("Recurrence", style = HabitateTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(null, "DAILY", "WEEKLY").forEach { recurrence ->
                     FilterChip(

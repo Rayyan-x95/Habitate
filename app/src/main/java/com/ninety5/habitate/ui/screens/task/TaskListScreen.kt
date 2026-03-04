@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninety5.habitate.domain.model.Task
 import com.ninety5.habitate.domain.model.TaskStatus
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,21 +35,21 @@ fun TaskListScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HabitateTheme.colors.background,
         topBar = {
             TopAppBar(
-                title = { Text("Tasks", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text("Tasks", color = HabitateTheme.colors.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = HabitateTheme.colors.background,
+                    titleContentColor = HabitateTheme.colors.onBackground
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateTaskClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = HabitateTheme.colors.primary,
+                contentColor = HabitateTheme.colors.onPrimary
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Create Task")
             }
@@ -64,7 +65,7 @@ fun TaskListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No tasks yet", color = MaterialTheme.colorScheme.onBackground)
+                    Text("No tasks yet", color = HabitateTheme.colors.onBackground)
                 }
             } else {
                 LazyColumn(
@@ -104,7 +105,7 @@ fun TaskItem(
             .fillMaxWidth()
             .clickable(onClick = onTaskClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = HabitateTheme.colors.surface
         )
     ) {
         Row(
@@ -119,7 +120,7 @@ fun TaskItem(
                 Icon(
                     imageVector = if (task.status == TaskStatus.COMPLETED) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked,
                     contentDescription = if (task.status == TaskStatus.COMPLETED) "Mark as incomplete" else "Mark as complete",
-                    tint = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (task.status == TaskStatus.COMPLETED) HabitateTheme.colors.primary else HabitateTheme.colors.onSurfaceVariant
                 )
             }
             
@@ -130,24 +131,24 @@ fun TaskItem(
             ) {
                 Text(
                     text = task.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = HabitateTheme.typography.titleMedium,
                     textDecoration = if (task.status == TaskStatus.COMPLETED) TextDecoration.LineThrough else null,
-                    color = if (task.status == TaskStatus.COMPLETED) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                    color = if (task.status == TaskStatus.COMPLETED) HabitateTheme.colors.onSurfaceVariant else HabitateTheme.colors.onSurface
                 )
                 if (!task.description.isNullOrBlank()) {
                     Text(
                         text = task.description,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = HabitateTheme.typography.bodyMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = HabitateTheme.colors.onSurfaceVariant
                     )
                 }
                 task.dueAt?.let { dueAt ->
                     Text(
                         text = "Due: ${DateTimeFormatter.ISO_INSTANT.format(dueAt)}", // Simplified formatting
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        style = HabitateTheme.typography.labelSmall,
+                        color = HabitateTheme.colors.primary
                     )
                 }
             }

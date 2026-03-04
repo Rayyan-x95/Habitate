@@ -56,6 +56,8 @@ import com.ninety5.habitate.data.local.entity.MessageReactionEntity
 import com.ninety5.habitate.data.local.entity.StoryViewEntity
 import com.ninety5.habitate.data.local.entity.StoryMuteEntity
 
+const val HABITATE_DB_VERSION = 28
+
 @Database(
     entities = [
         // User
@@ -102,7 +104,7 @@ import com.ninety5.habitate.data.local.entity.StoryMuteEntity
         com.ninety5.habitate.data.local.entity.InsightEntity::class
     ],
     views = [com.ninety5.habitate.data.local.view.TimelineItem::class],
-    version = 27, // Updated to include sync_queue migration for chat_message (26->27)
+    version = HABITATE_DB_VERSION, // 28: adds uniqueness constraints for story_views and message_reactions
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -137,6 +139,25 @@ abstract class HabitateDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "habitate.db"
+
+        private fun hasColumn(
+            db: SupportSQLiteDatabase,
+            tableName: String,
+            columnName: String
+        ): Boolean {
+            val cursor = db.query("PRAGMA table_info(`$tableName`)")
+            return try {
+                val nameIndex = cursor.getColumnIndex("name")
+                while (cursor.moveToNext()) {
+                    if (nameIndex >= 0 && cursor.getString(nameIndex) == columnName) {
+                        return true
+                    }
+                }
+                false
+            } finally {
+                cursor.close()
+            }
+        }
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -307,7 +328,9 @@ abstract class HabitateDatabase : RoomDatabase() {
 
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE `stories` ADD COLUMN `syncState` TEXT NOT NULL DEFAULT 'SYNCED'")
+                if (!hasColumn(db, "stories", "syncState")) {
+                    db.execSQL("ALTER TABLE `stories` ADD COLUMN `syncState` TEXT NOT NULL DEFAULT 'SYNCED'")
+                }
             }
         }
 
@@ -361,8 +384,10 @@ abstract class HabitateDatabase : RoomDatabase() {
                     )
                 """)
 
-                // Add syncState to stories
-                db.execSQL("ALTER TABLE `stories` ADD COLUMN `syncState` TEXT NOT NULL DEFAULT 'SYNCED'")
+                // Add syncState to stories (guarded for upgrade paths that already applied 6->7)
+                if (!hasColumn(db, "stories", "syncState")) {
+                    db.execSQL("ALTER TABLE `stories` ADD COLUMN `syncState` TEXT NOT NULL DEFAULT 'SYNCED'")
+                }
             }
         }
 
@@ -600,10 +625,10 @@ abstract class HabitateDatabase : RoomDatabase() {
 
         val MIGRATION_26_27 = object : Migration(26, 27) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("UPDATE sync_queue SET entity_type = 'chat_message' WHERE entity_type = 'message'")
+                db.execSQL("UPDATE sync_queue SET entityType = 'chat_message' WHERE entityType = 'message'")
                 
                 // Sanity check
-                val cursor = db.query("SELECT COUNT(*) FROM sync_queue WHERE entity_type = 'message'")
+                val cursor = db.query("SELECT COUNT(*) FROM sync_queue WHERE entityType = 'message'")
                 if (cursor.moveToFirst()) {
                     val count = cursor.getInt(0)
                     if (count > 0) {
@@ -611,6 +636,46 @@ abstract class HabitateDatabase : RoomDatabase() {
                     }
                 }
                 cursor.close()
+            }
+        }
+
+        val MIGRATION_27_28 = object : Migration(27, 28) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Keep one row per (storyId, viewerId) before adding uniqueness.
+                db.execSQL(
+                    """
+                    DELETE FROM story_views
+                    WHERE id NOT IN (
+                        SELECT MIN(id)
+                        FROM story_views
+                        GROUP BY storyId, viewerId
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS `index_story_views_storyId_viewerId`
+                    ON `story_views` (`storyId`, `viewerId`)
+                    """.trimIndent()
+                )
+
+                // Keep one row per (messageId, userId, emoji) before adding uniqueness.
+                db.execSQL(
+                    """
+                    DELETE FROM message_reactions
+                    WHERE id NOT IN (
+                        SELECT MIN(id)
+                        FROM message_reactions
+                        GROUP BY messageId, userId, emoji
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS `index_message_reactions_messageId_userId_emoji`
+                    ON `message_reactions` (`messageId`, `userId`, `emoji`)
+                    """.trimIndent()
+                )
             }
         }
     }

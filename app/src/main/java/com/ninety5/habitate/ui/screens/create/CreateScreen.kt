@@ -1,30 +1,50 @@
 package com.ninety5.habitate.ui.screens.create
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.SmartToy
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ninety5.habitate.ui.theme.HabitateDarkGreenStart
-import com.ninety5.habitate.ui.theme.HabitateOffWhite
-import com.ninety5.habitate.ui.theme.SageGreen
+import com.ninety5.habitate.ui.theme.HabitateTheme
+import com.ninety5.habitate.ui.theme.Radius
+import com.ninety5.habitate.ui.theme.Size
+import com.ninety5.habitate.ui.theme.Spacing
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
     onCreatePost: () -> Unit,
@@ -34,21 +54,31 @@ fun CreateScreen(
     onCreateHabitat: () -> Unit,
     onPlannerClick: () -> Unit
 ) {
-    Scaffold(
-        containerColor = HabitateDarkGreenStart
-    ) { paddingValues ->
+    val colors = HabitateTheme.colors
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = Spacing.screenHorizontal)
+                .padding(top = Spacing.xxl, bottom = 96.dp)
         ) {
             Text(
-                text = "What would you like to create?",
-                style = MaterialTheme.typography.headlineSmall,
+                text = "Create",
+                style = HabitateTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = HabitateOffWhite,
-                modifier = Modifier.padding(bottom = 24.dp)
+                color = colors.onBackground
+            )
+            Spacer(modifier = Modifier.height(Spacing.xxs))
+            Text(
+                text = "What would you like to create?",
+                style = HabitateTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = Spacing.lg)
             )
 
             val options = listOf(
@@ -62,11 +92,26 @@ fun CreateScreen(
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                items(options) { option ->
-                    CreateOptionCard(option)
+                itemsIndexed(options) { index, option ->
+                    // Staggered entrance animation
+                    var visible by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        delay(index * 60L)
+                        visible = true
+                    }
+                    val alpha by animateFloatAsState(
+                        targetValue = if (visible) 1f else 0f,
+                        animationSpec = tween(300),
+                        label = "card_alpha"
+                    )
+
+                    CreateOptionCard(
+                        option = option,
+                        modifier = Modifier.alpha(alpha)
+                    )
                 }
             }
         }
@@ -81,40 +126,56 @@ data class CreateOption(
 )
 
 @Composable
-fun CreateOptionCard(option: CreateOption) {
+fun CreateOptionCard(
+    option: CreateOption,
+    modifier: Modifier = Modifier
+) {
+    val colors = HabitateTheme.colors
+
     Card(
         onClick = option.onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(Radius.md),
         colors = CardDefaults.cardColors(
-            containerColor = HabitateOffWhite.copy(alpha = 0.05f)
+            containerColor = colors.surfaceVariant.copy(alpha = 0.5f)
         ),
-        modifier = Modifier.fillMaxWidth()
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(Spacing.md)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = option.icon,
-                contentDescription = null,
-                tint = SageGreen,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .size(Size.iconXl)
+                    .background(
+                        color = colors.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(Radius.md)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = option.icon,
+                    contentDescription = null,
+                    tint = colors.primary,
+                    modifier = Modifier.size(Size.iconLg)
+                )
+            }
+            Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
                 text = option.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = HabitateOffWhite
+                style = HabitateTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onSurface
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxs))
             Text(
                 text = option.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = HabitateOffWhite.copy(alpha = 0.7f),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                style = HabitateTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }

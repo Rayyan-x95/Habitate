@@ -37,8 +37,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import com.ninety5.habitate.ui.components.BetaBadge
+import com.ninety5.habitate.ui.theme.HabitateTheme
 import com.ninety5.habitate.BuildConfig
+import com.ninety5.habitate.R
 
 private const val PRIVACY_POLICY_URL = "https://habitate.app/privacy"
 private const val TERMS_OF_SERVICE_URL = "https://habitate.app/terms"
@@ -58,13 +61,16 @@ fun SettingsScreen(
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var hasObservedLoggedInState by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
     val authState by authViewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     // Handle navigation when logged out (either by logout or delete account)
     LaunchedEffect(authState.isLoggedIn) {
-        if (!authState.isLoggedIn) {
+        if (authState.isLoggedIn) {
+            hasObservedLoggedInState = true
+        } else if (hasObservedLoggedInState) {
             onLogout()
         }
     }
@@ -82,7 +88,7 @@ fun SettingsScreen(
                         showDeleteDialog = false
                         authViewModel.deleteAccount()
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.error)
                 ) {
                     Text("Delete")
                 }
@@ -92,19 +98,22 @@ fun SettingsScreen(
                     Text("Cancel")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            containerColor = HabitateTheme.colors.surface,
+            titleContentColor = HabitateTheme.colors.onSurface,
+            textContentColor = HabitateTheme.colors.onSurfaceVariant
         )
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -125,8 +134,8 @@ fun SettingsScreen(
             // Theme Settings
             Text(
                 text = "Appearance",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = HabitateTheme.typography.labelLarge,
+                color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
             )
             
@@ -185,8 +194,8 @@ fun SettingsScreen(
             // Data & Storage
             Text(
                 text = "Data & Storage",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = HabitateTheme.typography.labelLarge,
+                color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
             )
 
@@ -214,8 +223,8 @@ fun SettingsScreen(
             // Legal & Compliance
             Text(
                 text = "Legal",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = HabitateTheme.typography.labelLarge,
+                color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
             )
 
@@ -243,14 +252,14 @@ fun SettingsScreen(
                 icon = Icons.AutoMirrored.Rounded.ExitToApp,
                 title = "Logout",
                 onClick = { authViewModel.logout() },
-                textColor = MaterialTheme.colorScheme.error
+                textColor = HabitateTheme.colors.error
             )
             HorizontalDivider()
             SettingsItem(
                 icon = Icons.Rounded.DeleteForever,
                 title = "Delete Account",
                 onClick = { showDeleteDialog = true },
-                textColor = MaterialTheme.colorScheme.error
+                textColor = HabitateTheme.colors.error
             )
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -265,16 +274,16 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Habitate v${BuildConfig.VERSION_NAME}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = HabitateTheme.typography.bodySmall,
+                        color = HabitateTheme.colors.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     BetaBadge(text = "PUBLIC BETA")
                 }
                 Text(
                     text = "Build ${BuildConfig.VERSION_CODE}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    style = HabitateTheme.typography.labelSmall,
+                    color = HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
         }
@@ -286,7 +295,7 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
-    textColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
+    textColor: androidx.compose.ui.graphics.Color = HabitateTheme.colors.onSurface,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
     ListItem(
