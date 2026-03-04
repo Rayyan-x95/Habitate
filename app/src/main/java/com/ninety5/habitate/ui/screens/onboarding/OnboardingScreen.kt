@@ -201,7 +201,7 @@ fun OnboardingPageContent(
                 imageVector = page.icon,
                 contentDescription = null,
                 modifier = Modifier.size(120.dp),
-                tint = colors.onBackground
+                tint = page.accentColor
             )
         }
 

@@ -287,7 +287,7 @@ private fun CategoryCard(
             .aspectRatio(1f)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) color.copy(alpha = 0.2f) else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.05f)
+            containerColor = if (selected) color.copy(alpha = 0.2f) else HabitateTheme.colors.surfaceVariant.copy(alpha = 0.12f)
         ),
         border = if (selected) BorderStroke(2.dp, color) else null
     ) {
@@ -385,7 +385,7 @@ private fun IconPicker(
                 color = if (selectedIcon == icon) 
                     HabitateTheme.colors.primary.copy(alpha = 0.3f)
                 else 
-                    HabitateTheme.colors.surfaceVariant.copy(alpha = 0.05f),
+                    HabitateTheme.colors.surfaceVariant.copy(alpha = 0.12f),
                 modifier = Modifier.aspectRatio(1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {

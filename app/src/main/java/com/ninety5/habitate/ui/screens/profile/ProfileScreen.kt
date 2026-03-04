@@ -130,7 +130,11 @@ fun ProfileScreen(
                 }
 
                 // Error state
-                if (uiState.error != null && user == null) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = uiState.error != null && user == null && !uiState.isLoading,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
                     HabitateErrorState(
                         title = stringResource(R.string.profile_error_title),
                         description = uiState.error ?: stringResource(R.string.profile_error_description),
@@ -263,11 +267,12 @@ fun ProfileScreen(
                                 onReactionClick = { reaction -> viewModel.toggleLike(post.id, reaction) },
                                 onCommentClick = { onPostClick(post.id) },
                                 onShareClick = {
+                                    val shareText = context.getString(R.string.share_post_text, post.authorName, post.contentText)
                                     val sendIntent = Intent().apply {
                                         action = Intent.ACTION_SEND
                                         putExtra(
                                             Intent.EXTRA_TEXT,
-                                            "Check out this post by ${post.authorName}: ${post.contentText}"
+                                            shareText
                                         )
                                         type = "text/plain"
                                     }

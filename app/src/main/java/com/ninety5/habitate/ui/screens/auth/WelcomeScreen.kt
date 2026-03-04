@@ -139,7 +139,6 @@ fun WelcomeScreen(
                 color = colors.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .alpha(contentAlpha.value * 0.8f)
                     .padding(bottom = Spacing.lg)
             )
         }

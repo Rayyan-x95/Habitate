@@ -15,5 +15,47 @@
     <string name="profile_no_posts_title">No posts yet</string>
     <string name="profile_no_posts_owner_desc">Share your first thought with the community</string>
     <string name="profile_no_posts_other_desc">This user hasn\'t posted yet</string>
+
+    <!-- Share -->
+    <string name="share_post_text">Check out this post by %1$s: %2$s</string>
+
+    <!-- Focus Screen -->
+    <string name="focus_focusing_label">focusing</string>
+    <string name="focus_pause_button">Pause</string>
+    <string name="focus_start_button">Start</string>
+    <string name="focus_stop_button">Stop</string>
+    <string name="focus_duration_label">Duration</string>
+    <string name="focus_ambient_sound_label">Ambient Sound</string>
+    <string name="focus_sound_rain">Rain</string>
+    <string name="focus_sound_forest">Forest</string>
+    <string name="focus_music_label">Music</string>
+    <string name="focus_open_spotify">Open Spotify Focus</string>
+    <string name="focus_session_complete_title">Session Complete!</string>
+    <string name="focus_great_job">Great job staying focused.</string>
+    <string name="focus_start_new_session">Start New Session</string>
+    <string name="focus_session_completed_desc">Session completed successfully</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_edit_profile">Edit Profile</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme: %1$s</string>
+    <string name="settings_health_connect">Health Connect</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_private_account">Private Account</string>
+    <string name="settings_section_data">Data &amp; Storage</string>
+    <string name="settings_archived_items">Archived Items</string>
+    <string name="settings_public_api">Public APIs Integration</string>
+    <string name="settings_privacy_dashboard">Privacy Dashboard</string>
+    <string name="settings_section_legal">Legal</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_terms_of_service">Terms of Service</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="settings_delete_account_message">Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be lost.</string>
+    <string name="settings_delete_confirm">Delete</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_version">Habitate v%1$s</string>
+    <string name="settings_build">Build %1$d</string>
+    <string name="settings_public_beta">PUBLIC BETA</string>
 </resources>
 

@@ -1,5 +1,6 @@
 package com.ninety5.habitate.ui.screens.focus
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -155,7 +157,7 @@ fun FocusTimerScreen(
                 )
                 if (uiState.isTimerRunning) {
                     Text(
-                        text = "focusing",
+                        text = stringResource(R.string.focus_focusing_label),
                         style = HabitateTheme.typography.labelMedium,
                         color = colors.primary
                     )
@@ -171,7 +173,7 @@ fun FocusTimerScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             HabitatePrimaryButton(
-                text = if (uiState.isTimerRunning) "Pause" else "Start",
+                text = if (uiState.isTimerRunning) stringResource(R.string.focus_pause_button) else stringResource(R.string.focus_start_button),
                 onClick = onToggleTimer,
                 icon = if (uiState.isTimerRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
                 modifier = Modifier.width(160.dp)
@@ -181,7 +183,7 @@ fun FocusTimerScreen(
                 visible = uiState.isTimerRunning || uiState.timeLeftSeconds != uiState.initialDuration
             ) {
                 HabitateSecondaryButton(
-                    text = "Stop",
+                    text = stringResource(R.string.focus_stop_button),
                     onClick = onStopSession,
                     icon = Icons.Default.Stop
                 )
@@ -194,7 +196,7 @@ fun FocusTimerScreen(
         AnimatedVisibility(visible = !uiState.isTimerRunning) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Duration",
+                    text = stringResource(R.string.focus_duration_label),
                     style = HabitateTheme.typography.titleSmall,
                     color = colors.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = Spacing.sm)
@@ -231,7 +233,7 @@ fun FocusTimerScreen(
 
         // Ambient Sound
         Text(
-            text = "Ambient Sound",
+            text = stringResource(R.string.focus_ambient_sound_label),
             style = HabitateTheme.typography.titleSmall,
             color = colors.onSurfaceVariant,
             modifier = Modifier.padding(bottom = Spacing.sm)
@@ -240,7 +242,7 @@ fun FocusTimerScreen(
             FilterChip(
                 selected = uiState.selectedSound == "Rain",
                 onClick = { onPlaySound("Rain", R.raw.rain) },
-                label = { Text("Rain") },
+                label = { Text(stringResource(R.string.focus_sound_rain)) },
                 leadingIcon = { Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(16.dp)) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = colors.primary.copy(alpha = 0.12f),
@@ -253,7 +255,7 @@ fun FocusTimerScreen(
             FilterChip(
                 selected = uiState.selectedSound == "Forest",
                 onClick = { onPlaySound("Forest", R.raw.forest) },
-                label = { Text("Forest") },
+                label = { Text(stringResource(R.string.focus_sound_forest)) },
                 leadingIcon = { Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(16.dp)) },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = colors.primary.copy(alpha = 0.12f),
@@ -269,21 +271,22 @@ fun FocusTimerScreen(
 
         // Spotify
         Text(
-            text = "Music",
+            text = stringResource(R.string.focus_music_label),
             style = HabitateTheme.typography.titleSmall,
             color = colors.onSurfaceVariant,
             modifier = Modifier.padding(bottom = Spacing.sm)
         )
         val context = LocalContext.current
         HabitateTonalButton(
-            text = "Open Spotify Focus",
+            text = stringResource(R.string.focus_open_spotify),
             onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:genre:focus"))
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 try {
                     context.startActivity(intent)
-                } catch (_: Exception) {
+                } catch (_: ActivityNotFoundException) {
                     val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/genre/focus"))
+                    webIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(webIntent)
                 }
             },
@@ -312,27 +315,27 @@ fun SessionCompleteScreen(onReset: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.focus_session_completed_desc),
                 tint = colors.primary,
                 modifier = Modifier.size(Size.iconXl)
             )
         }
         Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
-            text = "Session Complete!",
+            text = stringResource(R.string.focus_session_complete_title),
             style = HabitateTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = colors.onBackground
         )
         Spacer(modifier = Modifier.height(Spacing.xs))
         Text(
-            text = "Great job staying focused.",
+            text = stringResource(R.string.focus_great_job),
             style = HabitateTheme.typography.bodyLarge,
             color = colors.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(Spacing.xxl))
         HabitatePrimaryButton(
-            text = "Start New Session",
+            text = stringResource(R.string.focus_start_new_session),
             onClick = onReset
         )
     }

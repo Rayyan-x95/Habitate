@@ -78,9 +78,9 @@ fun SettingsScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Account") },
+            title = { Text(stringResource(R.string.settings_delete_account)) },
             text = { 
-                Text("Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be lost.") 
+                Text(stringResource(R.string.settings_delete_account_message)) 
             },
             confirmButton = {
                 TextButton(
@@ -90,12 +90,12 @@ fun SettingsScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = HabitateTheme.colors.error)
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.settings_delete_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.settings_cancel))
                 }
             },
             containerColor = HabitateTheme.colors.surface,
@@ -126,14 +126,14 @@ fun SettingsScreen(
         ) {
             SettingsItem(
                 icon = Icons.Rounded.Edit,
-                title = "Edit Profile",
+                title = stringResource(R.string.settings_edit_profile),
                 onClick = onNavigateToEditProfile
             )
             HorizontalDivider()
             
             // Theme Settings
             Text(
-                text = "Appearance",
+                text = stringResource(R.string.settings_section_appearance),
                 style = HabitateTheme.typography.labelLarge,
                 color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -145,7 +145,7 @@ fun SettingsScreen(
                     "dark" -> Icons.Rounded.DarkMode
                     else -> Icons.Rounded.SettingsSystemDaydream
                 },
-                title = "Theme: ${uiState.themeMode.replaceFirstChar { it.uppercase() }}",
+                title = stringResource(R.string.settings_theme, uiState.themeMode.replaceFirstChar { it.uppercase() }),
                 onClick = {
                     val nextMode = when(uiState.themeMode) {
                         "system" -> "light"
@@ -160,14 +160,14 @@ fun SettingsScreen(
 
             SettingsItem(
                 icon = Icons.Rounded.Favorite,
-                title = "Health Connect",
+                title = stringResource(R.string.settings_health_connect),
                 onClick = onNavigateToHealthConnect
             )
             HorizontalDivider()
             
             SettingsItem(
                 icon = Icons.Rounded.Notifications,
-                title = "Notifications",
+                title = stringResource(R.string.settings_notifications),
                 onClick = onNavigateToNotifications,
                 trailingContent = {
                     Switch(
@@ -180,7 +180,7 @@ fun SettingsScreen(
             
             SettingsItem(
                 icon = Icons.Rounded.Security,
-                title = "Private Account",
+                title = stringResource(R.string.settings_private_account),
                 onClick = { viewModel.togglePrivateAccount(!uiState.isPrivateAccount) },
                 trailingContent = {
                     Switch(
@@ -193,7 +193,7 @@ fun SettingsScreen(
 
             // Data & Storage
             Text(
-                text = "Data & Storage",
+                text = stringResource(R.string.settings_section_data),
                 style = HabitateTheme.typography.labelLarge,
                 color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -201,28 +201,28 @@ fun SettingsScreen(
 
             SettingsItem(
                 icon = Icons.Rounded.Archive,
-                title = "Archived Items",
+                title = stringResource(R.string.settings_archived_items),
                 onClick = onNavigateToArchive
             )
             HorizontalDivider()
 
             SettingsItem(
                 icon = Icons.Rounded.Description,
-                title = "Public APIs Integration",
+                title = stringResource(R.string.settings_public_api),
                 onClick = onNavigateToPublicApi
             )
             HorizontalDivider()
 
             SettingsItem(
                 icon = Icons.Rounded.Security,
-                title = "Privacy Dashboard",
+                title = stringResource(R.string.settings_privacy_dashboard),
                 onClick = onNavigateToPrivacyDashboard
             )
             HorizontalDivider()
 
             // Legal & Compliance
             Text(
-                text = "Legal",
+                text = stringResource(R.string.settings_section_legal),
                 style = HabitateTheme.typography.labelLarge,
                 color = HabitateTheme.colors.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -230,7 +230,7 @@ fun SettingsScreen(
 
             SettingsItem(
                 icon = Icons.Rounded.Policy,
-                title = "Privacy Policy",
+                title = stringResource(R.string.settings_privacy_policy),
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
                     context.startActivity(intent)
@@ -240,7 +240,7 @@ fun SettingsScreen(
 
             SettingsItem(
                 icon = Icons.Rounded.Description,
-                title = "Terms of Service",
+                title = stringResource(R.string.settings_terms_of_service),
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(TERMS_OF_SERVICE_URL))
                     context.startActivity(intent)
@@ -250,14 +250,14 @@ fun SettingsScreen(
             
             SettingsItem(
                 icon = Icons.AutoMirrored.Rounded.ExitToApp,
-                title = "Logout",
+                title = stringResource(R.string.settings_logout),
                 onClick = { authViewModel.logout() },
                 textColor = HabitateTheme.colors.error
             )
             HorizontalDivider()
             SettingsItem(
                 icon = Icons.Rounded.DeleteForever,
-                title = "Delete Account",
+                title = stringResource(R.string.settings_delete_account),
                 onClick = { showDeleteDialog = true },
                 textColor = HabitateTheme.colors.error
             )
@@ -273,15 +273,15 @@ fun SettingsScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Habitate v${BuildConfig.VERSION_NAME}",
+                        text = stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                         style = HabitateTheme.typography.bodySmall,
                         color = HabitateTheme.colors.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    BetaBadge(text = "PUBLIC BETA")
+                    BetaBadge(text = stringResource(R.string.settings_public_beta))
                 }
                 Text(
-                    text = "Build ${BuildConfig.VERSION_CODE}",
+                    text = stringResource(R.string.settings_build, BuildConfig.VERSION_CODE),
                     style = HabitateTheme.typography.labelSmall,
                     color = HabitateTheme.colors.onSurfaceVariant.copy(alpha = 0.7f)
                 )

@@ -85,7 +85,9 @@ Surfaces define visual hierarchy.
 
 Token	Light	Dark
 background	#FAFAF8	#0F1412
+onBackground	#1A1C1E	#E8E8E6
 surface	#FFFFFF	#161D1A
+onSurface	#1A1C1E	#E8E8E6
 surfaceVariant	#F5F5F3	#1E2724
 outline	#E0E0DD	#2A332F
 4. Typography
@@ -117,7 +119,8 @@ Button	14sp	500	Buttons
 Typography Rules
 
 ✓ Avoid bold (700) in most cases
-✓ Use medium (500) sparingly
+✓ Weight 500 (medium) is the standard for Display, ScreenTitle, SectionTitle, CardTitle, and Button
+✓ Use weight 400 for body, supporting, meta, and caption text
 ✓ Maintain line-height ≥ 1.4 for readability
 ✓ Avoid dense text blocks
 
@@ -244,7 +247,10 @@ Create is centered FAB.
 
 Icons:
 
-24dp.
+Bottom navigation icons: 24dp
+App bar / toolbar icons: 24dp
+FAB icon: 32dp
+Inline / body icons: 20dp
 
 9. Motion & Animation
 
@@ -272,7 +278,7 @@ Habitate must be accessible by default.
 
 Contrast
 
-All text must meet WCAG AA.
+All text must meet WCAG 2.1 Level AA contrast requirements.
 
 Touch Targets
 
@@ -299,7 +305,7 @@ Primary adjustments:
 Element	Value
 Background	#0F1412
 Surface	#161D1A
-Text	#E8E8E6
+Text (onBackground / onSurface)	#E8E8E6
 
 Primary colors become slightly more saturated.
 
@@ -313,7 +319,7 @@ Responsive
 
 Examples:
 
-• Like animations subtle
+• Keep animations subtle
 • Transitions smooth
 • Loading states calm
 

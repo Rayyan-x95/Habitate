@@ -163,7 +163,7 @@ fun ForgotPasswordScreen(
                 ) {
                     Text(
                         text = uiState.error ?: "",
-                        color = colors.error,
+                        color = colors.onErrorContainer,
                         modifier = Modifier.padding(Spacing.md),
                         style = HabitateTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center
