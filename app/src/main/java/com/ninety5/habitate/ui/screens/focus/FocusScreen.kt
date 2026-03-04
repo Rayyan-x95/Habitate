@@ -287,7 +287,11 @@ fun FocusTimerScreen(
                 } catch (_: ActivityNotFoundException) {
                     val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/genre/focus"))
                     webIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(webIntent)
+                    try {
+                        context.startActivity(webIntent)
+                    } catch (_: ActivityNotFoundException) {
+                        android.widget.Toast.makeText(context, context.getString(R.string.focus_no_browser), android.widget.Toast.LENGTH_SHORT).show()
+                    }
                 }
             },
             icon = Icons.Default.MusicNote

@@ -30,6 +30,7 @@
     <string name="focus_sound_forest">Forest</string>
     <string name="focus_music_label">Music</string>
     <string name="focus_open_spotify">Open Spotify Focus</string>
+    <string name="focus_no_browser">No app available to open this link</string>
     <string name="focus_session_complete_title">Session Complete!</string>
     <string name="focus_great_job">Great job staying focused.</string>
     <string name="focus_start_new_session">Start New Session</string>
